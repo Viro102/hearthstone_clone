@@ -1,0 +1,30 @@
+Fireball spell 0 5 4
+Fireball spell 0 5 4
+Meteor aoe 0 2 3
+Meteor aoe 0 2 3
+Meteor aoe 0 2 3
+Grunt taunt 5 1 2
+Grunt taunt 5 1 2
+Diluc taunt 7 3 4
+Dragon taunt 3 3 3
+Murloc minion 2 1 2
+Murloc minion 2 1 2
+Paimon minion 1 1 0
+Paimon minion 1 1 0
+Warrior minion 3 3 3
+Warrior minion 3 3 3
+Wizard minion 4 7 6
+Wizard minion 4 7 6
+C'Thun minion 1 2 1
+C'Thun minion 1 2 1
+Archer minion 3 2 2
+Catapult minion 5 5 6
+Eula minion 8 9 9
+Eula minion 8 9 9
+Soldier minion 5 2 3
+Soldier minion 5 2 3
+Noelle buff 2 4 3 4
+Noelle buff 2 4 3 4
+General buff 3 6 5 6
+General buff 3 6 5 6
+General buff 3 6 5 6
