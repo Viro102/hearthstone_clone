@@ -4,6 +4,7 @@
 #include "Card.h"
 #include <ranges>
 #include <algorithm>
+#include <memory>
 
 class Board {
 private:
@@ -11,20 +12,20 @@ private:
 public:
     void addCard(const Card &card);
 
-    void removeCard(const Card &card);
-
     void removeCard(int i);
 
-    Card getCard(int i);
+    void removeCard(const Card &card);
 
-    const vector<Card> &getCards() const;
+    Card &getCard(int i) const;
+
+    const vector<std::unique_ptr<Card>> &getCards() const;
 
     bool isFull() const;
 
     void printBoard() const;
 
 private:
-    vector<Card> m_cards;
+    vector<std::unique_ptr<Card>> m_cards;
 };
 
 #endif //RAYLIB_TEST_BOARD_H

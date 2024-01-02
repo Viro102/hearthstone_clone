@@ -1,11 +1,11 @@
 #include "Board.h"
 
 void Board::addCard(const Card &card) {
-    m_cards.push_back(card);
+    m_cards.push_back(std::make_unique<Card>(card));
 }
 
 void Board::removeCard(const Card &card) {
-    std::erase(m_cards, card);
+    std::erase(m_cards, std::make_unique<Card>(card));
 }
 
 void Board::removeCard(int i) {
@@ -16,11 +16,14 @@ void Board::removeCard(int i) {
     }
 }
 
-Card Board::getCard(int i) {
-    return m_cards[i];
+Card &Board::getCard(int i) const {
+    if (i >= 0 && i < m_cards.size()) {
+        return *m_cards[i];
+    }
+    throw std::out_of_range("Index out of range in Board::getCard");
 }
 
-const vector<Card> &Board::getCards() const {
+const vector<std::unique_ptr<Card>> &Board::getCards() const {
     return m_cards;
 }
 
@@ -29,8 +32,8 @@ bool Board::isFull() const {
 }
 
 void Board::printBoard() const {
-    for (const Card &card: m_cards) {
-        cout << card.getName() << " " << card.getType() << "\n";
-        cout << "HP: " << card.getHp() << " DMG: " << card.getDamage() << " COST: " << card.getCost() << "\n";
+    for (auto &card: m_cards) {
+        cout << card->getName() << " " << card->getType() << "\n";
+        cout << "HP: " << card->getHp() << " DMG: " << card->getDamage() << " COST: " << card->getCost() << "\n";
     }
 }

@@ -12,7 +12,7 @@ void Hand::removeCard(const Card &card) {
     std::erase(m_cards, card);
 }
 
-Card Hand::getCard(int i) const {
+const Card &Hand::getCard(int i) const {
     return m_cards[i];
 }
 

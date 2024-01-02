@@ -14,7 +14,7 @@ public:
 
     void removeCard(const Card &card);
 
-    Card getCard(int i) const;
+    const Card &getCard(int i) const;
 
     const vector<Card> &getCards() const;
 
@@ -26,7 +26,6 @@ public:
 
 private:
     vector<Card> m_cards;
-
 };
 
 #endif //RAYLIB_TEST_HAND_H
