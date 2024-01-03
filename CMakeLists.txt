@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.18)
-project(raylib_test)
+project(Hearthstone_clone)
 
 set(CMAKE_CXX_STANDARD 20)
 
