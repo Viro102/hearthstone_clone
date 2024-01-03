@@ -29,8 +29,6 @@ public:
 
     int getWidth() const;
 
-    const Rectangle &getShape() const;
-
     bool getHasAttacked() const;
 
     void setHasAttacked(bool hasAttacked);
@@ -47,8 +45,7 @@ public:
 
     void init();
 
-    bool operator==(const Card &other) const;
-
+    bool operator==(const Card &other) const = default;
 
 private:
     string m_name{};
@@ -62,7 +59,6 @@ private:
     int m_width{};
     int m_height{};
     bool m_hasAttacked{};
-
 };
 
 #endif //RAYLIB_TEST_CARD_H

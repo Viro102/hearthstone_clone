@@ -58,10 +58,6 @@ int Card::getWidth() const {
     return m_width;
 }
 
-const Rectangle &Card::getShape() const {
-    return Rectangle(m_x, m_y, m_width, m_height);
-}
-
 bool Card::getHasAttacked() const {
     return m_hasAttacked;
 }
@@ -97,5 +93,3 @@ void Card::init() {
     m_width = 150;
     m_height = 200;
 }
-
-bool Card::operator==(const Card &other) const = default;
