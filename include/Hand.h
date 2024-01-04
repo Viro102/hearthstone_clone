@@ -15,7 +15,7 @@ public:
 
     const Card &getCard(int i) const;
 
-    const vector<Card> &getCards() const;
+    vector<std::unique_ptr<Card>> &getCards();
 
     int getNumOfCards() const;
 
@@ -24,5 +24,5 @@ public:
     void printHand() const;
 
 private:
-    vector<Card> m_cards;
+    vector<std::unique_ptr<Card>> m_cards;
 };

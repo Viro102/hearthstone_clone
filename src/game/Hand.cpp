@@ -1,7 +1,7 @@
 #include "../../include/Hand.h"
 
 void Hand::addCard(const Card &card) {
-    m_cards.push_back(card);
+    m_cards.push_back(std::make_unique<Card>(card));
 }
 
 void Hand::removeCard(int i) {
@@ -9,14 +9,20 @@ void Hand::removeCard(int i) {
 }
 
 void Hand::removeCard(const Card &card) {
-    std::erase(m_cards, card);
+    auto it = std::find_if(m_cards.begin(), m_cards.end(), [&card](const std::unique_ptr<Card> &ptr) {
+        return ptr.get() == &card;  // Compare addresses
+    });
+
+    if (it != m_cards.end()) {
+        m_cards.erase(it);  // Remove the found card
+    }
 }
 
 const Card &Hand::getCard(int i) const {
-    return m_cards[i];
+    return *m_cards[i];
 }
 
-const vector<Card> &Hand::getCards() const {
+vector<std::unique_ptr<Card>> &Hand::getCards() {
     return m_cards;
 }
 
@@ -29,10 +35,10 @@ bool Hand::isFull() const {
 }
 
 void Hand::printHand() const {
-    for (const Card &card: m_cards) {
-        cout << card.getName() << " "
-             << card.getType() << "\nHP: " << card.getHp()
-             << " DMG: " << card.getDamage()
-             << " COST: " << card.getCost() << "\n";
+    for (auto &card: m_cards) {
+        cout << card->getName() << " "
+             << card->getType() << "\nHP: " << card->getHp()
+             << " DMG: " << card->getDamage()
+             << " COST: " << card->getCost() << "\n";
     }
 }
