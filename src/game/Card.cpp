@@ -89,6 +89,12 @@ void Card::setPosition(int x, int y) {
     setY(y);
 }
 
+void Card::setPosition(Rectangle rec) {
+    setX(rec.x);
+    setY(rec.y);
+}
+
+
 void Card::init() {
     m_x = 0;
     m_y = 0;

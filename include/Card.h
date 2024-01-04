@@ -42,6 +42,8 @@ public:
 
     void setPosition(int x, int y);
 
+    void setPosition(Rectangle rec);
+
     void init();
 
     bool operator==(const Card &other) const = default;
