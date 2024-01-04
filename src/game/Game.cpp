@@ -1,4 +1,5 @@
 #include "../../include/Game.h"
+#include "../../include/Server.h"
 
 void Game::startGame(const string &player1, const string &player2) {
     m_players[0] = std::make_unique<Player>(PLAYER_MAX_HP, 0, player1);
@@ -195,4 +196,84 @@ void Game::specialCard(const Player &player, const Card &card) {
             }
         }
     }
+}
+
+// NETWORKING
+// Initialize and start the server
+void Game::startServer(short port) {
+    m_server_fd = Server::startServer(port);
+
+    // After setting up the server socket, start listening and accepting clients
+    m_is_running = true;
+    std::jthread(&Game::listenForClients, this).detach();
+}
+
+// Main loop for listening to clients
+void Game::listenForClients() {
+    struct sockaddr_in client_addr{}; // Structure to hold client's address
+    socklen_t client_addr_len = sizeof(client_addr); // Length of the client's address structure
+
+    while (m_is_running) {
+        int new_socket = accept(m_server_fd, (struct sockaddr *) &client_addr, &client_addr_len);
+
+        // Check if accept was successful
+        if (new_socket >= 0) {
+            // Successfully accepted a new connection
+            std::lock_guard<std::mutex> lock(m_client_sockets_mutex);
+            m_client_sockets.push_back(new_socket);
+            std::thread(&Game::handleClient, this, new_socket).detach();
+        } else {
+            // Error occurred while trying to accept a new connection
+            perror("accept");
+            // Decide how you want to handle this error. You might just print an error message and continue,
+            // or you might want to implement some kind of recovery or shutdown procedure.
+        }
+    }
+}
+
+// Handle individual client
+void Game::handleClient(int client_socket) {
+    while (m_is_running) {
+        char buffer[1024] = {0};
+        int valread = recv(client_socket, buffer, 1024, 0);
+        if (valread > 0) {
+            std::string message(buffer, valread);
+            processMessage(client_socket, message);
+        } else if (valread == 0) {
+            close(client_socket);
+            break;
+        }
+    }
+}
+
+// Process incoming messages from clients
+void Game::processMessage(int client_socket, const std::string &message) {
+    // ... (parse the message and perform actions based on it)
+    if (message == "play card") {
+        // ... (extract which card)
+//        playACard(*m_players[client_socket], cardIndex);
+        broadcastGameState();
+    }
+    // Add more commands as needed
+}
+
+// Send the game state to all connected clients
+void Game::broadcastGameState() {
+    std::string state = serializeGameState();
+    std::lock_guard<std::mutex> lock(m_client_sockets_mutex);
+    for (int client_socket: m_client_sockets) {
+        send(client_socket, state.c_str(), state.length(), 0);
+    }
+}
+
+// Convert the game state to a string for sending
+std::string Game::serializeGameState() {
+    // ... (convert the game state into a string or JSON format)
+    return "game state";
+}
+
+// Safely shutdown the server
+void Game::stopServer() {
+    m_is_running = false;
+    close(m_server_fd);
 }
