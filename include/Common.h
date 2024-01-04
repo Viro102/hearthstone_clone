@@ -4,6 +4,8 @@
 #include <iostream>
 #include <array>
 #include <vector>
+#include <memory>
+#include <algorithm>
 #include "raylib.h"
 
 using std::string;
