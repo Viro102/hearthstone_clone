@@ -13,8 +13,8 @@ void Game::startGame(const string &player1, const string &player2) {
 
 void Game::endTurn() {
     if (m_turnCounter >= 30) {
-//            JOptionPaneshowMessageDialog(panel, "Game over, no one won");
-//            System.exit(0);
+        cout << "Game over, no one won" << endl;
+        // TODO: exit to menu
     }
     auto &currentPlayer = getOnTurnPlayer();
     auto &offPlayer = getOffTurnPlayer();
@@ -24,7 +24,7 @@ void Game::endTurn() {
     offPlayer.setMana(offPlayer.getCurrentMaxMana() + 1);
     offPlayer.drawCard();
 
-    for (auto &card: currentPlayer.getBoard().getCards()) {
+    for (const auto &card: currentPlayer.getBoard().getCards()) {
         if (card != nullptr) {
             card->setHasAttacked(false);
         }
@@ -33,7 +33,6 @@ void Game::endTurn() {
         m_selectedCard = nullptr;
     }
 //        panel.removeGlow();
-//        panel.update();
     m_turnCounter++;
     cout << "Turn ended!\n";
 }
@@ -43,20 +42,15 @@ void Game::playACard(Player &player, int i) {
     auto card = player.playCard(i);
     if (card != nullptr) {
         specialCard(player, *card);
-//            panel.update();
     }
 }
 
-void Game::selectCardBoard(Player &player, int i) {
+void Game::selectCardBoard(const Player &player, int i) {
     if (m_selectedCard == nullptr) {
         m_selectedCard = std::make_unique<Card>(player.getBoard().getCard(i));
 //            panel.addGlow(i, "m_board");
 
     } else if (*m_selectedCard == player.getBoard().getCard(i)) {
-        m_selectedCard = nullptr;
-//            panel.removeGlow();
-    } else {
-//            JOptionPaneshowMessageDialog(panel, "Can't select two m_cards at once");
         m_selectedCard = nullptr;
 //            panel.removeGlow();
     }
@@ -78,8 +72,8 @@ void Game::attack(int i) {
         return;
     }
 //        panel.removeGlow();
-    auto &opponent = getOffTurnPlayer();
-    auto &currentPlayer = getOnTurnPlayer();
+    const auto &opponent = getOffTurnPlayer();
+    const auto &currentPlayer = getOnTurnPlayer();
     auto &targetCard = opponent.getBoard().getCard(i);
 
     if (!m_selectedCard->getHasAttacked()) {
@@ -93,16 +87,15 @@ void Game::attack(int i) {
             currentPlayer.getBoard().removeCard(*m_selectedCard);
         }
     } else {
-//            JOptionPaneshowMessageDialog(panel, "Card has already attacked!");
+        cout << "Card has already attacked!" << endl;
     }
 
     m_selectedCard = nullptr;
-//        panel.update();
 }
 
 void Game::attackFace() {
     auto &target = getOffTurnPlayer();
-    auto &attacker = getOnTurnPlayer();
+    const auto &attacker = getOnTurnPlayer();
 
     if (m_selectedCard == nullptr) {
         cout << "No card selected";
@@ -111,12 +104,12 @@ void Game::attackFace() {
 
 //        panel.removeGlow();
 
-    for (auto &c: target.getBoard().getCards()) {
+    for (const auto &c: target.getBoard().getCards()) {
         if (c == nullptr) {
             continue;
         }
         if (c->getType() == "taunt") {
-//                JOptionPaneshowMessageDialog(panel, "Taunt card in play, cannot attack hero");
+            cout << "Taunt card in play, cannot attack hero" << endl;
             return;
         }
     }
@@ -127,11 +120,10 @@ void Game::attackFace() {
             attacker.getBoard().removeCard(*m_selectedCard);
         }
     } else {
-//            JOptionPaneshowMessageDialog(panel, "Card has already attacked!");
+        cout << "Card has already attacked" << endl;
     }
 
     m_selectedCard = nullptr;
-//        panel.update();
     isGameOver();
 }
 
@@ -159,7 +151,6 @@ array<std::unique_ptr<Player>, 2> &Game::getPlayers() {
     return m_players;
 }
 
-
 bool Game::isSelected() const {
     return m_selectedCard != nullptr;
 }
@@ -172,10 +163,10 @@ void Game::isGameOver() const {
     }
 }
 
-void Game::specialCard(Player &player, const Card &card) {
+void Game::specialCard(const Player &player, const Card &card) {
     if (card.getType() == "buff") {
         int buffAmount = card.getBuffAmount();
-        for (auto &c: player.getBoard().getCards()) {
+        for (const auto &c: player.getBoard().getCards()) {
             if (c == nullptr) {
                 continue;
             }
@@ -194,7 +185,7 @@ void Game::specialCard(Player &player, const Card &card) {
     if (card.getType() == "aoe") {
         getOnTurnPlayer().getHand().removeCard(card);
         m_selectedCard = nullptr;
-        for (auto &target: getOffTurnPlayer().getBoard().getCards()) {
+        for (const auto &target: getOffTurnPlayer().getBoard().getCards()) {
             if (target == nullptr) {
                 continue;
             }

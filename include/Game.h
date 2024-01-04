@@ -12,7 +12,7 @@ public:
 
     void playACard(Player &player, int i);
 
-    void selectCardBoard(Player &player, int i);
+    void selectCardBoard(const Player &player, int i);
 
     void selectCardHand(const Player &player, int i);
 
@@ -30,7 +30,7 @@ public:
 
     void isGameOver() const;
 
-    void specialCard(Player &player, const Card &card);
+    void specialCard(const Player &player, const Card &card);
 
 private:
     const int PLAYER_MAX_HP{20};
