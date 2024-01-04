@@ -2,29 +2,17 @@
 
 #include <fstream>
 #include <sstream>
-#include "Common.h"
-#include "Card.h"
+#include "CardContainer.h"
 
-class Deck {
+class Deck : public CardContainer {
 public:
     explicit Deck(const string &filename);
 
-    void addCard(const Card &card);
+    Deck() = default;
 
-    void removeCard(const Card &card);
-
-    vector<Card> &getCards();
-
-    Card &getCard(int i);
-
-    int getNumOfCards() const;
-
-    string getNumOfCardsString() const;
+    ~Deck() override = default;
 
     Deck &makeDeck(const std::string &filename);
 
-private:
-    int m_numberOfCards{0};
-    vector<Card> m_cards{};
-
+    int getMaxCards() const override;
 };

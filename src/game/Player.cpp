@@ -7,10 +7,11 @@ std::unique_ptr<Card> Player::drawCard() {
     if (!m_hand->isFull()) {
         if (!m_deck->getCards().empty()) {
             this->shuffleDeck();
-            auto drawnCard = m_deck->getCard(0);
+            auto &drawnCard = m_deck->getCard(0);
+            auto returns = std::make_unique<Card>(drawnCard);
             m_hand->addCard(drawnCard);
             m_deck->removeCard(drawnCard);
-            return std::make_unique<Card>(drawnCard);
+            return returns;
         } else {
             cout << "You have no more cards in your deck\n";
             return nullptr;
@@ -21,7 +22,7 @@ std::unique_ptr<Card> Player::drawCard() {
 }
 
 std::unique_ptr<Card> Player::playCard(int i) {
-    auto card = m_hand->getCard(i);
+    auto &card = m_hand->getCard(i);
     if (m_board->isFull()) {
         cout << "Your board is full!\n";
         return nullptr;
@@ -44,11 +45,11 @@ void Player::shuffleDeck() {
     std::random_device rd;
     std::mt19937 generator(rd());
 
-    auto cards = m_deck->getCards();
+    auto &cards = m_deck->getCards();
     std::ranges::shuffle(cards.begin(), cards.end(), generator);
 }
 
-Board &Player::getBoard() {
+CardContainer &Player::getBoard() const {
     return *m_board;
 }
 
@@ -56,7 +57,7 @@ Deck &Player::getDeck() const {
     return *m_deck;
 }
 
-Hand &Player::getHand() const {
+CardContainer &Player::getHand() const {
     return *m_hand;
 }
 

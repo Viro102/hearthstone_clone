@@ -4,32 +4,6 @@ Deck::Deck(const string &filename) {
     makeDeck(filename);
 }
 
-void Deck::addCard(const Card &card) {
-    m_numberOfCards++;
-    m_cards.push_back(card);
-}
-
-void Deck::removeCard(const Card &card) {
-    m_numberOfCards--;
-    std::erase(m_cards, card);
-}
-
-vector<Card> &Deck::getCards() {
-    return m_cards;
-}
-
-Card &Deck::getCard(int i) {
-    return m_cards[i];
-}
-
-int Deck::getNumOfCards() const {
-    return m_numberOfCards;
-}
-
-string Deck::getNumOfCardsString() const {
-    return std::to_string(m_numberOfCards);
-}
-
 Deck &Deck::makeDeck(const string &filename) {
     try {
         std::ifstream file(filename);
@@ -67,4 +41,8 @@ Deck &Deck::makeDeck(const string &filename) {
     }
 
     return *this;
+}
+
+int Deck::getMaxCards() const {
+    return 30;
 }
