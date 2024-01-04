@@ -38,6 +38,10 @@ add_executable(${PROJECT_NAME} src/Main.cpp
         src/game/Deck.cpp
         include/Deck.h
         src/game/Board.cpp
-        include/Board.h)
+        include/Board.h
+        src/gui/Panel.cpp
+        include/Panel.h
+        src/game/Slot.cpp
+        include/Slot.h)
 
 target_link_libraries(${PROJECT_NAME} raylib)
