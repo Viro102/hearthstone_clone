@@ -2,6 +2,7 @@
 
 #include "Common.h"
 #include "Card.h"
+#include <memory>
 
 class CardContainer {
 public:

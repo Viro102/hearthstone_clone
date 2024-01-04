@@ -3,6 +3,7 @@
 #include "Common.h"
 #include "Game.h"
 #include "Slot.h"
+#include <memory>
 
 class Panel {
 public:

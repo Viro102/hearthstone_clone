@@ -1,4 +1,6 @@
 #include "../../include/CardContainer.h"
+#include <memory>
+#include <algorithm>
 
 void CardContainer::addCard(const Card &card) {
     if (!isFull()) {

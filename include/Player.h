@@ -5,6 +5,7 @@
 #include "Common.h"
 #include "Card.h"
 #include "Deck.h"
+#include <algorithm>
 
 class Player {
 private:

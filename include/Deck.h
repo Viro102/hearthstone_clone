@@ -3,6 +3,7 @@
 #include <fstream>
 #include <sstream>
 #include "CardContainer.h"
+#include <memory>
 
 class Deck : public CardContainer {
 public:

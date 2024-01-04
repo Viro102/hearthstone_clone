@@ -5,6 +5,7 @@
 #include <array>
 #include <vector>
 #include "raylib.h"
+#include <memory>
 
 using std::string;
 using std::cout;
