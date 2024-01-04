@@ -69,7 +69,11 @@ private:
         char buffer[1024] = {0};
         while (true) {
             int valread = read(clientSocket, buffer, 1024);
-            if (valread <= 0) break; // Client disconnected
+            if (valread <= 0) {
+
+                std::cout << "Client " << clientSocket << " disconnected." << std::endl;
+                break;
+            }
 
             std::cout << "Received message from client " << clientSocket << ": " << buffer << std::endl; // Log received message
 
@@ -88,7 +92,7 @@ private:
             for (auto& client : _clients) {
                 if (client.socket == clientSocket) {
                     client.isReady = true;
-                    std::cout << "Client " << clientSocket << " marked as ready." << std::endl; // Log ready status
+                    std::cout << "Client " << clientSocket << " marked as ready." << std::endl;
                     break;
                 }
             }
