@@ -71,24 +71,24 @@ private:
             int valread = read(clientSocket, buffer, 1024);
             if (valread <= 0) break; // Client disconnected
 
-            // Process the client's message
-            std::string message(buffer);
+            std::cout << "Received message from client " << clientSocket << ": " << buffer << std::endl; // Log received message
+
+            std::string message(buffer, valread); // Create a string with the received data
             processClientMessage(clientSocket, message);
 
-            // Reset buffer
-            memset(buffer, 0, 1024);
+            memset(buffer, 0, 1024); // Reset buffer
         }
 
         removeClient(clientSocket);
     }
 
     void processClientMessage(int clientSocket, const std::string& message) {
-        if (message == "ready") {
+        if (message.find("ready") != std::string::npos) { // Check if message contains "ready"
             _clients_mutex.lock();
             for (auto& client : _clients) {
                 if (client.socket == clientSocket) {
                     client.isReady = true;
-                    std::cout << "Client " << clientSocket << " is ready." << std::endl;
+                    std::cout << "Client " << clientSocket << " marked as ready." << std::endl; // Log ready status
                     break;
                 }
             }
