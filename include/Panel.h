@@ -6,7 +6,7 @@
 
 class Panel {
 public:
-    Panel(Game &game);
+    explicit Panel(Game &game);
 
     ~Panel();
 
@@ -25,18 +25,16 @@ private:
     const int PANEL_HEIGHT = 750;
     Game &m_game;
     vector<Texture2D> m_images{};
-    Rectangle m_endTurnButtonHitbox;
-    Rectangle m_heroHitbox;
+    Rectangle m_endTurnButtonHitbox{};
+    Rectangle m_heroHitbox{};
     vector<Card> m_cardsHand{};
     vector<Card> m_cardsBoard{};
     array<Slot, 5> m_slotsHand;
     array<array<Slot, 5>, 2> m_slotsBoard;
 
-    void init();
+    void paintHero(int pos, Texture2D hero, const Player &player) const;
 
-    void paintHero(int pos, Texture2D hero, const Player &player);
+    void paintUI() const;
 
-    void paintUI();
-
-    void paintCards(const vector<Card> &cards);
+    void paintCards(const vector<Card> &cards) const;
 };

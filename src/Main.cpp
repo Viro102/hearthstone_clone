@@ -1,13 +1,6 @@
 #include "../include/Game.h"
 #include "../include/Panel.h"
 
-enum class GameState {
-    MENU,
-    LOBBY,
-    GAMEPLAY,
-    END
-};
-
 int main() {
     // Initialization
     const int screenWidth = 1400;
@@ -26,10 +19,10 @@ int main() {
     Rectangle lobbyBtn = {screenCenterX - 100, 200, 200, 50};
     Rectangle exitBtn = {screenCenterX - 100, 300, 200, 50};
     Rectangle gameBtn = {screenCenterX - 100, 300, 200, 50};
-    Color lobbyBtnColor = GRAY;
-    Color exitBtnColor = GRAY;
-    Color gameBtnColor = GRAY;
-    Color hoverColor = DARKGRAY;
+    auto lobbyBtnColor = GRAY;
+    auto exitBtnColor = GRAY;
+    auto gameBtnColor = GRAY;
+    auto hoverColor = DARKGRAY;
 
     SetTargetFPS(60);
     SetExitKey(KEY_NULL);
@@ -44,14 +37,13 @@ int main() {
         }
 
         switch (gameState) {
-            using enum GameState;
-            case MENU:
+            case GameState::MENU:
                 // Update menu logic
                 // Check for button clicks and react
                 if (CheckCollisionPointRec(GetMousePosition(), lobbyBtn)) {
                     lobbyBtnColor = hoverColor;
                     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-                        gameState = LOBBY;
+                        gameState = GameState::LOBBY;
                     }
                     // Enter lobby logic here
                 } else {
@@ -60,27 +52,27 @@ int main() {
                 if (CheckCollisionPointRec(GetMousePosition(), exitBtn)) {
                     exitBtnColor = hoverColor;
                     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-                        gameState = END;
+                        gameState = GameState::END;
                     }
                 } else {
                     exitBtnColor = GRAY;
                 }
                 break;
-            case LOBBY:
+            case GameState::LOBBY:
                 if (CheckCollisionPointRec(GetMousePosition(), gameBtn)) {
                     gameBtnColor = hoverColor;
                     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-                        gameState = GAMEPLAY;
+                        gameState = GameState::GAMEPLAY;
                     }
                     // Enter game logic here
                 } else {
                     gameBtnColor = GRAY;
                 }
                 break;
-            case GAMEPLAY:
+            case GameState::GAMEPLAY:
                 panel.update();
                 break;
-            case END:
+            case GameState::END:
                 CloseWindow();
                 return 0;
         }
@@ -110,7 +102,7 @@ int main() {
                 panel.draw();
                 break;
             case END:
-                cout << "INFO: Ending the game...\n";
+                cout << "INFO: Ending the game..." << endl;
                 break;
         }
 

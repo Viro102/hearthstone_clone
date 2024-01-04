@@ -1,17 +1,6 @@
 #include "../../include/Panel.h"
 
 Panel::Panel(Game &game) : m_game(game) {
-    init();
-}
-
-Panel::~Panel() {
-    for (auto &image: m_images) {
-        UnloadTexture(image);
-    }
-}
-
-void Panel::init() {
-
     m_images.resize(4);
 
     for (int i = 0; i < m_slotsHand.size(); i++) {
@@ -42,10 +31,15 @@ void Panel::init() {
     m_endTurnButtonHitbox = Rectangle(200, 100);
     m_endTurnButtonHitbox.x = END_TURN_BUTTON_POSITION_X;
     m_endTurnButtonHitbox.y = END_TURN_BUTTON_POSITION_Y;
-
 }
 
-void Panel::paintHero(int pos, Texture2D hero, const Player &player) {
+Panel::~Panel() {
+    for (const auto &image: m_images) {
+        UnloadTexture(image);
+    }
+}
+
+void Panel::paintHero(int pos, Texture2D hero, const Player &player) const {
     const int OFFSET_X = 220;
     const int OFFSET_Y_HP = 650;
     const int OFFSET_Y_MANA = 700;
@@ -63,13 +57,13 @@ void Panel::paintHero(int pos, Texture2D hero, const Player &player) {
     }
 }
 
-void Panel::paintUI() {
+void Panel::paintUI() const {
     const auto &board = m_images[0];
     const auto &deck = m_images[1];
     const auto &mage = m_images[2];
     const auto &warrior = m_images[3];
-    auto &currentPlayer = m_game.getPlayers()[0];
-    auto &opponentPlayer = m_game.getPlayers()[1];
+    const auto &currentPlayer = m_game.getPlayers()[0];
+    const auto &opponentPlayer = m_game.getPlayers()[1];
 
     // End turn button
     DrawText("END TURN", END_TURN_BUTTON_POSITION_X, END_TURN_BUTTON_POSITION_Y, 20, BLACK);
@@ -93,7 +87,7 @@ void Panel::paintUI() {
     DrawText(("Cards: " + currentPlayer->getDeck().getNumOfCardsString()).c_str(), 1170, 200, 20, BLACK);
 }
 
-void Panel::paintCards(const std::vector<Card> &cards) {
+void Panel::paintCards(const vector<Card> &cards) const {
     for (const auto &card: cards) {
         int attPosY = card.getY() + card.getHeight();
         int attPosX = card.getX() + 2;
@@ -127,33 +121,31 @@ void Panel::paintCards(const std::vector<Card> &cards) {
 void Panel::update() {
     m_cardsHand.clear();
     m_cardsBoard.clear();
-    auto &players = m_game.getPlayers();
-    auto &currentPlayer = m_game.getOnTurnPlayer();
+    const auto &players = m_game.getPlayers();
+    const auto &currentPlayer = m_game.getOnTurnPlayer();
     auto &playerCardsHand = currentPlayer.getHand().getCards();
 
     for (size_t i = 0; i < playerCardsHand.size(); i++) {
-        auto &cardToPaint = playerCardsHand[i];
+        const auto &cardToPaint = playerCardsHand[i];
         if (cardToPaint != nullptr) {
             m_slotsHand[i].setFree(false);
-            int x = m_slotsHand[i].getX();
-            int y = m_slotsHand[i].getY();
-            cardToPaint->setPosition(x, y);
+            auto shape = m_slotsHand[i].getShape();
+            cardToPaint->setPosition(shape);
             m_cardsHand.push_back(*cardToPaint);
         } else {
             m_slotsHand[i].setFree(true);
         }
     }
 
-    for (size_t j = 0; j < players.size(); j++) {
-        int id = players[j]->getId();
-        auto &playerCardsBoard = players[j]->getBoard().getCards();
+    for (const auto &player: players) {
+        int id = player->getId();
+        auto &playerCardsBoard = player->getBoard().getCards();
 
         for (size_t i = 0; i < playerCardsBoard.size(); i++) {
             if (playerCardsBoard[i] != nullptr) {
                 m_slotsBoard[id][i].setFree(false);
-                int x = m_slotsBoard[id][i].getX();
-                int y = m_slotsBoard[id][i].getY();
-                playerCardsBoard[i]->setPosition(x, y);
+                auto shape = m_slotsBoard[id][i].getShape();
+                playerCardsBoard[i]->setPosition(shape);
                 m_cardsBoard.push_back(*playerCardsBoard[i]);
             } else {
                 m_slotsBoard[id][i].setFree(true);
@@ -187,9 +179,9 @@ void Panel::draw() {
     }
 
     // Draw glows for slots in hand
-    for (size_t i = 0; i < m_slotsHand.size(); i++) {
-        if (!m_slotsHand[i].isFree() && m_slotsHand[i].isGlow()) {
-            DrawRectangleLinesEx(m_slotsHand[i].getShape(), 2, YELLOW); // Assuming getShape returns a Rectangle
+    for (const auto &slot: m_slotsHand) {
+        if (!slot.isFree() && slot.isGlow()) {
+            DrawRectangleLinesEx(slot.getShape(), 2, YELLOW); // Assuming getShape returns a Rectangle
         }
     }
 }
