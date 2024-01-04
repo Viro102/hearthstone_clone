@@ -31,17 +31,15 @@ add_executable(${PROJECT_NAME} src/Main.cpp
         src/game/Player.cpp
         include/Player.h
         include/Common.h
-        src/game/Hand.cpp
-        include/Hand.h
         src/game/Card.cpp
         include/Card.h
         src/game/Deck.cpp
         include/Deck.h
-        src/game/Board.cpp
-        include/Board.h
         src/gui/Panel.cpp
         include/Panel.h
         src/game/Slot.cpp
-        include/Slot.h)
+        include/Slot.h
+        include/CardContainer.h
+        src/utility/CardContainer.cpp)
 
 target_link_libraries(${PROJECT_NAME} raylib)
