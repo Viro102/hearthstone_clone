@@ -12,7 +12,7 @@ int startClient() {
     char buffer[1024] = {0};
 
     if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-        cout << "\n Socket creation error \n";
+        std::cout << "\n Socket creation error \n";
         return -1;
     }
 
@@ -21,17 +21,18 @@ int startClient() {
 
     // Convert IPv4 and IPv6 addresses from text to binary form
     if(inet_pton(AF_INET, "127.0.0.1", &serv_addr.sin_addr)<=0) {
-        cout << "\nInvalid address/ Address not supported \n";
+        std::cout << "\nInvalid address/Address not supported\n";
         return -1;
     }
 
     if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
-        cout << "\nConnection Failed \n";
+        std::cout << "\nConnection Failed\n";
         return -1;
     }
 
     send(sock, hello, strlen(hello), 0);
-    std::cout << "Hello message sent\n";
+    std::cout << "Hello message sent" << std::endl;
+
     read(sock, buffer, 1024);
     std::cout << buffer << std::endl;
 
