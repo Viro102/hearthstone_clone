@@ -37,4 +37,8 @@ private:
     void paintUI() const;
 
     void paintCards(const vector<Card> &cards) const;
+
+    void addGlow(int i, const string &where);
+
+    void removeGlow();
 };
