@@ -40,6 +40,9 @@ add_executable(${PROJECT_NAME} src/Main.cpp
         src/game/Slot.cpp
         include/Slot.h
         include/CardContainer.h
-        src/utility/CardContainer.cpp)
+        src/utility/CardContainer.cpp
+        include/Server.h
+        include/Client.h
+)
 
 target_link_libraries(${PROJECT_NAME} raylib)
