@@ -23,7 +23,7 @@ public:
 
     Deck &getDeck() const;
 
-    CardContainer & getHand() const;
+    CardContainer &getHand() const;
 
     int getHp() const;
 
@@ -56,5 +56,5 @@ private:
     bool m_turn{false};
     std::unique_ptr<CardContainer> m_hand{std::make_unique<CardContainer>()};
     std::unique_ptr<CardContainer> m_board{std::make_unique<CardContainer>()};
-    std::unique_ptr<Deck> m_deck{std::make_unique<Deck>(R"(..\assets\cards.txt)")};
+    std::unique_ptr<Deck> m_deck{std::make_unique<Deck>("../assets/cards.txt")};
 };
