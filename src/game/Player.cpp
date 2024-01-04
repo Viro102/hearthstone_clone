@@ -1,6 +1,7 @@
-#include "Player.h"
+#include <utility>
+#include "../../include/Player.h"
 
-Player::Player(int hp, int id, const string &archetype) : m_archetype(archetype), m_hp(hp), m_id(id) {}
+Player::Player(int hp, int id, string archetype) : m_archetype(std::move(archetype)), m_hp(hp), m_id(id) {}
 
 std::unique_ptr<Card> Player::drawCard() {
     if (!m_hand->isFull()) {

@@ -1,28 +1,30 @@
-#include "Card.h"
-
 #include <utility>
-
+#include "../../include/Card.h"
 
 Card::Card(string name, string type, int buffAmount, int hp, int damage, int cost) : m_name(std::move(name)),
                                                                                      m_type(std::move(type)),
-                                                                                     m_buffAmount(buffAmount), m_hp(hp),
-                                                                                     m_damage(damage), m_cost(cost) {
+                                                                                     m_buffAmount(
+                                                                                             buffAmount),
+                                                                                     m_hp(hp),
+                                                                                     m_damage(damage),
+                                                                                     m_cost(cost) {
 
     init();
 }
 
-Card::Card(string name, string type, int hp, int damage, int cost) : m_name(std::move(name)), m_type(std::move(type)),
+Card::Card(string name, string type, int hp, int damage, int cost) : m_name(std::move(name)),
+                                                                     m_type(std::move(type)),
                                                                      m_hp(hp),
                                                                      m_damage(damage), m_cost(cost) {
 
     init();
 }
 
-string Card::getName() const {
+const string &Card::getName() const {
     return m_name;
 }
 
-string Card::getType() const {
+const string &Card::getType() const {
     return m_type;
 }
 

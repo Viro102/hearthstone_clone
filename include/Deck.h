@@ -1,5 +1,4 @@
-#ifndef RAYLIB_TEST_DECK_H
-#define RAYLIB_TEST_DECK_H
+#pragma once
 
 #include <fstream>
 #include <sstream>
@@ -8,15 +7,15 @@
 
 class Deck {
 public:
-    Deck(const string &filename);
+    explicit Deck(const string &filename);
 
     void addCard(const Card &card);
 
     void removeCard(const Card &card);
 
-    vector<Card> getCards() const;
+    vector<Card> &getCards();
 
-    Card getCard(int i) const;
+    Card &getCard(int i);
 
     int getNumOfCards() const;
 
@@ -29,5 +28,3 @@ private:
     vector<Card> m_cards{};
 
 };
-
-#endif //RAYLIB_TEST_DECK_H

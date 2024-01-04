@@ -1,5 +1,4 @@
-#ifndef RAYLIB_TEST_COMMON_H
-#define RAYLIB_TEST_COMMON_H
+#pragma once
 
 #include <string>
 #include <iostream>
@@ -11,5 +10,3 @@ using std::string;
 using std::cout;
 using std::array;
 using std::vector;
-
-#endif //RAYLIB_TEST_COMMON_H

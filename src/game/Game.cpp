@@ -1,6 +1,4 @@
-#include "Game.h"
-
-const int Game::PLAYER_MAX_HP{20};
+#include "../../include/Game.h"
 
 void Game::startGame(const string &player1, const string &player2) {
     m_players[0] = std::make_unique<Player>(PLAYER_MAX_HP, 0, player1);
@@ -38,7 +36,6 @@ void Game::endTurn() {
 //        panel.update();
     m_turnCounter++;
     cout << "Turn ended!\n";
-//        LoggingprintStateHand(players);
 }
 
 

@@ -1,5 +1,4 @@
-#ifndef RAYLIB_TEST_CARD_H
-#define RAYLIB_TEST_CARD_H
+#pragma once
 
 #include "Common.h"
 
@@ -9,9 +8,9 @@ public:
 
     Card(string name, string type, int hp, int damage, int cost);
 
-    string getName() const;
+    const string &getName() const;
 
-    string getType() const;
+    const string &getType() const;
 
     int getHp() const;
 
@@ -60,5 +59,3 @@ private:
     int m_height{};
     bool m_hasAttacked{};
 };
-
-#endif //RAYLIB_TEST_CARD_H

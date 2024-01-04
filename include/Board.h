@@ -1,14 +1,13 @@
-#ifndef RAYLIB_TEST_BOARD_H
-#define RAYLIB_TEST_BOARD_H
+#pragma once
 
-#include "Card.h"
 #include <ranges>
 #include <algorithm>
 #include <memory>
+#include "Card.h"
 
 class Board {
 private:
-    static const int MAX_CARDS_ON_BOARD = 5;
+    const int MAX_CARDS_ON_BOARD{5};
 public:
     void addCard(const Card &card);
 
@@ -27,5 +26,3 @@ public:
 private:
     vector<std::unique_ptr<Card>> m_cards;
 };
-
-#endif //RAYLIB_TEST_BOARD_H

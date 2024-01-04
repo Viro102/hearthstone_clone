@@ -1,5 +1,4 @@
-#ifndef RAYLIB_TEST_GAME_H
-#define RAYLIB_TEST_GAME_H
+#pragma once
 
 #include "Player.h"
 #include "Common.h"
@@ -34,11 +33,8 @@ public:
     void specialCard(Player &player, const Card &card);
 
 private:
-    static const int PLAYER_MAX_HP;
+    const int PLAYER_MAX_HP{20};
     array<std::unique_ptr<Player>, 2> m_players{};
     std::unique_ptr<Card> m_selectedCard;
     int m_turnCounter{0};
 };
-
-
-#endif //RAYLIB_TEST_GAME_H

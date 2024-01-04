@@ -1,4 +1,4 @@
-#include "Deck.h"
+#include "../../include/Deck.h"
 
 Deck::Deck(const string &filename) {
     makeDeck(filename);
@@ -14,11 +14,11 @@ void Deck::removeCard(const Card &card) {
     std::erase(m_cards, card);
 }
 
-vector<Card> Deck::getCards() const {
+vector<Card> &Deck::getCards() {
     return m_cards;
 }
 
-Card Deck::getCard(int i) const {
+Card &Deck::getCard(int i) {
     return m_cards[i];
 }
 

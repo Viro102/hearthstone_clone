@@ -1,12 +1,11 @@
-#ifndef RAYLIB_TEST_HAND_H
-#define RAYLIB_TEST_HAND_H
+#pragma once
 
 #include "Common.h"
 #include "Card.h"
 
 class Hand {
 private:
-    static const int MAX_CARDS = 5;
+    const int MAX_CARDS{5};
 public:
     void addCard(const Card &card);
 
@@ -27,5 +26,3 @@ public:
 private:
     vector<Card> m_cards;
 };
-
-#endif //RAYLIB_TEST_HAND_H

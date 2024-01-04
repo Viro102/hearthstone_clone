@@ -1,4 +1,4 @@
-#include "Board.h"
+#include "../../include/Board.h"
 
 void Board::addCard(const Card &card) {
     m_cards.push_back(std::make_unique<Card>(card));

@@ -1,7 +1,8 @@
-#include "Game.h"
+#include "../include/Game.h"
 
 enum class GameState {
     MENU,
+    LOBBY,
     GAMEPLAY,
     END
 };
@@ -33,8 +34,7 @@ int main() {
     while (!WindowShouldClose()) {
         // Update
         switch (gameState) {
-            using
-            enum GameState;
+            using enum GameState;
             case MENU:
                 // Update menu logic
                 // Check for button clicks and react
@@ -57,6 +57,9 @@ int main() {
                     exitBtnColor = GRAY;
                 }
                 break;
+            case LOBBY:
+                // TODO
+                break;
             case GAMEPLAY:
                 // Update game logic
                 if (IsKeyPressed(KEY_ESCAPE)) {
@@ -76,8 +79,7 @@ int main() {
         ClearBackground(RAYWHITE);
 
         switch (gameState) {
-            using
-            enum GameState;
+            using enum GameState;
             case MENU:
                 // Draw buttons
                 DrawRectangleRec(lobbyBtn, lobbyBtnColor);
@@ -86,6 +88,9 @@ int main() {
                 // Draw button text
                 DrawText("Lobby", lobbyBtn.x + 70, lobbyBtn.y + 15, 20, BLACK);
                 DrawText("Exit", exitBtn.x + 80, exitBtn.y + 15, 20, BLACK);
+                break;
+            case LOBBY:
+                // TODO
                 break;
             case GAMEPLAY:
                 // Draw your game here

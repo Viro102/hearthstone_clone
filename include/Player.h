@@ -1,5 +1,4 @@
-#ifndef RAYLIB_TEST_PLAYER_H
-#define RAYLIB_TEST_PLAYER_H
+#pragma once
 
 #include <random>
 #include <memory>
@@ -11,10 +10,10 @@
 
 class Player {
 private:
-    static const int MAX_MANA = 10;
+    const int MAX_MANA{10};
 
 public:
-    Player(int hp, int id, const string &archetype);
+    Player(int hp, int id, string archetype);
 
     std::unique_ptr<Card> drawCard();
 
@@ -59,8 +58,5 @@ private:
     bool m_turn{false};
     std::unique_ptr<Hand> m_hand{std::make_unique<Hand>()};
     std::unique_ptr<Board> m_board{std::make_unique<Board>()};
-    std::unique_ptr<Deck> m_deck{std::make_unique<Deck>(R"(..\src\res\cards.txt)")};
+    std::unique_ptr<Deck> m_deck{std::make_unique<Deck>(R"(..\assets\cards.txt)")};
 };
-
-
-#endif //RAYLIB_TEST_PLAYER_H

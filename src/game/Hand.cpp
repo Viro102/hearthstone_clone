@@ -1,4 +1,4 @@
-#include "Hand.h"
+#include "../../include/Hand.h"
 
 void Hand::addCard(const Card &card) {
     m_cards.push_back(card);

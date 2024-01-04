@@ -26,17 +26,18 @@ if (NOT raylib_FOUND)
 endif ()
 
 add_executable(${PROJECT_NAME} src/Main.cpp
-        src/Game.cpp
-        src/Game.h
-        src/Player.cpp
-        src/Player.h
-        src/Common.h
-        src/Hand.cpp
-        src/Hand.h
-        src/Card.cpp
-        src/Card.h
-        src/Deck.cpp
-        src/Deck.h
-        src/Board.cpp
-        src/Board.h)
+        src/game/Game.cpp
+        include/Game.h
+        src/game/Player.cpp
+        include/Player.h
+        include/Common.h
+        src/game/Hand.cpp
+        include/Hand.h
+        src/game/Card.cpp
+        include/Card.h
+        src/game/Deck.cpp
+        include/Deck.h
+        src/game/Board.cpp
+        include/Board.h)
+
 target_link_libraries(${PROJECT_NAME} raylib)
