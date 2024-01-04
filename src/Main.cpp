@@ -1,4 +1,5 @@
 #include "../include/Game.h"
+#include "../include/Panel.h"
 
 enum class GameState {
     MENU,
@@ -8,31 +9,40 @@ enum class GameState {
 };
 
 int main() {
-    auto game = std::make_unique<Game>();
-    game->startGame("mage", "warrior");
-
     // Initialization
-    const int screenWidth = 1200;
-    const int screenHeight = 800;
+    const int screenWidth = 1400;
+    const int screenHeight = 750;
     const int screenCenterX = screenWidth / 2;
     const int screenCenterY = screenHeight / 2;
 
     InitWindow(screenWidth, screenHeight, "Hearthstone");
+
+    Game game;
+    Panel panel(game);
 
     GameState gameState = GameState::MENU;
 
     // Define the buttons
     Rectangle lobbyBtn = {screenCenterX - 100, 200, 200, 50};
     Rectangle exitBtn = {screenCenterX - 100, 300, 200, 50};
+    Rectangle gameBtn = {screenCenterX - 100, 300, 200, 50};
     Color lobbyBtnColor = GRAY;
     Color exitBtnColor = GRAY;
+    Color gameBtnColor = GRAY;
     Color hoverColor = DARKGRAY;
 
     SetTargetFPS(60);
+    SetExitKey(KEY_NULL);
+
+    game.startGame("mage","warrior");
 
     // Main game loop
     while (!WindowShouldClose()) {
         // Update
+        if (IsKeyPressed(KEY_ESCAPE)) {
+            gameState = GameState::MENU;
+        }
+
         switch (gameState) {
             using enum GameState;
             case MENU:
@@ -41,7 +51,7 @@ int main() {
                 if (CheckCollisionPointRec(GetMousePosition(), lobbyBtn)) {
                     lobbyBtnColor = hoverColor;
                     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-                        gameState = GAMEPLAY;
+                        gameState = LOBBY;
                     }
                     // Enter lobby logic here
                 } else {
@@ -52,22 +62,25 @@ int main() {
                     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
                         gameState = END;
                     }
-                    // Exit game logic here
                 } else {
                     exitBtnColor = GRAY;
                 }
                 break;
             case LOBBY:
-                // TODO
-                break;
-            case GAMEPLAY:
-                // Update game logic
-                if (IsKeyPressed(KEY_ESCAPE)) {
-                    gameState = END;
+                if (CheckCollisionPointRec(GetMousePosition(), gameBtn)) {
+                    gameBtnColor = hoverColor;
+                    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                        gameState = GAMEPLAY;
+                    }
+                    // Enter game logic here
+                } else {
+                    gameBtnColor = GRAY;
                 }
                 break;
+            case GAMEPLAY:
+                panel.update();
+                break;
             case END:
-                // Cleanup and close
                 CloseWindow();
                 return 0;
         }
@@ -90,14 +103,14 @@ int main() {
                 DrawText("Exit", exitBtn.x + 80, exitBtn.y + 15, 20, BLACK);
                 break;
             case LOBBY:
-                // TODO
+                DrawRectangleRec(gameBtn, gameBtnColor);
+                DrawText("Game", gameBtn.x + 80, gameBtn.y + 15, 20, BLACK);
                 break;
             case GAMEPLAY:
-                // Draw your game here
-                DrawText("Gameplay! Press ESC to exit", screenCenterX, screenCenterY, 20, LIGHTGRAY);
+                panel.draw();
                 break;
             case END:
-                cout << "INFO: Ending the game..\n";
+                cout << "INFO: Ending the game...\n";
                 break;
         }
 
