@@ -4,7 +4,7 @@
 
 class Slot {
 public:
-    Slot();
+    Slot() = default;
 
     Slot(int x, int y);
 
@@ -16,21 +16,13 @@ public:
 
     void setFree(bool free);
 
-    int getX() const;
-
-    int getY() const;
-
-    int getWidth() const;
-
-    int getHeight() const;
-
-    const Rectangle getShape() const;
+    Rectangle getShape() const;
 
 private:
-    int m_x;
-    int m_y;
+    int m_x{0};
+    int m_y{0};
     int m_width{150};
     int m_height{200};
-    bool m_free;
-    bool m_glow;
+    bool m_free{true};
+    bool m_glow{false};
 };
