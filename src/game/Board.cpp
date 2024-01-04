@@ -12,7 +12,7 @@ void Board::removeCard(int i) {
     if (i < m_cards.size()) {
         m_cards.erase(m_cards.begin() + i);
     } else {
-        std::cout << "Invalid index." << std::endl;
+        cout << "Invalid index." << std::endl;
     }
 }
 
