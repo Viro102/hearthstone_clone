@@ -6,6 +6,30 @@ set(CMAKE_CXX_STANDARD 20)
 # Generate compile_commands.json
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+
+set(SERVER_SOURCES
+        src/networking/ServerMain.cpp
+        src/networking/Server.cpp
+        src/networking/Client.cpp)
+
+add_executable(Server ${SERVER_SOURCES})
+
+set(CLIENT_SOURCES
+        src/Main.cpp
+        src/game/Game.cpp
+        src/game/Player.cpp
+        src/game/Card.cpp
+        src/game/Deck.cpp
+        src/gui/Panel.cpp
+        src/game/Slot.cpp
+        src/utility/CardContainer.cpp
+        src/networking/Client.cpp)
+
+add_executable(Client ${CLIENT_SOURCES})
+
+target_include_directories(Server PRIVATE include)
+target_include_directories(Client PRIVATE include)
+
 # Dependencies
 set(RAYLIB_VERSION 4.5.0)
 find_package(raylib ${RAYLIB_VERSION} QUIET)
@@ -25,24 +49,5 @@ if (NOT raylib_FOUND)
     endif ()
 endif ()
 
-add_executable(${PROJECT_NAME} src/Main.cpp
-        src/game/Game.cpp
-        include/Game.h
-        src/game/Player.cpp
-        include/Player.h
-        include/Common.h
-        src/game/Card.cpp
-        include/Card.h
-        src/game/Deck.cpp
-        include/Deck.h
-        src/gui/Panel.cpp
-        include/Panel.h
-        src/game/Slot.cpp
-        include/Slot.h
-        include/CardContainer.h
-        src/utility/CardContainer.cpp
-        include/Server.h
-        include/Client.h
-)
-
-target_link_libraries(${PROJECT_NAME} raylib)
+target_link_libraries(Client raylib)
+target_link_libraries(Server raylib)
