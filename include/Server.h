@@ -1,45 +1,56 @@
 #pragma once
 
-#include "Common.h"
+#include <Client.h>
+#include <thread>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <unistd.h>
 #include <cstring>
+#include <mutex>
+#include <string>
+#include <iostream>
+#include <vector>
+#include <memory>
+#include <algorithm>
+
+using std::string;
+using std::cout;
+using std::vector;
+using std::endl;
 
 class Server {
 public:
-    static int startServer(short port) {
-        int server_fd;
-        struct sockaddr_in address{};
-        int opt = 1;
+    explicit Server(short port);
 
-        // Creating socket file descriptor
-        if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
-            perror("socket failed");
-            exit(EXIT_FAILURE);
-        }
+    ~Server();
 
-        // Forcefully attaching socket to the port 8080
-        if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt))) {
-            perror("setsockopt");
-            exit(EXIT_FAILURE);
-        }
+    // Main loop for listening to clients
+    void listenForClients();
 
-        address.sin_family = AF_INET;
-        address.sin_addr.s_addr = INADDR_ANY;
-        address.sin_port = htons(port);
+private:
+    void startServer(short port);
 
-        // Forcefully attaching socket to the port 8080
-        if (bind(server_fd, (struct sockaddr *) &address, sizeof(address)) < 0) {
-            perror("bind failed");
-            exit(EXIT_FAILURE);
-        }
+    void stopServer();
 
-        if (listen(server_fd, 3) < 0) {
-            perror("listen");
-            exit(EXIT_FAILURE);
-        }
+    void removeClient(int clientSocket);
 
-        return server_fd;
-    }
+    void checkAllClientsReady();
+
+    // Handle individual client
+    void handleClient(int clientSocket);
+
+    // Process incoming messages from clients
+    void processMessage(int clientSocket, const string &message);
+
+    // Send the game state to all connected clients
+    void broadcastGameState();
+
+    // Convert the game state to a string for sending
+    string serializeGameState();
+
+
+    int m_serverFD{-1};
+    vector<std::unique_ptr<Client>> m_clients{};
+    std::atomic<bool> m_isRunning{false};     // For safely stopping the server
+    std::mutex m_clientMutex;
 };

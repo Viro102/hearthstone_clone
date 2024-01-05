@@ -1,7 +1,13 @@
-#include "../include/Game.h"
-#include "../include/Panel.h"
-#include "../include/Client.h"
-#include <thread>
+#include <Game.h>
+#include <Panel.h>
+#include <Client.h>
+
+enum class GameState {
+    MENU,
+    LOBBY,
+    GAMEPLAY,
+    END
+};
 
 int main() {
     // Initialization
@@ -14,6 +20,8 @@ int main() {
 
     Game game;
     Panel panel(game);
+    Client client;
+    client.startClient(8080);
 
     GameState gameState = GameState::MENU;
 
@@ -39,10 +47,6 @@ int main() {
     SetExitKey(KEY_NULL);
 
     game.startGame("mage", "warrior");
-    game.startServer(8080);
-
-//    int client_fd = Client::startClient();
-//    int client_fd2 = Client::startClient();
 
 
     // Main game loop
@@ -58,7 +62,9 @@ int main() {
                 if (CheckCollisionPointRec(GetMousePosition(), lobbyBtn)) {
                     lobbyBtnColor = hoverColor;
                     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-                        gameState = GameState::LOBBY;
+                        if (client.getSocket() != -1) {
+                            gameState = GameState::LOBBY;
+                        }
                     }
                 } else {
                     lobbyBtnColor = GRAY;
@@ -75,6 +81,11 @@ int main() {
             case GameState::LOBBY:
                 if (CheckCollisionPointRec(GetMousePosition(), readyBtn)) {
                     readyBtnColor = hoverColor;
+                    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                        string readyMsg = "ready";
+                        send(client.getSocket(), readyMsg.c_str(), readyMsg.length(), 0);
+                        player1Ready = !player1Ready;
+                    }
                 } else {
                     readyBtnColor = GRAY;
                 }
@@ -145,6 +156,5 @@ int main() {
 
     // De-Initialization
     CloseWindow();
-    game.stopServer();
     return 0;
 }
