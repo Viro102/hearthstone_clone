@@ -1,4 +1,4 @@
-#include "../../include/Panel.h"
+#include <Panel.h>
 
 Panel::Panel(Game &game) : m_game(game) {
     m_images.resize(4);
@@ -162,7 +162,7 @@ void Panel::draw() {
     paintUI();
 
     // Combine the hand and board cards into a single list for painting
-    std::vector<Card> allCards;
+    vector<Card> allCards;
     allCards.insert(allCards.end(), m_cardsHand.begin(), m_cardsHand.end());
     allCards.insert(allCards.end(), m_cardsBoard.begin(), m_cardsBoard.end());
 

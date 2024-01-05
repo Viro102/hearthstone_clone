@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Common.h"
-#include "Game.h"
-#include "Slot.h"
+#include <Common.h>
+#include <Game.h>
+#include <Slot.h>
 
 class Panel {
 public:

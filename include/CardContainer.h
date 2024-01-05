@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Common.h"
-#include "Card.h"
+#include <Common.h>
+#include <Card.h>
 
 class CardContainer {
 public:

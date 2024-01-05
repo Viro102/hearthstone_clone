@@ -2,7 +2,7 @@
 
 #include <fstream>
 #include <sstream>
-#include "CardContainer.h"
+#include <CardContainer.h>
 
 class Deck : public CardContainer {
 public:

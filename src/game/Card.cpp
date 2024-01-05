@@ -1,5 +1,4 @@
-#include <utility>
-#include "../../include/Card.h"
+#include <Card.h>
 
 Card::Card(string name, string type, int buffAmount, int hp, int damage, int cost) : m_name(std::move(name)),
                                                                                      m_type(std::move(type)),

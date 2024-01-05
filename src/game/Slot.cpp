@@ -1,4 +1,4 @@
-#include "../../include/Slot.h"
+#include <Slot.h>
 
 Slot::Slot(int x, int y) : m_x(x), m_y(y) {}
 

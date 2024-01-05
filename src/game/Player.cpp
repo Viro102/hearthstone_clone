@@ -1,5 +1,4 @@
-#include <utility>
-#include "../../include/Player.h"
+#include <Player.h>
 
 Player::Player(int hp, int id, string archetype) : m_archetype(std::move(archetype)), m_hp(hp), m_id(id) {}
 
@@ -46,7 +45,7 @@ void Player::shuffleDeck() {
     std::mt19937 generator(rd());
 
     auto &cards = m_deck->getCards();
-    std::ranges::shuffle(cards.begin(), cards.end(), generator);
+    std::ranges::shuffle(cards, generator);
 }
 
 CardContainer &Player::getBoard() const {

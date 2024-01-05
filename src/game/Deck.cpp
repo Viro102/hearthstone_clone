@@ -1,4 +1,4 @@
-#include "../../include/Deck.h"
+#include <Deck.h>
 
 Deck::Deck(const string &filename) {
     makeDeck(filename);

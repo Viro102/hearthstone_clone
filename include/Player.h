@@ -2,9 +2,9 @@
 
 #include <random>
 #include <memory>
-#include "Common.h"
-#include "Card.h"
-#include "Deck.h"
+#include <Common.h>
+#include <Card.h>
+#include <Deck.h>
 
 class Player {
 private:

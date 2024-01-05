@@ -6,6 +6,7 @@
 #include <vector>
 #include <memory>
 #include <algorithm>
+#include <utility>
 #include "raylib.h"
 
 using std::string;
@@ -13,10 +14,3 @@ using std::cout;
 using std::array;
 using std::vector;
 using std::endl;
-
-enum class GameState {
-    MENU,
-    LOBBY,
-    GAMEPLAY,
-    END
-};

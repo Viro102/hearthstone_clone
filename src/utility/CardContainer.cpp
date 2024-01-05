@@ -1,4 +1,4 @@
-#include "../../include/CardContainer.h"
+#include <CardContainer.h>
 
 void CardContainer::addCard(const Card &card) {
     if (!isFull()) {
@@ -19,7 +19,7 @@ void CardContainer::removeCard(int i) {
 }
 
 void CardContainer::removeCard(const Card &card) {
-    auto iterator = std::ranges::find_if(m_cards.begin(), m_cards.end(), [&card](const std::unique_ptr<Card> &ptr) {
+    auto iterator = std::ranges::find_if(m_cards, [&card](const auto &ptr) {
         return ptr.get() == &card;  // Compare addresses
     });
 
