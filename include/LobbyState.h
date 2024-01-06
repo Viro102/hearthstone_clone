@@ -4,8 +4,8 @@
 
 struct LobbyState {
     struct PlayerInfo {
-        string name;
-        bool isReady = false;
+        string name{};
+        bool isReady{false};
     };
 
     vector<PlayerInfo> players;
