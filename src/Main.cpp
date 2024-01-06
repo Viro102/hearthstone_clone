@@ -19,8 +19,10 @@ int main() {
     InitWindow(screenWidth, screenHeight, "Hearthstone");
 
     Game game;
-    Panel panel(game);
     Client client;
+    std::unique_ptr<Panel> panel = nullptr;
+
+    bool hasInit = false;
 
     GameState gameState = GameState::MENU;
 
@@ -41,8 +43,6 @@ int main() {
     SetTargetFPS(60);
     SetExitKey(KEY_NULL);
 
-    game.startGame("mage", "warrior");
-
 
     // Main game loop
     while (!WindowShouldClose()) {
@@ -57,7 +57,7 @@ int main() {
                 if (CheckCollisionPointRec(GetMousePosition(), lobbyBtn)) {
                     lobbyBtnColor = hoverColor;
                     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-                        client.startClient(8080);
+                        client.start(8080);
                         if (client.getSocket() != -1) {
                             gameState = GameState::LOBBY;
                         }
@@ -78,8 +78,7 @@ int main() {
                 if (CheckCollisionPointRec(GetMousePosition(), readyBtn)) {
                     readyBtnColor = hoverColor;
                     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-                        string readyMsg = "ready";
-                        send(client.getSocket(), readyMsg.c_str(), readyMsg.length(), 0);
+                        client.sendMessage("ready");
                     }
                 } else {
                     readyBtnColor = GRAY;
@@ -94,7 +93,7 @@ int main() {
                 }
                 if (CheckCollisionPointRec(GetMousePosition(), startBtn)) {
                     startBtnColor = hoverColor;
-                    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && client.canStart()) {
                         gameState = GameState::GAMEPLAY;
                     }
                 } else {
@@ -102,7 +101,13 @@ int main() {
                 }
                 break;
             case GameState::GAMEPLAY:
-                panel.update();
+                if (!hasInit) {
+                    panel = std::make_unique<Panel>(game);
+                    game.startGame("mage", "warrior");
+                    hasInit = true;
+                } else {
+                    panel->update();
+                }
                 break;
             case GameState::END:
                 CloseWindow();
@@ -129,11 +134,10 @@ int main() {
                 DrawText("Game Lobby", screenWidth / 2 - MeasureText("Game Lobby", 20) / 2, 20, 20, BLACK);
 
                 // Draw player states
-                for (size_t i = 0; i < client.getLobbyState().players.size(); ++i) {
+                for (int i = 0; i < client.getLobbyState().players.size(); ++i) {
                     const auto &player = client.getLobbyState().players[i];
                     DrawText(TextFormat("Player %zu: %s", i + 1, player.isReady ? "Ready" : "Not Ready"), 100,
-                             150 + 50 * i, 20,
-                             BLACK);
+                             150 + 50 * i, 20, BLACK);
                 }
 
                 // Draw buttons
@@ -145,7 +149,9 @@ int main() {
                 DrawText("Exit", exitBtnLobby.x + 20, exitBtnLobby.y + 15, 20, BLACK);
                 break;
             case GameState::GAMEPLAY:
-                panel.draw();
+                if (hasInit) {
+                    panel->draw();
+                }
                 break;
             case GameState::END:
                 cout << "INFO: Ending the game..." << endl;
