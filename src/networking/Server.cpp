@@ -106,10 +106,9 @@ void Server::processMessage(int clientSocket, const string &message) {
             }
             lock.unlock();
             broadcastMessage("updateLobbyState", serializeLobbyState());
-        } else if (type == "startGame"){
-                broadcastMessage("startGame", json());
+        } else if (type == "startGame") {
+            broadcastMessage("startGame", json());
         }
-
 
 
     } catch (json::parse_error &e) {

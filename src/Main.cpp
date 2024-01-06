@@ -1,6 +1,7 @@
 #include <Game.h>
 #include <Panel.h>
 #include <Client.h>
+
 int main() {
     // Initialization
     const int screenWidth = 1400;

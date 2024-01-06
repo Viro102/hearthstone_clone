@@ -56,7 +56,7 @@ void Client::sendMessage(const string &message) const {
     send(m_socket, serializedMsg.c_str(), serializedMsg.size(), 0);
 }
 
-void Client::setStateChangeCallback(const StateChangeCallback& callback) {
+void Client::setStateChangeCallback(const StateChangeCallback &callback) {
     stateChangeCallback = callback;
 }
 
@@ -75,7 +75,7 @@ void Client::processMessage(const string &message) {
         }
 
         if (type == "startGame") {
-            if(stateChangeCallback) {
+            if (stateChangeCallback) {
                 stateChangeCallback(GameState::GAMEPLAY);
             }
         }
