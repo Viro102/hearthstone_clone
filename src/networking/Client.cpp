@@ -33,13 +33,20 @@ int Client::start(short port) {
 }
 
 void Client::listenToServer() {
+    string buffer;
+    char tempBuffer[1024];
+
     while (true) {
-        char buffer[1024] = {0};
-        auto valread = recv(m_socket, buffer, 1024, 0);
+        ssize_t valread = recv(m_socket, tempBuffer, sizeof(tempBuffer), 0);
         if (valread > 0) {
-            string message(buffer, valread);
-            cout << "Client: received message = " << message << endl;
-            processMessage(message);
+            buffer.append(tempBuffer, valread);
+
+            size_t pos;
+            while ((pos = buffer.find('\n')) != string::npos) {
+                string message = buffer.substr(0, pos);
+                buffer.erase(0, pos + 1);
+                processMessage(message);
+            }
         } else {
             break;
         }
@@ -55,6 +62,10 @@ void Client::sendMessage(const string &message) const {
     send(m_socket, serializedMsg.c_str(), serializedMsg.size(), 0);
 }
 
+void Client::setStateChangeCallback(const StateChangeCallback& callback) {
+    stateChangeCallback = callback;
+}
+
 void Client::processMessage(const string &message) {
     try {
         json j = json::parse(message);
@@ -68,6 +79,13 @@ void Client::processMessage(const string &message) {
         } else if (type == "allReady") {
             m_canStart = true;
         }
+
+        if (type == "startGame") {
+            if(stateChangeCallback) {
+                stateChangeCallback(GameState::GAMEPLAY);
+            }
+        }
+
 
     } catch (json::parse_error &e) {
         std::cerr << "Received an invalid JSON message: " << message << " error:" << e.what() << endl;
