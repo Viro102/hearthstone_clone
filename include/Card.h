@@ -9,27 +9,27 @@ public:
 
     Card(string name, string type, int hp, int damage, int cost);
 
-    const string &getName() const;
+    [[nodiscard]] const string &getName() const;
 
-    const string &getType() const;
+    [[nodiscard]] const string &getType() const;
 
-    int getHp() const;
+    [[nodiscard]] int getHp() const;
 
-    int getDamage() const;
+    [[nodiscard]] int getDamage() const;
 
-    int getCost() const;
+    [[nodiscard]] int getCost() const;
 
-    int getBuffAmount() const;
+    [[nodiscard]] int getBuffAmount() const;
 
-    int getX() const;
+    [[nodiscard]] int getX() const;
 
-    int getY() const;
+    [[nodiscard]] int getY() const;
 
-    int getHeight() const;
+    [[nodiscard]] int getHeight() const;
 
-    int getWidth() const;
+    [[nodiscard]] int getWidth() const;
 
-    bool getHasAttacked() const;
+    [[nodiscard]] bool getHasAttacked() const;
 
     void setHasAttacked(bool hasAttacked);
 

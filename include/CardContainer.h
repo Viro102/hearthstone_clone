@@ -20,15 +20,15 @@ public:
 
     vector<std::unique_ptr<Card>> &getCards();
 
-    int getNumOfCards() const;
+    [[nodiscard]] int getNumOfCards() const;
 
-    string getNumOfCardsString() const;
+    [[nodiscard]] string getNumOfCardsString() const;
 
-    bool isFull() const;
+    [[nodiscard]] bool isFull() const;
 
     void print() const;
 
-    virtual int getMaxCards() const;
+    [[nodiscard]] virtual int getMaxCards() const;
 
 private:
     vector<std::unique_ptr<Card>> m_cards;

@@ -36,7 +36,7 @@ private:
 
     void paintUI() const;
 
-    void paintCards(const vector<Card> &cards) const;
+    static void paintCards(const vector<Card> &cards);
 
     void addGlow(int i, const string &where);
 

@@ -19,31 +19,31 @@ public:
 
     void shuffleDeck();
 
-    CardContainer &getBoard() const;
+    [[nodiscard]] CardContainer &getBoard() const;
 
-    Deck &getDeck() const;
+    [[nodiscard]] Deck &getDeck() const;
 
-    CardContainer &getHand() const;
+    [[nodiscard]] CardContainer &getHand() const;
 
-    int getHp() const;
+    [[nodiscard]] int getHp() const;
 
-    int getId() const;
+    [[nodiscard]] int getId() const;
 
-    int getMana() const;
+    [[nodiscard]] int getMana() const;
 
-    int getCurrentMaxMana() const;
+    [[nodiscard]] int getCurrentMaxMana() const;
 
-    string getHpString() const;
+    [[nodiscard]] string getHpString() const;
 
-    string getManaString() const;
+    [[nodiscard]] string getManaString() const;
 
-    string getArchetype() const;
+    [[nodiscard]] string getArchetype() const;
 
     void setHp(int hp);
 
     void setMana(int mana);
 
-    bool isTurn() const;
+    [[nodiscard]] bool isTurn() const;
 
     void setTurn(bool turn);
 

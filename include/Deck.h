@@ -12,7 +12,7 @@ public:
 
     ~Deck() override = default;
 
-    Deck &makeDeck(const std::string &filename);
+    Deck &makeDeck(const string &filename);
 
-    int getMaxCards() const override;
+    [[nodiscard]] int getMaxCards() const override;
 };

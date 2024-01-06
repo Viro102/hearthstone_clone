@@ -21,13 +21,13 @@ public:
 
     void attackFace();
 
-    Player &getOnTurnPlayer() const;
+    [[nodiscard]] Player &getOnTurnPlayer() const;
 
-    Player &getOffTurnPlayer() const;
+    [[nodiscard]] Player &getOffTurnPlayer() const;
 
     array<std::unique_ptr<Player>, 2> &getPlayers();
 
-    bool isSelected() const;
+    [[nodiscard]] bool isSelected() const;
 
     void isGameOver() const;
 

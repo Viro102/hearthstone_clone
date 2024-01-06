@@ -87,7 +87,7 @@ void Panel::paintUI() const {
     DrawText(("Cards: " + currentPlayer->getDeck().getNumOfCardsString()).c_str(), 1170, 200, 20, BLACK);
 }
 
-void Panel::paintCards(const vector<Card> &cards) const {
+void Panel::paintCards(const vector<Card> &cards) {
     for (const auto &card: cards) {
         int attPosY = card.getY() + card.getHeight();
         int attPosX = card.getX() + 2;
@@ -202,7 +202,7 @@ void Panel::removeGlow() {
         }
     }
 
-    for (int i = 0; i < m_slotsHand.size(); i++) {
-        m_slotsHand[i].setGlow(false);
+    for (auto &i: m_slotsHand) {
+        i.setGlow(false);
     }
 }
