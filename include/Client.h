@@ -5,6 +5,10 @@
 #include <netinet/in.h>
 #include <unistd.h>
 #include <arpa/inet.h>
+#include <LobbyState.h>
+#include <nlohmann/json.hpp>
+#include <thread>
+
 
 class Client {
 public:
@@ -22,10 +26,16 @@ public:
 
     int startClient(short port);
 
-private:
+    void listenToServer();
 
+    LobbyState getLobbyState();
+
+private:
     void shutdownClient() const;
+
+    void updateLocalLobbyState(const string &message);
 
     int m_socket{-1};
     bool m_isReady{false};
+    LobbyState m_lobbyState{};
 };

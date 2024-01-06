@@ -21,7 +21,6 @@ int main() {
     Game game;
     Panel panel(game);
     Client client;
-    client.startClient(8080);
 
     GameState gameState = GameState::MENU;
 
@@ -31,10 +30,6 @@ int main() {
     Rectangle readyBtn = {screenCenterX - 150, 350, 100, 50};
     Rectangle startBtn = {screenCenterX - 50, 350, 100, 50};
     Rectangle exitBtnLobby = {screenCenterX + 50, 350, 100, 50};
-
-    // TODO: ready
-    bool player1Ready = false;
-    bool player2Ready = false;
 
     auto lobbyBtnColor = GRAY;
     auto exitBtnColor = GRAY;
@@ -62,6 +57,7 @@ int main() {
                 if (CheckCollisionPointRec(GetMousePosition(), lobbyBtn)) {
                     lobbyBtnColor = hoverColor;
                     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                        client.startClient(8080);
                         if (client.getSocket() != -1) {
                             gameState = GameState::LOBBY;
                         }
@@ -84,7 +80,6 @@ int main() {
                     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
                         string readyMsg = "ready";
                         send(client.getSocket(), readyMsg.c_str(), readyMsg.length(), 0);
-                        player1Ready = !player1Ready;
                     }
                 } else {
                     readyBtnColor = GRAY;
@@ -132,8 +127,14 @@ int main() {
                 break;
             case GameState::LOBBY:
                 DrawText("Game Lobby", screenWidth / 2 - MeasureText("Game Lobby", 20) / 2, 20, 20, BLACK);
-                DrawText(TextFormat("Player 1: %s", player1Ready ? "Ready" : "Not Ready"), 100, 150, 20, BLACK);
-                DrawText(TextFormat("Player 2: %s", player2Ready ? "Ready" : "Not Ready"), 100, 200, 20, BLACK);
+
+                // Draw player states
+                for (size_t i = 0; i < client.getLobbyState().players.size(); ++i) {
+                    const auto &player = client.getLobbyState().players[i];
+                    DrawText(TextFormat("Player %zu: %s", i + 1, player.isReady ? "Ready" : "Not Ready"), 100,
+                             150 + 50 * i, 20,
+                             BLACK);
+                }
 
                 // Draw buttons
                 DrawRectangleRec(readyBtn, readyBtnColor);
@@ -154,7 +155,6 @@ int main() {
         EndDrawing();
     }
 
-    // De-Initialization
     CloseWindow();
     return 0;
 }

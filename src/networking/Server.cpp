@@ -1,6 +1,5 @@
 #include <Server.h>
 
-// Initialize and start the server
 void Server::startServer(short port) {
     struct sockaddr_in address{};
     int opt = 1;
@@ -27,18 +26,17 @@ void Server::startServer(short port) {
     std::jthread(&Server::listenForClients, this).detach();
 }
 
-// Main loop for listening to clients
 void Server::listenForClients() {
     struct sockaddr_in clientAddress{};
     socklen_t clientAddressLength = sizeof(clientAddress);
 
     while (m_isRunning) {
         int newClientSocket = accept(m_serverFD, (struct sockaddr *) &clientAddress, &clientAddressLength);
-        // Check if accept was successful
         if (newClientSocket >= 0) {
             std::scoped_lock lock(m_clientMutex);
             m_clients.push_back(std::make_unique<Client>(newClientSocket));
             cout << "Client " << newClientSocket << " has connected" << endl;
+            updateLobbyStateWithNewClient(newClientSocket);
             std::jthread(&Server::handleClient, this, newClientSocket).detach();
         } else {
             cout << "Client couldn't connect" << endl;
@@ -46,9 +44,10 @@ void Server::listenForClients() {
     }
 }
 
-// Handle individual client
 void Server::handleClient(int clientSocket) {
     while (m_isRunning) {
+        broadcastLobbyState();
+        checkAllClientsReady();
         char buffer[1024] = {0};
         auto valread = recv(clientSocket, buffer, 1024, 0);
         if (valread > 0) {
@@ -65,34 +64,59 @@ void Server::handleClient(int clientSocket) {
     }
 }
 
-// Process incoming messages from clients
 void Server::processMessage(int clientSocket, const string &message) {
     if (message == "playCard") {
-//        playACard(*m_players[clientSocket], cardIndex);
-//        broadcastGameState();
+        // TODO
     }
     if (message == "ready") {
-        std::scoped_lock lock(m_clientMutex);
-        for (const auto &client: m_clients) {
-            if (client->getSocket() == clientSocket) {
-                client->setReady(true);
+        for (auto &player: m_lobbyState.players) {
+            cout << player.name << " " << clientSocket << endl;
+            if (std::stoi(player.name) == clientSocket) {
+                player.isReady = true;
                 cout << "Client " << clientSocket << " marked as ready." << endl;
                 break;
             }
         }
     }
-    checkAllClientsReady();
 }
 
-// Send the game state to all connected clients
-void Server::broadcastGameState() {
-    std::string state = serializeGameState();
+void Server::broadcastLobbyState() {
+    string state = serializeLobbyState(m_lobbyState);
     std::scoped_lock lock(m_clientMutex);
     for (const auto &client: m_clients) {
-        auto sock = client->getSocket();
+        send(client->getSocket(), state.c_str(), state.length(), 0);
+    }
+}
+
+string Server::serializeLobbyState(const LobbyState &state) {
+    nlohmann::json j;
+    for (const auto &player: state.players) {
+        nlohmann::json playerJson = {
+                {"name",    player.name},
+                {"isReady", player.isReady}
+        };
+        j["players"].push_back(playerJson);
+    }
+    return j.dump();
+}
+
+void Server::broadcastGameState() {
+    string state = serializeGameState();
+    std::scoped_lock lock(m_clientMutex);
+    for (const auto &client: m_clients) {
+        int sock = client->getSocket();
         send(sock, state.c_str(), state.length(), 0);
     }
 }
+
+void Server::updateLobbyStateWithNewClient(int clientSocket) {
+    LobbyState::PlayerInfo newPlayer;
+    newPlayer.name = std::to_string(clientSocket);
+    newPlayer.isReady = false;
+
+    m_lobbyState.players.push_back(newPlayer);
+}
+
 
 void Server::removeClient(int clientSocket) {
     std::scoped_lock lock(m_clientMutex);
@@ -115,19 +139,18 @@ void Server::checkAllClientsReady() {
 }
 
 
-// Convert the game state to a string for sending
 std::string Server::serializeGameState() {
+    // TODO
     return "game state";
 }
 
-// Safely shutdown the server
 void Server::stopServer() {
     m_isRunning = false;
     for (const auto &client: m_clients) {
         close(client->getSocket());
     }
     close(m_serverFD);
-    cout << "Server is down" << endl;
+    cout << "Server is shutting down..." << endl;
 }
 
 Server::Server(short port) {

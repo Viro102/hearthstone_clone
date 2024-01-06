@@ -28,8 +28,33 @@ int Client::startClient(short port) {
         return -1;
     }
 
+    std::jthread(&Client::listenToServer, this).detach();
     return 0;
 }
+
+void Client::listenToServer() {
+    while (true) {
+        char buffer[1024] = {0};
+        long valread = recv(m_socket, buffer, 1024, 0);
+        if (valread > 0) {
+            string message(buffer, valread);
+            updateLocalLobbyState(message);
+        }
+    }
+}
+
+void Client::updateLocalLobbyState(const string &message) {
+    nlohmann::json json = nlohmann::json::parse(message);
+
+    m_lobbyState.players.clear();
+    for (const auto &playerJson: json["players"]) {
+        LobbyState::PlayerInfo player;
+        player.name = playerJson["name"];
+        player.isReady = playerJson["isReady"];
+        m_lobbyState.players.push_back(player);
+    }
+}
+
 
 void Client::shutdownClient() const {
     if (m_socket >= 0) {
@@ -47,4 +72,8 @@ bool Client::isReady() const {
 
 void Client::setReady(bool ready) {
     m_isReady = ready;
+}
+
+LobbyState Client::getLobbyState() {
+    return m_lobbyState;
 }

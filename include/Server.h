@@ -1,22 +1,15 @@
 #pragma once
 
 #include <Client.h>
+#include <Common.h>
 #include <thread>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <unistd.h>
 #include <cstring>
+#include <LobbyState.h>
+#include <nlohmann/json.hpp>
 #include <mutex>
-#include <string>
-#include <iostream>
-#include <vector>
-#include <memory>
-#include <algorithm>
-
-using std::string;
-using std::cout;
-using std::vector;
-using std::endl;
 
 class Server {
 public:
@@ -48,9 +41,16 @@ private:
     // Convert the game state to a string for sending
     string serializeGameState();
 
+    void updateLobbyStateWithNewClient(int clientSocket);
+
+    void broadcastLobbyState();
+
+    string serializeLobbyState(const LobbyState &state);
+
 
     int m_serverFD{-1};
     vector<std::unique_ptr<Client>> m_clients{};
-    std::atomic<bool> m_isRunning{false};     // For safely stopping the server
+    std::atomic<bool> m_isRunning{false};
     std::mutex m_clientMutex;
+    LobbyState m_lobbyState{};
 };
