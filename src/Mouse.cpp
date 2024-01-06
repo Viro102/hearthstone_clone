@@ -18,14 +18,15 @@ void Mouse::update() {
 
 void Mouse::handleClick(const string &objectName) {
     if (objectName == "endTurnButton") {
+        cout << "clicked on end turn" << endl;
         m_game.endTurn();
         m_gameScreen.removeGlow();
-    }
-    if (objectName == "heroAvatar") {
+    } else if (objectName == "heroOpponent") {
+        cout << "clicked on opponent" << endl;
         m_game.attackFace();
+    } else if (objectName == "heroPlayer") {
+        cout << "clicked on yourself" << endl;
+    } else {
+        cout << "clicked " << objectName << endl;
     }
-
-
-    cout << "clicked " << objectName << endl;
 }
-

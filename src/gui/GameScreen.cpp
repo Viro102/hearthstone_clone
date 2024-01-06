@@ -30,11 +30,13 @@ GameScreen::GameScreen(Game &game) : m_game(game) {
     m_images[2] = LoadTextureFromImage(mage);
     m_images[3] = LoadTextureFromImage(warrior);
 
-    m_heroHitbox = Rectangle(HEROES_POSITION_X, SECOND_HERO_POSITION_Y, m_images[2].width, m_images[2].height);
+    m_heroHitboxPlayer = Rectangle(HEROES_POSITION_X, FIRST_HERO_POSITION_Y, m_images[3].width, m_images[3].height);
+    m_heroHitboxOpponent = Rectangle(HEROES_POSITION_X, SECOND_HERO_POSITION_Y, m_images[2].width, m_images[2].height);
 
     m_endTurnButtonHitbox = Rectangle(END_TURN_BUTTON_POSITION_X, END_TURN_BUTTON_POSITION_Y, 200, 100);
 
-    registerAsClickable("heroAvatar", m_heroHitbox);
+    registerAsClickable("heroPlayer", m_heroHitboxPlayer);
+    registerAsClickable("heroOpponent", m_heroHitboxOpponent);
     registerAsClickable("endTurnButton", m_endTurnButtonHitbox);
 }
 
@@ -71,8 +73,8 @@ void GameScreen::paintUI() const {
     const auto &opponentPlayer = m_game.getPlayers()[1];
 
     // End turn button
-    DrawText("END TURN", END_TURN_BUTTON_POSITION_X, END_TURN_BUTTON_POSITION_Y, 20, BLACK);
     DrawRectangle(END_TURN_BUTTON_POSITION_X, END_TURN_BUTTON_POSITION_Y, 200, 70, GRAY);
+    DrawText("END TURN", END_TURN_BUTTON_POSITION_X, END_TURN_BUTTON_POSITION_Y, 20, BLACK);
 
     if (currentPlayer->getArchetype().empty()) {
         return;
@@ -89,24 +91,24 @@ void GameScreen::paintUI() const {
 
     DrawTexture(board, 20, 10, WHITE);
     DrawTexture(deck, 1150, 200, WHITE);
-    DrawText(("Cards: " + currentPlayer->getDeck().getNumOfCardsString()).c_str(), 1170, 200, 20, BLACK);
+    DrawText(("Cards: " + currentPlayer->getDeck().getNumOfCardsString()).c_str(), 1170, 175, 20, BLACK);
 }
 
 void GameScreen::paintCards(const vector<Card> &cards) {
     for (const auto &card: cards) {
-        int attPosY = card.getY() + card.getHeight();
+        int attPosY = card.getY() + card.getHeight() - 28;
         int attPosX = card.getX() + 2;
 
-        int hpPosY = card.getY() + card.getHeight();
+        int hpPosY = card.getY() + card.getHeight() - 28;
         int hpPosX = card.getX() + card.getWidth() - 18;
 
-        int costPosY = card.getY() + 25;
+        int costPosY = card.getY();
         int costPosX = card.getX() + 2;
 
-        int namePosY = card.getY() + 100;
+        int namePosY = card.getY() + 80;
         int namePosX = card.getX() + 40;
 
-        int typePosY = card.getY() + 125;
+        int typePosY = card.getY() + 100;
         int typePosX = card.getX() + 45;
 
         // Draw card rectangle
@@ -160,10 +162,8 @@ void GameScreen::update() {
 }
 
 void GameScreen::draw() {
-    // Clear the background
     ClearBackground(RAYWHITE);
 
-    // Draw the UI elements
     paintUI();
 
     // Combine the hand and board cards into a single list for painting
@@ -171,22 +171,21 @@ void GameScreen::draw() {
     allCards.insert(allCards.end(), m_cardsHand.begin(), m_cardsHand.end());
     allCards.insert(allCards.end(), m_cardsBoard.begin(), m_cardsBoard.end());
 
-    // Draw the cards
     paintCards(allCards);
 
-    // Draw glows for slots on the board
-    for (size_t i = 0; i < m_slotsBoard.size(); i++) {
-        for (size_t j = 0; j < m_slotsBoard[i].size(); j++) {
+    // Draw glow for slots on the board
+    for (int i = 0; i < m_slotsBoard.size(); i++) {
+        for (int j = 0; j < m_slotsBoard[i].size(); j++) {
             if (!m_slotsBoard[i][j].isFree() && m_slotsBoard[i][j].isGlow()) {
-                DrawRectangleLinesEx(m_slotsBoard[i][j].getShape(), 2, YELLOW); // Assuming getShape returns a Rectangle
+                DrawRectangleLinesEx(m_slotsBoard[i][j].getShape(), 2, YELLOW);
             }
         }
     }
 
-    // Draw glows for slots in hand
+    // Draw glow for slots in hand
     for (const auto &slot: m_slotsHand) {
         if (!slot.isFree() && slot.isGlow()) {
-            DrawRectangleLinesEx(slot.getShape(), 2, YELLOW); // Assuming getShape returns a Rectangle
+            DrawRectangleLinesEx(slot.getShape(), 2, YELLOW);
         }
     }
 }

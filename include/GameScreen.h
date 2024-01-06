@@ -18,7 +18,7 @@ public:
     const std::map<string, Rectangle> &getClickableObjects() const;
 
     void addGlow(int i, const string &where);
-    
+
     void removeGlow();
 
 private:
@@ -30,7 +30,8 @@ private:
     Game &m_game;
     vector<Texture2D> m_images{};
     Rectangle m_endTurnButtonHitbox{};
-    Rectangle m_heroHitbox{};
+    Rectangle m_heroHitboxPlayer{};
+    Rectangle m_heroHitboxOpponent{};
     vector<Card> m_cardsHand{};
     vector<Card> m_cardsBoard{};
     array<Slot, 5> m_slotsHand;
