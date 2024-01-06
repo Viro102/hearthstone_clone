@@ -8,6 +8,8 @@
 #include <LobbyState.h>
 #include <nlohmann/json.hpp>
 #include <thread>
+#include <functional>
+#include <GameState.h>
 
 using nlohmann::json;
 
@@ -31,9 +33,16 @@ public:
 
     [[nodiscard]] LobbyState getLobbyState() const;
 
+    using StateChangeCallback = std::function<void(GameState)>;
+
+    void setStateChangeCallback(const StateChangeCallback& callback);
+
     bool canStart() const;
 
 private:
+
+    StateChangeCallback stateChangeCallback;
+
     void updateLocalLobbyState(const string &message);
 
     void processMessage(const string &message);

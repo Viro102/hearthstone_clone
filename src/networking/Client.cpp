@@ -46,6 +46,7 @@ void Client::listenToServer() {
     }
 }
 
+
 void Client::sendMessage(const string &message) const {
     json j;
     j["type"] = message;
@@ -53,6 +54,10 @@ void Client::sendMessage(const string &message) const {
     string serializedMsg = j.dump();
 
     send(m_socket, serializedMsg.c_str(), serializedMsg.size(), 0);
+}
+
+void Client::setStateChangeCallback(const StateChangeCallback& callback) {
+    stateChangeCallback = callback;
 }
 
 void Client::processMessage(const string &message) {
@@ -68,6 +73,13 @@ void Client::processMessage(const string &message) {
         } else if (type == "allReady") {
             m_canStart = true;
         }
+
+        if (type == "startGame") {
+            if(stateChangeCallback) {
+                stateChangeCallback(GameState::GAMEPLAY);
+            }
+        }
+
 
     } catch (json::parse_error &e) {
         std::cerr << "Received an invalid JSON message: " << message << " error:" << e.what() << endl;

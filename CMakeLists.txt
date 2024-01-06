@@ -22,7 +22,8 @@ set(CLIENT_SOURCES
         src/gui/Panel.cpp
         src/game/Slot.cpp
         src/utility/CardContainer.cpp
-        src/networking/Client.cpp)
+        src/networking/Client.cpp
+        include/GameState.h)
 
 add_executable(Client ${CLIENT_SOURCES})
 
