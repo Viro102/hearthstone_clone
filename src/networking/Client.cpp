@@ -33,25 +33,19 @@ int Client::start(short port) {
 }
 
 void Client::listenToServer() {
-    string buffer;
-    char tempBuffer[1024];
-
     while (true) {
-        ssize_t valread = recv(m_socket, tempBuffer, sizeof(tempBuffer), 0);
+        char buffer[1024] = {0};
+        auto valread = recv(m_socket, buffer, 1024, 0);
         if (valread > 0) {
-            buffer.append(tempBuffer, valread);
-
-            size_t pos;
-            while ((pos = buffer.find('\n')) != string::npos) {
-                string message = buffer.substr(0, pos);
-                buffer.erase(0, pos + 1);
-                processMessage(message);
-            }
+            string message(buffer, valread);
+            cout << "Client: received message = " << message << endl;
+            processMessage(message);
         } else {
             break;
         }
     }
 }
+
 
 void Client::sendMessage(const string &message) const {
     json j;

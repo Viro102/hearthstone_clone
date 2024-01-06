@@ -123,7 +123,7 @@ void Server::broadcastMessage(const string &type, const json &data) {
     message["type"] = type;
     message["data"] = data;
 
-    string serializedMessage = message.dump() + "\n";
+    string serializedMessage = message.dump();
     std::scoped_lock lock(m_clientsMutex);
     for (const auto &client: m_clients) {
         send(client->getSocket(), serializedMessage.c_str(), serializedMessage.length(), 0);
