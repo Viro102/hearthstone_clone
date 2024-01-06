@@ -2,5 +2,8 @@
 
 int main() {
     Server server(8080);
-    server.listenForClients();
+
+    while (true) {
+        sleep(1);
+    }
 }

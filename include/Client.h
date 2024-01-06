@@ -9,6 +9,7 @@
 #include <nlohmann/json.hpp>
 #include <thread>
 
+using nlohmann::json;
 
 class Client {
 public:
@@ -18,24 +19,28 @@ public:
 
     ~Client();
 
-    int getSocket() const;
+    int start(short port);
 
-    bool isReady() const;
-
-    void setReady(bool ready);
-
-    int startClient(short port);
+    void shutdown();
 
     void listenToServer();
 
-    LobbyState getLobbyState();
+    void sendMessage(const string &message) const;
+
+    [[nodiscard]] int getSocket() const;
+
+    [[nodiscard]] LobbyState getLobbyState() const;
+
+    bool canStart() const;
 
 private:
-    void shutdownClient() const;
-
     void updateLocalLobbyState(const string &message);
 
+    void processMessage(const string &message);
+
+
     int m_socket{-1};
-    bool m_isReady{false};
+    bool m_canStart{false};
     LobbyState m_lobbyState{};
+    std::jthread m_serverListener;
 };

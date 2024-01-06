@@ -11,6 +11,8 @@
 #include <nlohmann/json.hpp>
 #include <mutex>
 
+using nlohmann::json;
+
 class Server {
 public:
     explicit Server(short port);
@@ -21,9 +23,9 @@ public:
     void listenForClients();
 
 private:
-    void startServer(short port);
+    void start(short port);
 
-    void stopServer();
+    void stop();
 
     void removeClient(int clientSocket);
 
@@ -35,22 +37,23 @@ private:
     // Process incoming messages from clients
     void processMessage(int clientSocket, const string &message);
 
+    void updateLobbyStateWithNewClient(int clientSocket);
+
     // Send the game state to all connected clients
     void broadcastGameState();
 
     // Convert the game state to a string for sending
     string serializeGameState();
 
-    void updateLobbyStateWithNewClient(int clientSocket);
+    void broadcastMessage(const string &type, const nlohmann::json &data);
 
-    void broadcastLobbyState();
-
-    string serializeLobbyState(const LobbyState &state);
-
+    json serializeLobbyState();
 
     int m_serverFD{-1};
-    vector<std::unique_ptr<Client>> m_clients{};
-    std::atomic<bool> m_isRunning{false};
-    std::mutex m_clientMutex;
     LobbyState m_lobbyState{};
+    vector<std::unique_ptr<Client>> m_clients{};
+    std::vector<std::jthread> m_clientThreads{};
+    std::atomic<bool> m_isRunning{false};
+    std::mutex m_clientsMutex;
+    std::mutex m_lobbyStateMutex;
 };

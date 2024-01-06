@@ -3,10 +3,10 @@
 Client::Client(int socketFD) : m_socket(socketFD) {}
 
 Client::~Client() {
-    shutdownClient();
+    shutdown();
 }
 
-int Client::startClient(short port) {
+int Client::start(short port) {
     struct sockaddr_in serverAddress{};
 
     if ((m_socket = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
@@ -28,23 +28,54 @@ int Client::startClient(short port) {
         return -1;
     }
 
-    std::jthread(&Client::listenToServer, this).detach();
+    m_serverListener = std::jthread(&Client::listenToServer, this);
     return 0;
 }
 
 void Client::listenToServer() {
     while (true) {
         char buffer[1024] = {0};
-        long valread = recv(m_socket, buffer, 1024, 0);
+        auto valread = recv(m_socket, buffer, 1024, 0);
         if (valread > 0) {
             string message(buffer, valread);
-            updateLocalLobbyState(message);
+            cout << "Client: received message = " << message << endl;
+            processMessage(message);
+        } else {
+            break;
         }
     }
 }
 
+void Client::sendMessage(const string &message) const {
+    json j;
+    j["type"] = message;
+    j["data"] = "";
+    string serializedMsg = j.dump();
+
+    send(m_socket, serializedMsg.c_str(), serializedMsg.size(), 0);
+}
+
+void Client::processMessage(const string &message) {
+    try {
+        json j = json::parse(message);
+
+        // Extract the message type
+        string type = j["type"];
+        string data = j["data"].dump();
+
+        if (type == "updateLobbyState") {
+            updateLocalLobbyState(data);
+        } else if (type == "allReady") {
+            m_canStart = true;
+        }
+
+    } catch (json::parse_error &e) {
+        std::cerr << "Received an invalid JSON message: " << message << " error:" << e.what() << endl;
+    }
+}
+
 void Client::updateLocalLobbyState(const string &message) {
-    nlohmann::json json = nlohmann::json::parse(message);
+    json json = json::parse(message);
 
     m_lobbyState.players.clear();
     for (const auto &playerJson: json["players"]) {
@@ -55,10 +86,14 @@ void Client::updateLocalLobbyState(const string &message) {
     }
 }
 
-
-void Client::shutdownClient() const {
+void Client::shutdown() {
     if (m_socket >= 0) {
         close(m_socket);
+        m_socket = -1;
+    }
+
+    if (m_serverListener.joinable()) {
+        m_serverListener.join();
     }
 }
 
@@ -66,14 +101,10 @@ int Client::getSocket() const {
     return m_socket;
 }
 
-bool Client::isReady() const {
-    return m_isReady;
-}
-
-void Client::setReady(bool ready) {
-    m_isReady = ready;
-}
-
-LobbyState Client::getLobbyState() {
+LobbyState Client::getLobbyState() const {
     return m_lobbyState;
+}
+
+bool Client::canStart() const {
+    return m_canStart;
 }
