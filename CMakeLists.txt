@@ -19,10 +19,11 @@ set(CLIENT_SOURCES
         src/game/Player.cpp
         src/game/Card.cpp
         src/game/Deck.cpp
-        src/gui/Panel.cpp
+        src/gui/GameScreen.cpp
         src/game/Slot.cpp
         src/utility/CardContainer.cpp
-        src/networking/Client.cpp)
+        src/networking/Client.cpp
+        src/Mouse.cpp)
 
 add_executable(Client ${CLIENT_SOURCES})
 

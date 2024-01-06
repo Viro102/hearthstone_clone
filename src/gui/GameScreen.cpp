@@ -1,6 +1,6 @@
-#include <Panel.h>
+#include <GameScreen.h>
 
-Panel::Panel(Game &game) : m_game(game) {
+GameScreen::GameScreen(Game &game) : m_game(game) {
     m_images.resize(4);
 
     for (int i = 0; i < m_slotsHand.size(); i++) {
@@ -31,15 +31,18 @@ Panel::Panel(Game &game) : m_game(game) {
     m_endTurnButtonHitbox = Rectangle(200, 100);
     m_endTurnButtonHitbox.x = END_TURN_BUTTON_POSITION_X;
     m_endTurnButtonHitbox.y = END_TURN_BUTTON_POSITION_Y;
+
+    registerAsClickable("heroAvatar", m_heroHitbox);
+    registerAsClickable("endTurnButton", m_endTurnButtonHitbox);
 }
 
-Panel::~Panel() {
+GameScreen::~GameScreen() {
     for (const auto &image: m_images) {
         UnloadTexture(image);
     }
 }
 
-void Panel::paintHero(int pos, Texture2D hero, const Player &player) const {
+void GameScreen::paintHero(int pos, Texture2D hero, const Player &player) const {
     const int OFFSET_X = 220;
     const int OFFSET_Y_HP = 650;
     const int OFFSET_Y_MANA = 700;
@@ -57,7 +60,7 @@ void Panel::paintHero(int pos, Texture2D hero, const Player &player) const {
     }
 }
 
-void Panel::paintUI() const {
+void GameScreen::paintUI() const {
     const auto &board = m_images[0];
     const auto &deck = m_images[1];
     const auto &mage = m_images[2];
@@ -67,7 +70,7 @@ void Panel::paintUI() const {
 
     // End turn button
     DrawText("END TURN", END_TURN_BUTTON_POSITION_X, END_TURN_BUTTON_POSITION_Y, 20, BLACK);
-    DrawRectangle(END_TURN_BUTTON_POSITION_X, END_TURN_BUTTON_POSITION_Y, 200, 100, GRAY);
+    DrawRectangle(END_TURN_BUTTON_POSITION_X, END_TURN_BUTTON_POSITION_Y, 200, 70, GRAY);
 
     if (currentPlayer->getArchetype().empty()) {
         return;
@@ -87,7 +90,7 @@ void Panel::paintUI() const {
     DrawText(("Cards: " + currentPlayer->getDeck().getNumOfCardsString()).c_str(), 1170, 200, 20, BLACK);
 }
 
-void Panel::paintCards(const vector<Card> &cards) {
+void GameScreen::paintCards(const vector<Card> &cards) {
     for (const auto &card: cards) {
         int attPosY = card.getY() + card.getHeight();
         int attPosX = card.getX() + 2;
@@ -118,7 +121,7 @@ void Panel::paintCards(const vector<Card> &cards) {
     }
 }
 
-void Panel::update() {
+void GameScreen::update() {
     m_cardsHand.clear();
     m_cardsBoard.clear();
     const auto &players = m_game.getPlayers();
@@ -154,7 +157,7 @@ void Panel::update() {
     }
 }
 
-void Panel::draw() {
+void GameScreen::draw() {
     // Clear the background
     ClearBackground(RAYWHITE);
 
@@ -186,7 +189,7 @@ void Panel::draw() {
     }
 }
 
-void Panel::addGlow(int i, const string &where) {
+void GameScreen::addGlow(int i, const string &where) {
     const auto &currentPlayer = m_game.getOnTurnPlayer();
     if (where == "hand") {
         m_slotsHand[i].setGlow(true);
@@ -195,7 +198,7 @@ void Panel::addGlow(int i, const string &where) {
     }
 }
 
-void Panel::removeGlow() {
+void GameScreen::removeGlow() {
     for (int i = 0; i < m_slotsBoard.size(); i++) {
         for (int j = 0; j < m_slotsBoard[i].size(); j++) {
             m_slotsBoard[i][j].setGlow(false);
@@ -205,4 +208,12 @@ void Panel::removeGlow() {
     for (auto &i: m_slotsHand) {
         i.setGlow(false);
     }
+}
+
+void GameScreen::registerAsClickable(const string &name, const Rectangle &hitbox) {
+    m_clickableObjects[name] = hitbox;
+}
+
+const std::map<string, Rectangle> &GameScreen::getClickableObjects() const {
+    return m_clickableObjects;
 }
