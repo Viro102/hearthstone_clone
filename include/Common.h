@@ -7,7 +7,6 @@
 #include <memory>
 #include <algorithm>
 #include <utility>
-#include "raylib.h"
 
 using std::string;
 using std::cout;

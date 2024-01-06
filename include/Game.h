@@ -3,6 +3,7 @@
 #include <Player.h>
 #include <Common.h>
 #include <Card.h>
+#include <raylib.h>
 
 class Game {
 public:

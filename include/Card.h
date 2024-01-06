@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Common.h>
+#include <raylib.h>
 
 class Card {
 public:
