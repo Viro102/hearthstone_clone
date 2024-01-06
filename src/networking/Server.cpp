@@ -157,7 +157,12 @@ void Server::removeClient(int clientSocket) {
                                                       [clientSocket](const auto &client) {
                                                           return client->getSocket() == clientSocket;
                                                       });
+    const auto [b, e] = std::ranges::remove_if(m_lobbyState.players,
+                                               [clientSocket](const auto &player) {
+                                                   return std::stoi(player.name) == clientSocket;
+                                               });
     m_clients.erase(first, last);
+    m_lobbyState.players.erase(b, e);
     close(clientSocket);
 }
 
