@@ -1,14 +1,6 @@
 #include <Game.h>
 #include <Panel.h>
 #include <Client.h>
-
-enum class GameState {
-    MENU,
-    LOBBY,
-    GAMEPLAY,
-    END
-};
-
 int main() {
     // Initialization
     const int screenWidth = 1400;
@@ -20,11 +12,15 @@ int main() {
 
     Game game;
     Client client;
+    GameState gameState = GameState::MENU;
+
+    client.setStateChangeCallback([&gameState](GameState newState) {
+        gameState = newState; // Update the game state
+    });
     std::unique_ptr<Panel> panel = nullptr;
 
     bool hasInit = false;
 
-    GameState gameState = GameState::MENU;
 
     // Define the buttons
     Rectangle lobbyBtn = {screenCenterX - 100, 200, 200, 50};
@@ -94,7 +90,8 @@ int main() {
                 if (CheckCollisionPointRec(GetMousePosition(), startBtn)) {
                     startBtnColor = hoverColor;
                     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && client.canStart()) {
-                        gameState = GameState::GAMEPLAY;
+                        client.sendMessage("startGame");
+                        //gameState = GameState::GAMEPLAY;
                     }
                 } else {
                     startBtnColor = GRAY;
