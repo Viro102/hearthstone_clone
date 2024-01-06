@@ -19,9 +19,13 @@ void Mouse::update() {
 void Mouse::handleClick(const string &objectName) {
     if (objectName == "endTurnButton") {
         m_game.endTurn();
+        m_gameScreen.removeGlow();
     }
     if (objectName == "heroAvatar") {
         m_game.attackFace();
     }
+
+
+    cout << "clicked " << objectName << endl;
 }
 

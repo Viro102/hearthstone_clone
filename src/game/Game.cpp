@@ -32,7 +32,6 @@ void Game::endTurn() {
     if (m_selectedCard != nullptr) {
         m_selectedCard = nullptr;
     }
-//        panel.removeGlow();
     m_turnCounter++;
     cout << "Turn ended!\n";
 }
@@ -48,21 +47,21 @@ void Game::playACard(Player &player, int i) {
 void Game::selectCardBoard(const Player &player, int i) {
     if (m_selectedCard == nullptr) {
         m_selectedCard = std::make_unique<Card>(player.getBoard().getCard(i));
-//            panel.addGlow(i, "m_board");
+        // panel.addGlow(i, "m_board");
 
     } else if (*m_selectedCard == player.getBoard().getCard(i)) {
         m_selectedCard = nullptr;
-//            panel.removeGlow();
+        // panel.removeGlow();
     }
 }
 
 void Game::selectCardHand(const Player &player, int i) {
     if (*m_selectedCard == player.getHand().getCard(i)) {
         m_selectedCard = nullptr;
-//            panel.removeGlow();
+        // panel.removeGlow();
     } else {
         m_selectedCard = std::make_unique<Card>(player.getHand().getCard(i));
-//            panel.addGlow(i, "m_hand");
+        // panel.addGlow(i, "m_hand");
     }
 }
 
@@ -71,7 +70,7 @@ void Game::attack(int i) {
         cout << "No card selected!\n";
         return;
     }
-//        panel.removeGlow();
+    // panel.removeGlow();
     const auto &opponent = getOffTurnPlayer();
     const auto &currentPlayer = getOnTurnPlayer();
     auto &targetCard = opponent.getBoard().getCard(i);
@@ -102,7 +101,7 @@ void Game::attackFace() {
         return;
     }
 
-//        panel.removeGlow();
+    // panel.removeGlow();
 
     for (const auto &c: target.getBoard().getCards()) {
         if (c == nullptr) {

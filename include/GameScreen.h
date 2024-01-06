@@ -17,6 +17,10 @@ public:
 
     const std::map<string, Rectangle> &getClickableObjects() const;
 
+    void addGlow(int i, const string &where);
+    
+    void removeGlow();
+
 private:
     const int END_TURN_BUTTON_POSITION_X = 910;
     const int END_TURN_BUTTON_POSITION_Y = 350;
@@ -40,8 +44,4 @@ private:
     void paintUI() const;
 
     static void paintCards(const vector<Card> &cards);
-
-    void addGlow(int i, const string &where);
-
-    void removeGlow();
 };

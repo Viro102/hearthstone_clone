@@ -4,13 +4,19 @@ GameScreen::GameScreen(Game &game) : m_game(game) {
     m_images.resize(4);
 
     for (int i = 0; i < m_slotsHand.size(); i++) {
+        auto newSlot = Slot(30 + (i * 170), 530);
         m_slotsHand[i] = Slot(30 + (i * 170), 530);
+        std::string label = "slotHand[" + std::to_string(i) + "]";
+        registerAsClickable(label, newSlot.getShape());
     }
 
     for (int i = 0; i < m_slotsBoard.size(); i++) {
         for (int j = 0; j < m_slotsBoard[i].size(); j++) {
             int x = std::abs(i - 1);
-            m_slotsBoard[x][j] = Slot(30 + (j * 170), 40 + (i * 240));
+            auto newSlot = Slot(30 + (j * 170), 40 + (i * 240));
+            m_slotsBoard[x][j] = newSlot;
+            std::string label = "slotBoard[" + std::to_string(x) + "][" + std::to_string(j) + "]";
+            registerAsClickable(label, newSlot.getShape());
         }
     }
 
@@ -24,13 +30,9 @@ GameScreen::GameScreen(Game &game) : m_game(game) {
     m_images[2] = LoadTextureFromImage(mage);
     m_images[3] = LoadTextureFromImage(warrior);
 
-    m_heroHitbox = Rectangle(m_images[2].width, m_images[2].height);
-    m_heroHitbox.x = HEROES_POSITION_X;
-    m_heroHitbox.y = SECOND_HERO_POSITION_Y;
+    m_heroHitbox = Rectangle(HEROES_POSITION_X, SECOND_HERO_POSITION_Y, m_images[2].width, m_images[2].height);
 
-    m_endTurnButtonHitbox = Rectangle(200, 100);
-    m_endTurnButtonHitbox.x = END_TURN_BUTTON_POSITION_X;
-    m_endTurnButtonHitbox.y = END_TURN_BUTTON_POSITION_Y;
+    m_endTurnButtonHitbox = Rectangle(END_TURN_BUTTON_POSITION_X, END_TURN_BUTTON_POSITION_Y, 200, 100);
 
     registerAsClickable("heroAvatar", m_heroHitbox);
     registerAsClickable("endTurnButton", m_endTurnButtonHitbox);
