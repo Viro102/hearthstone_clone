@@ -1,4 +1,4 @@
-#include "../../include/Deck.h"
+#include <Deck.h>
 
 Deck::Deck(const string &filename) {
     makeDeck(filename);
@@ -37,7 +37,7 @@ Deck &Deck::makeDeck(const string &filename) {
             }
         }
     } catch (const std::exception &e) {
-        std::cerr << "Error: " << e.what() << std::endl;
+        std::cerr << "Error: " << e.what() << endl;
     }
 
     return *this;

@@ -1,4 +1,4 @@
-#include "../../include/Game.h"
+#include <Game.h>
 
 void Game::startGame(const string &player1, const string &player2) {
     m_players[0] = std::make_unique<Player>(PLAYER_MAX_HP, 0, player1);

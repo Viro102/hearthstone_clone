@@ -2,10 +2,9 @@
 
 #include <random>
 #include <memory>
-#include "Common.h"
-#include "Card.h"
-#include "Deck.h"
-#include <algorithm>
+#include <Common.h>
+#include <Card.h>
+#include <Deck.h>
 
 class Player {
 private:
@@ -20,31 +19,31 @@ public:
 
     void shuffleDeck();
 
-    CardContainer &getBoard() const;
+    [[nodiscard]] CardContainer &getBoard() const;
 
-    Deck &getDeck() const;
+    [[nodiscard]] Deck &getDeck() const;
 
-    CardContainer & getHand() const;
+    [[nodiscard]] CardContainer &getHand() const;
 
-    int getHp() const;
+    [[nodiscard]] int getHp() const;
 
-    int getId() const;
+    [[nodiscard]] int getId() const;
 
-    int getMana() const;
+    [[nodiscard]] int getMana() const;
 
-    int getCurrentMaxMana() const;
+    [[nodiscard]] int getCurrentMaxMana() const;
 
-    string getHpString() const;
+    [[nodiscard]] string getHpString() const;
 
-    string getManaString() const;
+    [[nodiscard]] string getManaString() const;
 
-    string getArchetype() const;
+    [[nodiscard]] string getArchetype() const;
 
     void setHp(int hp);
 
     void setMana(int mana);
 
-    bool isTurn() const;
+    [[nodiscard]] bool isTurn() const;
 
     void setTurn(bool turn);
 
@@ -57,5 +56,5 @@ private:
     bool m_turn{false};
     std::unique_ptr<CardContainer> m_hand{std::make_unique<CardContainer>()};
     std::unique_ptr<CardContainer> m_board{std::make_unique<CardContainer>()};
-    std::unique_ptr<Deck> m_deck{std::make_unique<Deck>(R"(..\assets\cards.txt)")};
+    std::unique_ptr<Deck> m_deck{std::make_unique<Deck>("../assets/cards.txt")};
 };

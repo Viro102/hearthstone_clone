@@ -1,4 +1,4 @@
-#include "../../include/Panel.h"
+#include <Panel.h>
 
 Panel::Panel(Game &game) : m_game(game) {
     m_images.resize(4);
@@ -15,10 +15,10 @@ Panel::Panel(Game &game) : m_game(game) {
     }
 
 
-    auto board = LoadImage(R"(..\assets\board.png)");
-    auto deck = LoadImage(R"(..\assets\deck.png)");
-    auto mage = LoadImage(R"(..\assets\mage.png)");
-    auto warrior = LoadImage(R"(..\assets\warrior.png)");
+    auto board = LoadImage("../assets/board.png");
+    auto deck = LoadImage("../assets/deck.png");
+    auto mage = LoadImage("../assets/mage.png");
+    auto warrior = LoadImage("../assets/warrior.png");
     m_images[0] = LoadTextureFromImage(board);
     m_images[1] = LoadTextureFromImage(deck);
     m_images[2] = LoadTextureFromImage(mage);
@@ -87,7 +87,7 @@ void Panel::paintUI() const {
     DrawText(("Cards: " + currentPlayer->getDeck().getNumOfCardsString()).c_str(), 1170, 200, 20, BLACK);
 }
 
-void Panel::paintCards(const vector<Card> &cards) const {
+void Panel::paintCards(const vector<Card> &cards) {
     for (const auto &card: cards) {
         int attPosY = card.getY() + card.getHeight();
         int attPosX = card.getX() + 2;
@@ -162,7 +162,7 @@ void Panel::draw() {
     paintUI();
 
     // Combine the hand and board cards into a single list for painting
-    std::vector<Card> allCards;
+    vector<Card> allCards;
     allCards.insert(allCards.end(), m_cardsHand.begin(), m_cardsHand.end());
     allCards.insert(allCards.end(), m_cardsBoard.begin(), m_cardsBoard.end());
 
@@ -183,5 +183,26 @@ void Panel::draw() {
         if (!slot.isFree() && slot.isGlow()) {
             DrawRectangleLinesEx(slot.getShape(), 2, YELLOW); // Assuming getShape returns a Rectangle
         }
+    }
+}
+
+void Panel::addGlow(int i, const string &where) {
+    const auto &currentPlayer = m_game.getOnTurnPlayer();
+    if (where == "hand") {
+        m_slotsHand[i].setGlow(true);
+    } else if (where == "board") {
+        m_slotsBoard[currentPlayer.getId()][i].setGlow(true);
+    }
+}
+
+void Panel::removeGlow() {
+    for (int i = 0; i < m_slotsBoard.size(); i++) {
+        for (int j = 0; j < m_slotsBoard[i].size(); j++) {
+            m_slotsBoard[i][j].setGlow(false);
+        }
+    }
+
+    for (auto &i: m_slotsHand) {
+        i.setGlow(false);
     }
 }

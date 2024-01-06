@@ -1,9 +1,8 @@
 #pragma once
 
-#include "Common.h"
-#include "Game.h"
-#include "Slot.h"
-#include <memory>
+#include <Common.h>
+#include <Game.h>
+#include <Slot.h>
 
 class Panel {
 public:
@@ -37,5 +36,9 @@ private:
 
     void paintUI() const;
 
-    void paintCards(const vector<Card> &cards) const;
+    static void paintCards(const vector<Card> &cards);
+
+    void addGlow(int i, const string &where);
+
+    void removeGlow();
 };

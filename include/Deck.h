@@ -2,8 +2,7 @@
 
 #include <fstream>
 #include <sstream>
-#include "CardContainer.h"
-#include <memory>
+#include <CardContainer.h>
 
 class Deck : public CardContainer {
 public:
@@ -13,7 +12,7 @@ public:
 
     ~Deck() override = default;
 
-    Deck &makeDeck(const std::string &filename);
+    Deck &makeDeck(const string &filename);
 
-    int getMaxCards() const override;
+    [[nodiscard]] int getMaxCards() const override;
 };

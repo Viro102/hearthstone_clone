@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Common.h"
-#include <memory>
+#include <Common.h>
+#include <raylib.h>
 
 class Slot {
 public:
@@ -9,15 +9,15 @@ public:
 
     Slot(int x, int y);
 
-    bool isGlow() const;
+    [[nodiscard]] bool isGlow() const;
 
     void setGlow(bool glow);
 
-    bool isFree() const;
+    [[nodiscard]] bool isFree() const;
 
     void setFree(bool free);
 
-    Rectangle getShape() const;
+    [[nodiscard]] Rectangle getShape() const;
 
 private:
     int m_x{0};

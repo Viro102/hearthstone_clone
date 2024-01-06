@@ -4,18 +4,12 @@
 #include <iostream>
 #include <array>
 #include <vector>
-#include "raylib.h"
 #include <memory>
+#include <algorithm>
+#include <utility>
 
 using std::string;
 using std::cout;
 using std::array;
 using std::vector;
 using std::endl;
-
-enum class GameState {
-    MENU,
-    LOBBY,
-    GAMEPLAY,
-    END
-};

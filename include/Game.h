@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Player.h"
-#include "Common.h"
-#include "Card.h"
-#include <memory>
+#include <Player.h>
+#include <Common.h>
+#include <Card.h>
+#include <raylib.h>
 
 class Game {
 public:
@@ -21,17 +21,18 @@ public:
 
     void attackFace();
 
-    Player &getOnTurnPlayer() const;
+    [[nodiscard]] Player &getOnTurnPlayer() const;
 
-    Player &getOffTurnPlayer() const;
+    [[nodiscard]] Player &getOffTurnPlayer() const;
 
     array<std::unique_ptr<Player>, 2> &getPlayers();
 
-    bool isSelected() const;
+    [[nodiscard]] bool isSelected() const;
 
     void isGameOver() const;
 
     void specialCard(const Player &player, const Card &card);
+
 
 private:
     const int PLAYER_MAX_HP{20};
