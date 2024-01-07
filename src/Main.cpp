@@ -3,13 +3,6 @@
 #include <Client.h>
 #include <Mouse.h>
 
-enum class GameState {
-    MENU,
-    LOBBY,
-    GAMEPLAY,
-    END
-};
-
 int main() {
     // Initialization
     const int screenWidth = 1400;
@@ -24,7 +17,6 @@ int main() {
     std::unique_ptr<GameScreen> gameScreen = nullptr;
     std::unique_ptr<Mouse> mouse = nullptr;
 
-    GameState gameState = GameState::MENU;
 
     client.setStateChangeCallback([&gameState](GameState newState) {
         gameState = newState;
@@ -105,8 +97,9 @@ int main() {
                 }
                 if (CheckCollisionPointRec(GetMousePosition(), startBtn)) {
                     startBtnColor = hoverColor;
-                    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && client.canStart()) {
-                        gameState = GameState::GAMEPLAY;
+                    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && client.getLobbyState().canStart()) {
+                        client.sendMessage("startGame");
+                        //gameState = GameState::GAMEPLAY;
                     }
                     // single player
 //                    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
