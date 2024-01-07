@@ -90,7 +90,7 @@ int main() {
                 }
                 if (CheckCollisionPointRec(GetMousePosition(), startBtn)) {
                     startBtnColor = hoverColor;
-                    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && client.canStart()) {
+                    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && client.getLobbyState().canStart()) {
                         client.sendMessage("startGame");
                         //gameState = GameState::GAMEPLAY;
                     }
