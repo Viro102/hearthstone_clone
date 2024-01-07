@@ -3,34 +3,82 @@
 #include <Common.h>
 #include <Card.h>
 
+template<int MAX_CARDS>
 class CardContainer {
 public:
+    void addCard(const Card &card) {
+        if (!isFull()) {
+            for (auto &slot: m_cards) {
+                if (slot == nullptr) {
+                    slot = std::make_unique<Card>(card);
+                    m_numberOfCards++;
+                    return;
+                }
+            }
+        } else {
+            cout << "Container is full!" << endl;
+        }
+    };
 
-    CardContainer() = default;
+    void removeCard(int i) {
+        if (m_numberOfCards > 0) {
+            m_numberOfCards--;
+            m_cards[i] = nullptr;
+        } else {
+            cout << "Container is empty!" << endl;
+        }
+    };
 
-    virtual ~CardContainer() = default;
+    void removeCard(const Card &card) {
+        for (size_t i = 0; i < MAX_CARDS; ++i) {
+            if (m_cards[i] != nullptr && m_cards[i].get() == &card) {
+                m_cards[i] = nullptr;
+                m_numberOfCards--;
+                return;
+            }
+        }
+    };
 
-    void addCard(const Card &card);
+    Card &getCard(int i) {
+        static Card empty;
+        if (i >= 0 && i < MAX_CARDS && m_cards[i] != nullptr) {
+            return *m_cards[i];
+        } else {
+            return empty;
+        }
+    };
 
-    void removeCard(int i);
+    array<std::unique_ptr<Card>, MAX_CARDS> &getCards() {
+        return m_cards;
+    };
 
-    void removeCard(const Card &card);
+    [[nodiscard]] int getNumOfCards() const {
+        return m_numberOfCards;
+    };
 
-    Card &getCard(int i);
+    [[nodiscard]] string getNumOfCardsString() const {
+        return std::to_string(m_numberOfCards);
+    };
 
-    vector<std::unique_ptr<Card>> &getCards();
+    [[nodiscard]] bool isFull() const {
+        return m_numberOfCards >= MAX_CARDS;
+    };
 
-    [[nodiscard]] int getNumOfCards() const;
+    void print() const {
+        for (auto &card: m_cards) {
+            cout << card->getName() << " "
+                 << card->getType() << " "
+                 << " HP: " << card->getHp()
+                 << " DMG: " << card->getDamage()
+                 << " COST: " << card->getCost() << endl;
+        }
+    };
 
-    [[nodiscard]] string getNumOfCardsString() const;
-
-    [[nodiscard]] bool isFull() const;
-
-    void print() const;
-
-    [[nodiscard]] virtual int getMaxCards() const;
+    [[nodiscard]] int getMaxCards() const {
+        return MAX_CARDS;
+    };
 
 private:
-    vector<std::unique_ptr<Card>> m_cards;
+    array<std::unique_ptr<Card>, MAX_CARDS> m_cards;
     int m_numberOfCards{};
 };

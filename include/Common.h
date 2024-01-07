@@ -13,3 +13,7 @@ using std::cout;
 using std::array;
 using std::vector;
 using std::endl;
+
+namespace Common {
+    vector<int> extractNumbers(const string &input);
+}

@@ -32,37 +32,24 @@ void Game::endTurn() {
     if (m_selectedCard != nullptr) {
         m_selectedCard = nullptr;
     }
-//        panel.removeGlow();
     m_turnCounter++;
     cout << "Turn ended!\n";
 }
 
 
-void Game::playACard(Player &player, int i) {
-    auto card = player.playCard(i);
+void Game::playACard(int i) {
+    auto card = getOnTurnPlayer().playCard(i);
     if (card != nullptr) {
-        specialCard(player, *card);
+        specialCard(*card);
     }
 }
 
-void Game::selectCardBoard(const Player &player, int i) {
+void Game::selectCardBoard(int i) {
     if (m_selectedCard == nullptr) {
-        m_selectedCard = std::make_unique<Card>(player.getBoard().getCard(i));
-//            panel.addGlow(i, "m_board");
+        m_selectedCard = std::make_unique<Card>(getOnTurnPlayer().getBoard().getCard(i));
 
-    } else if (*m_selectedCard == player.getBoard().getCard(i)) {
+    } else if (*m_selectedCard == getOnTurnPlayer().getBoard().getCard(i)) {
         m_selectedCard = nullptr;
-//            panel.removeGlow();
-    }
-}
-
-void Game::selectCardHand(const Player &player, int i) {
-    if (*m_selectedCard == player.getHand().getCard(i)) {
-        m_selectedCard = nullptr;
-//            panel.removeGlow();
-    } else {
-        m_selectedCard = std::make_unique<Card>(player.getHand().getCard(i));
-//            panel.addGlow(i, "m_hand");
     }
 }
 
@@ -71,7 +58,7 @@ void Game::attack(int i) {
         cout << "No card selected!\n";
         return;
     }
-//        panel.removeGlow();
+    // panel.removeGlow();
     const auto &opponent = getOffTurnPlayer();
     const auto &currentPlayer = getOnTurnPlayer();
     auto &targetCard = opponent.getBoard().getCard(i);
@@ -102,7 +89,7 @@ void Game::attackFace() {
         return;
     }
 
-//        panel.removeGlow();
+    // panel.removeGlow();
 
     for (const auto &c: target.getBoard().getCards()) {
         if (c == nullptr) {
@@ -163,15 +150,14 @@ void Game::isGameOver() const {
     }
 }
 
-void Game::specialCard(const Player &player, const Card &card) {
+void Game::specialCard(const Card &card) {
     if (card.getType() == "buff") {
         int buffAmount = card.getBuffAmount();
-        for (const auto &c: player.getBoard().getCards()) {
-            if (c == nullptr) {
-                continue;
+        for (const auto &c: getOnTurnPlayer().getBoard().getCards()) {
+            if (c != nullptr) {
+                c->setHp(c->getHp() + buffAmount);
+                c->setDamage(c->getDamage() + buffAmount);
             }
-            c->setHp(c->getHp() + buffAmount);
-            c->setDamage(c->getDamage() + buffAmount);
         }
         return;
     }
@@ -186,12 +172,11 @@ void Game::specialCard(const Player &player, const Card &card) {
         getOnTurnPlayer().getHand().removeCard(card);
         m_selectedCard = nullptr;
         for (const auto &target: getOffTurnPlayer().getBoard().getCards()) {
-            if (target == nullptr) {
-                continue;
-            }
-            target->setHp(target->getHp() - card.getDamage());
-            if (target->getHp() <= 0) {
-                getOffTurnPlayer().getBoard().removeCard(*target);
+            if (target != nullptr) {
+                target->setHp(target->getHp() - card.getDamage());
+                if (target->getHp() <= 0) {
+                    getOffTurnPlayer().getBoard().removeCard(*target);
+                }
             }
         }
     }

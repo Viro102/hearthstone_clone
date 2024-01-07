@@ -1,6 +1,7 @@
 #include <Game.h>
-#include <Panel.h>
+#include <GameScreen.h>
 #include <Client.h>
+#include <Mouse.h>
 
 int main() {
     // Initialization
@@ -14,14 +15,15 @@ int main() {
     Game game;
     Client client;
     GameState gameState = GameState::MENU;
+    std::unique_ptr<GameScreen> gameScreen = nullptr;
+    std::unique_ptr<Mouse> mouse = nullptr;
 
     client.setStateChangeCallback([&gameState](GameState newState) {
-        gameState = newState; // Update the game state
+        gameState = newState;
     });
-    std::unique_ptr<Panel> panel = nullptr;
+
 
     bool hasInit = false;
-
 
     // Define the buttons
     Rectangle lobbyBtn = {screenCenterX - 100, 200, 200, 50};
@@ -47,6 +49,9 @@ int main() {
         if (IsKeyPressed(KEY_ESCAPE)) {
             gameState = GameState::MENU;
         }
+        if (mouse) {
+            mouse->update();
+        }
 
         switch (gameState) {
             case GameState::MENU:
@@ -54,10 +59,11 @@ int main() {
                 if (CheckCollisionPointRec(GetMousePosition(), lobbyBtn)) {
                     lobbyBtnColor = hoverColor;
                     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-                        client.start(8080);
-                        if (client.getSocket() != -1) {
+                        if (client.start(8080) != -1) {
                             gameState = GameState::LOBBY;
                         }
+                        // single player
+                        // gameState = GameState::LOBBY;
                     }
                 } else {
                     lobbyBtnColor = GRAY;
@@ -83,6 +89,7 @@ int main() {
                 if (CheckCollisionPointRec(GetMousePosition(), exitBtnLobby)) {
                     exitBtnLobbyColor = hoverColor;
                     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                        client.shutdown();
                         gameState = GameState::MENU;
                     }
                 } else {
@@ -92,19 +99,24 @@ int main() {
                     startBtnColor = hoverColor;
                     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && client.getLobbyState().canStart()) {
                         client.sendMessage("startGame");
-                        //gameState = GameState::GAMEPLAY;
+                        gameState = GameState::GAMEPLAY;
                     }
+                    // single player
+                    // if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                    // gameState = GameState::GAMEPLAY;
+                    // }
                 } else {
                     startBtnColor = GRAY;
                 }
                 break;
             case GameState::GAMEPLAY:
                 if (!hasInit) {
-                    panel = std::make_unique<Panel>(game);
+                    gameScreen = std::make_unique<GameScreen>(game);
                     game.startGame("mage", "warrior");
+                    mouse = std::make_unique<Mouse>(game, *gameScreen);
                     hasInit = true;
                 } else {
-                    panel->update();
+                    gameScreen->update();
                 }
                 break;
             case GameState::END:
@@ -148,7 +160,7 @@ int main() {
                 break;
             case GameState::GAMEPLAY:
                 if (hasInit) {
-                    panel->draw();
+                    gameScreen->draw();
                 }
                 break;
             case GameState::END:

@@ -9,6 +9,8 @@ public:
 
     Card(string name, string type, int hp, int damage, int cost);
 
+    Card() = default;
+
     [[nodiscard]] const string &getName() const;
 
     [[nodiscard]] const string &getType() const;

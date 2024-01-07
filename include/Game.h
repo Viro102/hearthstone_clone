@@ -11,11 +11,9 @@ public:
 
     void endTurn();
 
-    void playACard(Player &player, int i);
+    void playACard(int i);
 
-    void selectCardBoard(const Player &player, int i);
-
-    void selectCardHand(const Player &player, int i);
+    void selectCardBoard(int i);
 
     void attack(int i);
 
@@ -31,7 +29,7 @@ public:
 
     void isGameOver() const;
 
-    void specialCard(const Player &player, const Card &card);
+    void specialCard(const Card &card);
 
 
 private:

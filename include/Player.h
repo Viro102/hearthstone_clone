@@ -19,11 +19,11 @@ public:
 
     void shuffleDeck();
 
-    [[nodiscard]] CardContainer &getBoard() const;
+    [[nodiscard]] CardContainer<5> &getBoard() const;
 
     [[nodiscard]] Deck &getDeck() const;
 
-    [[nodiscard]] CardContainer &getHand() const;
+    [[nodiscard]] CardContainer<5> &getHand() const;
 
     [[nodiscard]] int getHp() const;
 
@@ -54,7 +54,7 @@ private:
     int m_mana{0};
     int m_currentMaxMana{0};
     bool m_turn{false};
-    std::unique_ptr<CardContainer> m_hand{std::make_unique<CardContainer>()};
-    std::unique_ptr<CardContainer> m_board{std::make_unique<CardContainer>()};
-    std::unique_ptr<Deck> m_deck{std::make_unique<Deck>("../assets/cards.txt")};
+    std::unique_ptr<CardContainer<5>> m_hand{std::make_unique<CardContainer<5>>()};
+    std::unique_ptr<CardContainer<5>> m_board{std::make_unique<CardContainer<5>>()};
+    std::unique_ptr<Deck> m_deck{std::make_unique<Deck>()};
 };
