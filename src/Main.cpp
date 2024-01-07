@@ -109,12 +109,14 @@ int main() {
                 }
                 break;
             case GameState::GAMEPLAY:
-                if (!hasInit) {
-                    gameScreen = std::make_unique<GameScreen>(client.getGameplayState());
-                    mouse = std::make_unique<Mouse>(client.getGameplayState(), *gameScreen);
-                    hasInit = true;
-                } else {
-                    gameScreen->update();
+                if (client.isGameStateInitialized()) {
+                    if (!hasInit) {
+                        gameScreen = std::make_unique<GameScreen>(client.getGameplayState());
+                        mouse = std::make_unique<Mouse>(client.getGameplayState(), *gameScreen);
+                        hasInit = true;
+                    } else {
+                        gameScreen->update();
+                    }
                 }
                 break;
             case GameState::END:
@@ -157,7 +159,7 @@ int main() {
                 DrawText("Exit", exitBtnLobby.x + 20, exitBtnLobby.y + 15, 20, BLACK);
                 break;
             case GameState::GAMEPLAY:
-                if (hasInit) {
+                if (hasInit && client.isGameStateInitialized()) {
                     gameScreen->draw();
                 }
                 break;

@@ -31,6 +31,8 @@ public:
 
     void specialCard(const Card &card);
 
+    void addPlayer(Player player, int i);
+
 
 private:
     const int PLAYER_MAX_HP{20};

@@ -33,8 +33,8 @@ int Client::start(short port) {
 
 void Client::listenToServer() {
     while (true) {
-        char buffer[1024] = {0};
-        auto valread = recv(m_socket, buffer, 1024, 0);
+        char buffer[32768] = {0};
+        auto valread = recv(m_socket, buffer, 32768, 0);
         if (valread > 0) {
             string message(buffer, valread);
             cout << "Client: received message = " << message << endl;
@@ -72,6 +72,7 @@ void Client::processMessage(const string &message) {
         }
 
         if (type == "startGame" && stateChangeCallback) {
+            updateLocalGameplayState(data);
             stateChangeCallback(GameState::GAMEPLAY);
         }
 
@@ -100,21 +101,35 @@ void Client::updateLocalLobbyState(const string &message) {
 void Client::updateLocalGameplayState(const string &message) {
     json json = json::parse(message);
 
+    if (!m_isGameStateInitialized) {
+        for (int i = 0; i < json["players"].size(); i++) {
+            const auto &playerJson = json["players"][i];
+            Player player(playerJson["hp"], playerJson["id"], playerJson["archetype"]);
+            m_gameplayState.addPlayer(std::move(player), i);
+        }
+    }
+
     for (int i = 0; i < json["players"].size(); i++) {
         const auto &playerJson = json["players"][i];
+        m_gameplayState.getPlayers()[i]->setTurn(playerJson["onTurn"]);
         m_gameplayState.getPlayers()[i]->setHp(playerJson["hp"]);
         m_gameplayState.getPlayers()[i]->setMana(playerJson["mana"]);
         m_gameplayState.getPlayers()[i]->setDeck(deserializeDeck(playerJson["deck"]));
         m_gameplayState.getPlayers()[i]->setHand(deserializeContainer(playerJson["hand"]));
         m_gameplayState.getPlayers()[i]->setBoard(deserializeContainer(playerJson["board"]));
     }
+
+
+    m_isGameStateInitialized = true;
 }
 
 std::unique_ptr<Deck> Client::deserializeDeck(const json &jsonArray) {
     auto deck = std::make_unique<Deck>();
     for (const auto &cardJson: jsonArray) {
         Card newCard = Card::createFromJson(cardJson);
-        deck->addCard(newCard);
+        if (!newCard.getName().empty()) {
+            deck->addCard(newCard);
+        }
     }
     return deck;
 }
@@ -123,7 +138,9 @@ std::unique_ptr<CardContainer<5>> Client::deserializeContainer(const json &jsonA
     auto cardContainer = std::make_unique<CardContainer<5>>();
     for (const auto &cardJson: jsonArray) {
         Card newCard = Card::createFromJson(cardJson);
-        cardContainer->addCard(newCard);
+        if (!newCard.getName().empty()) {
+            cardContainer->addCard(newCard);
+        }
     }
     return cardContainer;
 }
@@ -138,6 +155,8 @@ void Client::shutdown() {
     if (m_serverListener.joinable()) {
         m_serverListener.join();
     }
+
+    m_isGameStateInitialized = false;
 }
 
 int Client::getSocket() const {
@@ -150,4 +169,8 @@ LobbyState Client::getLobbyState() const {
 
 Game &Client::getGameplayState() {
     return m_gameplayState;
+}
+
+bool Client::isGameStateInitialized() const {
+    return m_isGameStateInitialized;
 }

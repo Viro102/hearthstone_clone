@@ -13,6 +13,7 @@
 #include <Game.h>
 
 using nlohmann::json;
+using StateChangeCallback = std::function<void(GameState)>;
 
 class Client {
 public:
@@ -36,12 +37,11 @@ public:
 
     [[nodiscard]] Game &getGameplayState();
 
-    using StateChangeCallback = std::function<void(GameState)>;
+    [[nodiscard]] bool isGameStateInitialized() const;
 
     void setStateChangeCallback(const StateChangeCallback &callback);
 
 private:
-
     StateChangeCallback stateChangeCallback;
 
     void updateLocalLobbyState(const string &message);
@@ -58,4 +58,5 @@ private:
     LobbyState m_lobbyState{};
     Game m_gameplayState{};
     std::jthread m_serverListener;
+    bool m_isGameStateInitialized{false};
 };

@@ -67,8 +67,8 @@ void GameScreen::paintUI() const {
     const auto &deck = m_images[1];
     const auto &mage = m_images[2];
     const auto &warrior = m_images[3];
-    const auto &currentPlayer = m_gameplayState.getOnTurnPlayer();
-    const auto &opponentPlayer = m_gameplayState.getOffTurnPlayer();
+    const auto &currentPlayer = m_gameplayState.getPlayers()[0];
+    const auto &opponentPlayer = m_gameplayState.getPlayers()[1];
 
     // End turn button
     int endTurnWidth = MeasureText("END TURN", 20);
@@ -76,22 +76,22 @@ void GameScreen::paintUI() const {
     DrawText("END TURN", END_TURN_BUTTON_POSITION_X + 200 / 2 - endTurnWidth / 2,
              END_TURN_BUTTON_POSITION_Y + 70 / 2, 20, BLACK);
 
-    if (currentPlayer.getArchetype().empty()) {
+    if (currentPlayer->getArchetype().empty()) {
         return;
     }
 
     // Draw heroes
-    if (currentPlayer.getArchetype() == "mage") {
-        paintHero(0, mage, currentPlayer);
-        paintHero(1, warrior, opponentPlayer);
-    } else if (currentPlayer.getArchetype() == "warrior") {
-        paintHero(0, warrior, currentPlayer);
-        paintHero(1, mage, opponentPlayer);
+    if (currentPlayer->getArchetype() == "mage") {
+        paintHero(0, mage, *currentPlayer);
+        paintHero(1, warrior, *opponentPlayer);
+    } else if (currentPlayer->getArchetype() == "warrior") {
+        paintHero(0, warrior, *currentPlayer);
+        paintHero(1, mage, *opponentPlayer);
     }
 
     DrawTexture(board, 20, 10, WHITE);
     DrawTexture(deck, 1150, 200, WHITE);
-    DrawText(("Cards: " + currentPlayer.getDeck().getNumOfCardsString()).c_str(), 1170, 175, 20, BLACK);
+    DrawText(("Cards: " + currentPlayer->getDeck().getNumOfCardsString()).c_str(), 1170, 175, 20, BLACK);
 }
 
 void GameScreen::paintCards(const vector<Card> &cards) {

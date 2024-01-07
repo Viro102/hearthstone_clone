@@ -22,7 +22,7 @@ public:
     void addCard(const Card &card) {
         if (!isFull()) {
             for (auto &slot: m_cards) {
-                if (slot == nullptr) {
+                if (slot->getName().empty()) {
                     slot = std::make_unique<Card>(card);
                     m_numberOfCards++;
                     return;
@@ -80,7 +80,9 @@ public:
     [[nodiscard]] json serialize() const {
         json cardsJson = json::array();
         for (const auto &card: m_cards) {
-            cardsJson.push_back(card->serialize());
+            if (card) {
+                cardsJson.push_back(card->serialize());
+            }
         }
         return cardsJson;
     };
