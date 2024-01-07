@@ -31,12 +31,16 @@ int main() {
     Rectangle readyBtn = {screenCenterX - 150, 350, 100, 50};
     Rectangle startBtn = {screenCenterX - 50, 350, 100, 50};
     Rectangle exitBtnLobby = {screenCenterX + 50, 350, 100, 50};
+    Rectangle exitBtnWin = {screenCenterX - 160, 400, 200, 50};
+    Rectangle exitBtnLose = {screenCenterX - 160, 400, 200, 50};
 
     auto lobbyBtnColor = GRAY;
     auto exitBtnColor = GRAY;
     auto readyBtnColor = GRAY;
     auto startBtnColor = GRAY;
     auto exitBtnLobbyColor = GRAY;
+    auto exitBtnWinColor = GRAY;
+    auto exitBtnLoseColor = GRAY;
     auto hoverColor = DARKGRAY;
 
     SetTargetFPS(60);
@@ -109,6 +113,30 @@ int main() {
                     startBtnColor = GRAY;
                 }
                 break;
+            case GameState::WIN:
+                if (CheckCollisionPointRec(GetMousePosition(), exitBtnWin)) {
+                    exitBtnWinColor = hoverColor;
+                    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                        gameState = GameState::MENU;
+                        client.shutdown();
+                    }
+                } else {
+                    exitBtnWinColor = GRAY;
+                }
+                break;
+                break;
+            case GameState::LOSE:
+                if (CheckCollisionPointRec(GetMousePosition(), exitBtnLose)) {
+                    exitBtnLoseColor = hoverColor;
+                    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                        gameState = GameState::MENU;
+                        client.shutdown();
+                    }
+                } else {
+                    exitBtnLoseColor = GRAY;
+                }
+                break;
+
             case GameState::GAMEPLAY:
                 if (!hasInit) {
                     gameScreen = std::make_unique<GameScreen>(game);
@@ -158,6 +186,18 @@ int main() {
                 DrawText("Start", startBtn.x + 20, startBtn.y + 15, 20, BLACK);
                 DrawText("Exit", exitBtnLobby.x + 20, exitBtnLobby.y + 15, 20, BLACK);
                 break;
+
+            case GameState::WIN:
+                DrawText("Congratulations, You Won!", screenCenterX / 2, screenCenterY - 20, 40, RED);
+                DrawRectangleRec(exitBtnWin, exitBtnWinColor);
+                DrawText("Back to Main Menu", exitBtnWin.x + 10 , exitBtnWin.y + 15, 20, BLACK);
+                break;
+
+            case GameState::LOSE:
+                DrawText("Oh no, You Lost!", screenCenterX / 2, screenCenterY - 20, 40, RED);
+                DrawRectangleRec(exitBtnLose, exitBtnLoseColor);
+                DrawText("Back to Main Menu", exitBtnLose.x + 10 , exitBtnLose.y + 15, 20, BLACK);
+                break;
             case GameState::GAMEPLAY:
                 if (hasInit) {
                     gameScreen->draw();
@@ -170,7 +210,6 @@ int main() {
 
         EndDrawing();
     }
-
     CloseWindow();
     return 0;
 }
