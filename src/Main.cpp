@@ -14,9 +14,9 @@ int main() {
 
     Game game;
     Client client;
+    GameState gameState = GameState::MENU;
     std::unique_ptr<GameScreen> gameScreen = nullptr;
     std::unique_ptr<Mouse> mouse = nullptr;
-
 
     client.setStateChangeCallback([&gameState](GameState newState) {
         gameState = newState;
@@ -62,8 +62,8 @@ int main() {
                         if (client.start(8080) != -1) {
                             gameState = GameState::LOBBY;
                         }
-//                        single player
-//                        gameState = GameState::LOBBY;
+                        // single player
+                        // gameState = GameState::LOBBY;
                     }
                 } else {
                     lobbyBtnColor = GRAY;
@@ -99,12 +99,12 @@ int main() {
                     startBtnColor = hoverColor;
                     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && client.getLobbyState().canStart()) {
                         client.sendMessage("startGame");
-                        //gameState = GameState::GAMEPLAY;
+                        gameState = GameState::GAMEPLAY;
                     }
                     // single player
-//                    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-//                        gameState = GameState::GAMEPLAY;
-//                    }
+                    // if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                    // gameState = GameState::GAMEPLAY;
+                    // }
                 } else {
                     startBtnColor = GRAY;
                 }
