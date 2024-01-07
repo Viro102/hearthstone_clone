@@ -9,15 +9,13 @@ class GameScreen {
 public:
     explicit GameScreen(Game &game);
 
-    ~GameScreen();
-
     void draw();
 
     void update();
 
-    const std::map<string, Rectangle> &getClickableObjects() const;
+    [[nodiscard]] const std::map<string, Rectangle> &getClickableObjects() const;
 
-    void addGlow(int i, const string &where);
+    void addGlow(int i);
 
     void removeGlow();
 

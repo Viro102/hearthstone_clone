@@ -3,6 +3,7 @@
 #include <raylib.h>
 #include <Game.h>
 #include <GameScreen.h>
+#include <Common.h>
 
 class Mouse {
 public:

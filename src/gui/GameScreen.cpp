@@ -6,7 +6,7 @@ GameScreen::GameScreen(Game &game) : m_game(game) {
     for (int i = 0; i < m_slotsHand.size(); i++) {
         auto newSlot = Slot(30 + (i * 170), 530);
         m_slotsHand[i] = Slot(30 + (i * 170), 530);
-        std::string label = "slotHand[" + std::to_string(i) + "]";
+        string label = "slotHand[" + std::to_string(i) + "]";
         registerAsClickable(label, newSlot.getShape());
     }
 
@@ -15,7 +15,7 @@ GameScreen::GameScreen(Game &game) : m_game(game) {
             int x = std::abs(i - 1);
             auto newSlot = Slot(30 + (j * 170), 40 + (i * 240));
             m_slotsBoard[x][j] = newSlot;
-            std::string label = "slotBoard[" + std::to_string(x) + "][" + std::to_string(j) + "]";
+            string label = "slotBoard[" + std::to_string(x) + "][" + std::to_string(j) + "]";
             registerAsClickable(label, newSlot.getShape());
         }
     }
@@ -29,6 +29,10 @@ GameScreen::GameScreen(Game &game) : m_game(game) {
     m_images[1] = LoadTextureFromImage(deck);
     m_images[2] = LoadTextureFromImage(mage);
     m_images[3] = LoadTextureFromImage(warrior);
+    UnloadImage(board);
+    UnloadImage(deck);
+    UnloadImage(mage);
+    UnloadImage(warrior);
 
     m_heroHitboxPlayer = Rectangle(HEROES_POSITION_X, FIRST_HERO_POSITION_Y, m_images[3].width, m_images[3].height);
     m_heroHitboxOpponent = Rectangle(HEROES_POSITION_X, SECOND_HERO_POSITION_Y, m_images[2].width, m_images[2].height);
@@ -38,12 +42,6 @@ GameScreen::GameScreen(Game &game) : m_game(game) {
     registerAsClickable("heroPlayer", m_heroHitboxPlayer);
     registerAsClickable("heroOpponent", m_heroHitboxOpponent);
     registerAsClickable("endTurnButton", m_endTurnButtonHitbox);
-}
-
-GameScreen::~GameScreen() {
-    for (const auto &image: m_images) {
-        UnloadTexture(image);
-    }
 }
 
 void GameScreen::paintHero(int pos, Texture2D hero, const Player &player) const {
@@ -73,8 +71,10 @@ void GameScreen::paintUI() const {
     const auto &opponentPlayer = m_game.getPlayers()[1];
 
     // End turn button
+    int endTurnWidth = MeasureText("END TURN", 20);
     DrawRectangle(END_TURN_BUTTON_POSITION_X, END_TURN_BUTTON_POSITION_Y, 200, 70, GRAY);
-    DrawText("END TURN", END_TURN_BUTTON_POSITION_X, END_TURN_BUTTON_POSITION_Y, 20, BLACK);
+    DrawText("END TURN", END_TURN_BUTTON_POSITION_X + 200 / 2 - endTurnWidth / 2,
+             END_TURN_BUTTON_POSITION_Y + 70 / 2, 20, BLACK);
 
     if (currentPlayer->getArchetype().empty()) {
         return;
@@ -132,7 +132,7 @@ void GameScreen::update() {
     const auto &currentPlayer = m_game.getOnTurnPlayer();
     auto &playerCardsHand = currentPlayer.getHand().getCards();
 
-    for (size_t i = 0; i < playerCardsHand.size(); i++) {
+    for (int i = 0; i < playerCardsHand.size(); i++) {
         const auto &cardToPaint = playerCardsHand[i];
         if (cardToPaint != nullptr) {
             m_slotsHand[i].setFree(false);
@@ -148,7 +148,7 @@ void GameScreen::update() {
         int id = player->getId();
         auto &playerCardsBoard = player->getBoard().getCards();
 
-        for (size_t i = 0; i < playerCardsBoard.size(); i++) {
+        for (int i = 0; i < playerCardsBoard.size(); i++) {
             if (playerCardsBoard[i] != nullptr) {
                 m_slotsBoard[id][i].setFree(false);
                 auto shape = m_slotsBoard[id][i].getShape();
@@ -190,13 +190,9 @@ void GameScreen::draw() {
     }
 }
 
-void GameScreen::addGlow(int i, const string &where) {
+void GameScreen::addGlow(int i) {
     const auto &currentPlayer = m_game.getOnTurnPlayer();
-    if (where == "hand") {
-        m_slotsHand[i].setGlow(true);
-    } else if (where == "board") {
-        m_slotsBoard[currentPlayer.getId()][i].setGlow(true);
-    }
+    m_slotsBoard[currentPlayer.getId()][i].setGlow(true);
 }
 
 void GameScreen::removeGlow() {
@@ -204,10 +200,6 @@ void GameScreen::removeGlow() {
         for (int j = 0; j < m_slotsBoard[i].size(); j++) {
             m_slotsBoard[i][j].setGlow(false);
         }
-    }
-
-    for (auto &i: m_slotsHand) {
-        i.setGlow(false);
     }
 }
 
