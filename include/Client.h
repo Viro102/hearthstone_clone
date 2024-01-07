@@ -37,8 +37,6 @@ public:
 
     void setStateChangeCallback(const StateChangeCallback& callback);
 
-    bool canStart() const;
-
 private:
 
     StateChangeCallback stateChangeCallback;
@@ -49,7 +47,6 @@ private:
 
 
     int m_socket{-1};
-    bool m_canStart{false};
     LobbyState m_lobbyState{};
     std::jthread m_serverListener;
 };

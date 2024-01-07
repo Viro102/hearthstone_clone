@@ -47,6 +47,7 @@ void Client::listenToServer() {
 }
 
 
+
 void Client::sendMessage(const string &message) const {
     json j;
     j["type"] = message;
@@ -70,8 +71,6 @@ void Client::processMessage(const string &message) {
 
         if (type == "updateLobbyState") {
             updateLocalLobbyState(data);
-        } else if (type == "allReady") {
-            m_canStart = true;
         }
 
         if (type == "startGame") {
@@ -115,8 +114,4 @@ int Client::getSocket() const {
 
 LobbyState Client::getLobbyState() const {
     return m_lobbyState;
-}
-
-bool Client::canStart() const {
-    return m_canStart;
 }
