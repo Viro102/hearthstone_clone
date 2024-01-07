@@ -9,7 +9,11 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(SERVER_SOURCES
         src/networking/ServerMain.cpp
         src/networking/Server.cpp
-        src/networking/Client.cpp)
+        src/networking/Client.cpp
+        src/game/Card.cpp
+        src/game/Game.cpp
+        src/game/Player.cpp
+        src/game/Deck.cpp)
 
 add_executable(Server ${SERVER_SOURCES})
 
@@ -56,3 +60,4 @@ endif ()
 target_link_libraries(Client nlohmann_json::nlohmann_json)
 target_link_libraries(Server nlohmann_json::nlohmann_json pthread)
 target_link_libraries(Client raylib)
+target_link_libraries(Server raylib)
