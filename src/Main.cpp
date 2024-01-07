@@ -24,9 +24,14 @@ int main() {
     std::unique_ptr<GameScreen> gameScreen = nullptr;
     std::unique_ptr<Mouse> mouse = nullptr;
 
-    bool hasInit = false;
-
     GameState gameState = GameState::MENU;
+
+    client.setStateChangeCallback([&gameState](GameState newState) {
+        gameState = newState;
+    });
+
+
+    bool hasInit = false;
 
     // Define the buttons
     Rectangle lobbyBtn = {screenCenterX - 100, 200, 200, 50};
