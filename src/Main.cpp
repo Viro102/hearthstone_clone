@@ -62,10 +62,11 @@ int main() {
                 if (CheckCollisionPointRec(GetMousePosition(), lobbyBtn)) {
                     lobbyBtnColor = hoverColor;
                     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-//                        if (client.start(8080) != -1) {
-//                            gameState = GameState::LOBBY;
-//                        }
-                        gameState = GameState::LOBBY;
+                        if (client.start(8080) != -1) {
+                            gameState = GameState::LOBBY;
+                        }
+//                        single player
+//                        gameState = GameState::LOBBY;
                     }
                 } else {
                     lobbyBtnColor = GRAY;
@@ -99,12 +100,13 @@ int main() {
                 }
                 if (CheckCollisionPointRec(GetMousePosition(), startBtn)) {
                     startBtnColor = hoverColor;
-//                    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && client.canStart()) {
-//                        gameState = GameState::GAMEPLAY;
-//                    }
-                    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && client.canStart()) {
                         gameState = GameState::GAMEPLAY;
                     }
+                    // single player
+//                    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+//                        gameState = GameState::GAMEPLAY;
+//                    }
                 } else {
                     startBtnColor = GRAY;
                 }
