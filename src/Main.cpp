@@ -59,7 +59,7 @@ int main() {
                 if (CheckCollisionPointRec(GetMousePosition(), lobbyBtn)) {
                     lobbyBtnColor = hoverColor;
                     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-                        if (client.start(8080) != -1) {
+                        if (client.start(10322) != -1) {
                             gameState = GameState::LOBBY;
                         }
                         // single player
@@ -89,8 +89,8 @@ int main() {
                 if (CheckCollisionPointRec(GetMousePosition(), exitBtnLobby)) {
                     exitBtnLobbyColor = hoverColor;
                     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-                        client.shutdown();
                         gameState = GameState::MENU;
+                        client.shutdown();
                     }
                 } else {
                     exitBtnLobbyColor = GRAY;

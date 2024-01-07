@@ -18,7 +18,7 @@ int Client::start(short port) {
     serverAddress.sin_port = htons(port);
 
     // Convert IPv4 and IPv6 addresses from text to binary form
-    if (inet_pton(AF_INET, "127.0.0.1", &serverAddress.sin_addr) <= 0) {
+    if (inet_pton(AF_INET, "158.193.128.160", &serverAddress.sin_addr) <= 0) {
         cout << "\nInvalid address/Address not supported\n";
         return -1;
     }
@@ -45,7 +45,6 @@ void Client::listenToServer() {
         }
     }
 }
-
 
 
 void Client::sendMessage(const string &message) const {
@@ -99,6 +98,7 @@ void Client::updateLocalLobbyState(const string &message) {
 
 void Client::shutdown() {
     if (m_socket >= 0) {
+        ::shutdown(m_socket, SHUT_RDWR);
         close(m_socket);
         m_socket = -1;
     }

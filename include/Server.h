@@ -22,6 +22,8 @@ public:
     // Main loop for listening to clients
     void listenForClients();
 
+    [[nodiscard]] const bool isRunning() const;
+
 private:
     void start(short port);
 

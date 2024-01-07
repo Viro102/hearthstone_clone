@@ -99,7 +99,8 @@ void Server::processMessage(int clientSocket, const string &message) {
                 if (std::stoi(player.name) == clientSocket) {
                     player.isReady = !player.isReady;
                     cout << "Incoming message from client " << clientSocket << ": " << message << endl;
-                    cout << "Client " << clientSocket << " toggled ready state to " << (player.isReady ? "ready" : "not ready") << endl;
+                    cout << "Client " << clientSocket << " toggled ready state to "
+                         << (player.isReady ? "ready" : "not ready") << endl;
                     break;
                 }
             }
@@ -206,4 +207,8 @@ void Server::stop() {
     }
 
     cout << "Server is shutting down..." << endl;
+}
+
+const bool Server::isRunning() const {
+    return m_isRunning;
 }
