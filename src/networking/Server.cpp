@@ -93,20 +93,19 @@ void Server::processMessage(int clientSocket, const string &message) {
         string type = jsonMessage["type"];
         json data = jsonMessage["data"];
 
-        if (type == "playCard") {
-            // TODO
-        } else if (type == "ready") {
+        if (type == "ready") {
             std::unique_lock lock(m_lobbyStateMutex);
             for (auto &player: m_lobbyState.players) {
                 if (std::stoi(player.name) == clientSocket) {
-                    player.isReady = true;
-                    cout << "Client " << clientSocket << " marked as ready." << endl;
+                    player.isReady = !player.isReady;
+                    cout << "Incoming message from client " << clientSocket << ": " << message << endl;
+                    cout << "Client " << clientSocket << " toggled ready state to " << (player.isReady ? "ready" : "not ready") << endl;
                     break;
                 }
             }
             lock.unlock();
             broadcastMessage("updateLobbyState", serializeLobbyState());
-        } else if (type == "startGame") {
+        } else if (m_lobbyState.canStart()) {
             broadcastMessage("startGame", json());
         }
 
@@ -176,8 +175,6 @@ void Server::checkAllClientsReady() {
             return;
         }
     }
-
-    broadcastMessage("allReady", json());
     cout << "Clients are ready!" << endl;
 }
 
