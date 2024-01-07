@@ -6,6 +6,19 @@
 template<int MAX_CARDS>
 class CardContainer {
 public:
+    CardContainer() {
+        for (auto &card: m_cards) {
+            card = std::make_unique<Card>();
+        }
+    };
+
+    void print() const {
+        for (const auto &card: m_cards) {
+            card->print();
+            cout << endl;
+        }
+    }
+
     void addCard(const Card &card) {
         if (!isFull()) {
             for (auto &slot: m_cards) {
@@ -64,21 +77,15 @@ public:
         return m_numberOfCards >= MAX_CARDS;
     };
 
-    void print() const {
-        for (auto &card: m_cards) {
-            cout << card->getName() << " "
-                 << card->getType() << " "
-                 << " HP: " << card->getHp()
-                 << " DMG: " << card->getDamage()
-                 << " COST: " << card->getCost() << endl;
+    [[nodiscard]] json serialize() const {
+        json cardsJson = json::array();
+        for (const auto &card: m_cards) {
+            cardsJson.push_back(card->serialize());
         }
-    };
-
-    [[nodiscard]] int getMaxCards() const {
-        return MAX_CARDS;
+        return cardsJson;
     };
 
 private:
-    array<std::unique_ptr<Card>, MAX_CARDS> m_cards;
+    array<std::unique_ptr<Card>, MAX_CARDS> m_cards{};
     int m_numberOfCards{};
 };
