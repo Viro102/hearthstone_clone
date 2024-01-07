@@ -10,6 +10,26 @@ int main() {
     const int screenCenterX = screenWidth / 2;
     const int screenCenterY = screenHeight / 2;
 
+    string choice;
+    string ipAddress;
+    cout << "Which server to connect to: " << endl;
+    cout << "1. frios2" << endl;
+    cout << "2. localhost" << endl;
+    std::getline(std::cin, choice);
+    cout << "You entered: " << choice << endl;
+
+    switch (std::stoi(choice)) {
+        case 1:
+            ipAddress = "158.193.128.160";
+            break;
+        case 2:
+            ipAddress = "127.0.0.1";
+            break;
+        default:
+            cout << "error" << endl;
+            return -1;
+    }
+
     InitWindow(screenWidth, screenHeight, "Hearthstone");
 
     Game game;
@@ -63,7 +83,7 @@ int main() {
                 if (CheckCollisionPointRec(GetMousePosition(), lobbyBtn)) {
                     lobbyBtnColor = hoverColor;
                     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-                        if (client.start(10322) != -1) {
+                        if (client.start(10322, ipAddress) != -1) {
                             gameState = GameState::LOBBY;
                         }
                         // single player
@@ -123,7 +143,6 @@ int main() {
                 } else {
                     exitBtnWinColor = GRAY;
                 }
-                break;
                 break;
             case GameState::LOSE:
                 if (CheckCollisionPointRec(GetMousePosition(), exitBtnLose)) {
@@ -190,13 +209,13 @@ int main() {
             case GameState::WIN:
                 DrawText("Congratulations, You Won!", screenCenterX / 2, screenCenterY - 20, 40, RED);
                 DrawRectangleRec(exitBtnWin, exitBtnWinColor);
-                DrawText("Back to Main Menu", exitBtnWin.x + 10 , exitBtnWin.y + 15, 20, BLACK);
+                DrawText("Back to Main Menu", exitBtnWin.x + 10, exitBtnWin.y + 15, 20, BLACK);
                 break;
 
             case GameState::LOSE:
                 DrawText("Oh no, You Lost!", screenCenterX / 2, screenCenterY - 20, 40, RED);
                 DrawRectangleRec(exitBtnLose, exitBtnLoseColor);
-                DrawText("Back to Main Menu", exitBtnLose.x + 10 , exitBtnLose.y + 15, 20, BLACK);
+                DrawText("Back to Main Menu", exitBtnLose.x + 10, exitBtnLose.y + 15, 20, BLACK);
                 break;
             case GameState::GAMEPLAY:
                 if (hasInit) {

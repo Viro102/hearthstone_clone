@@ -6,7 +6,7 @@ Client::~Client() {
     shutdown();
 }
 
-int Client::start(short port) {
+int Client::start(short port, const string &ipAddr) {
     struct sockaddr_in serverAddress{};
 
     if ((m_socket = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
@@ -18,7 +18,7 @@ int Client::start(short port) {
     serverAddress.sin_port = htons(port);
 
     // Convert IPv4 and IPv6 addresses from text to binary form
-    if (inet_pton(AF_INET, "127.0.0.1", &serverAddress.sin_addr) <= 0) {
+    if (inet_pton(AF_INET, ipAddr.c_str(), &serverAddress.sin_addr) <= 0) {
         cout << "\nInvalid address/Address not supported\n";
         return -1;
     }
@@ -83,7 +83,6 @@ void Client::processMessage(const string &message) {
                 stateChangeCallback(GameState::WIN);
             }
         }
-
 
 
     } catch (json::parse_error &e) {

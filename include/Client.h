@@ -9,6 +9,7 @@
 #include <nlohmann/json.hpp>
 #include <thread>
 #include <functional>
+#include <utility>
 #include <GameState.h>
 
 using nlohmann::json;
@@ -21,7 +22,7 @@ public:
 
     ~Client();
 
-    int start(short port);
+    int start(short port, const string &ipAddr);
 
     void shutdown();
 
@@ -35,7 +36,7 @@ public:
 
     using StateChangeCallback = std::function<void(GameState)>;
 
-    void setStateChangeCallback(const StateChangeCallback& callback);
+    void setStateChangeCallback(const StateChangeCallback &callback);
 
 private:
 
