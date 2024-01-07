@@ -7,7 +7,7 @@
 
 class GameScreen {
 public:
-    explicit GameScreen(Game &game);
+    explicit GameScreen(Game &gameplayState);
 
     void draw();
 
@@ -25,7 +25,7 @@ private:
     const int HEROES_POSITION_X = 900;
     const int FIRST_HERO_POSITION_Y = 460;
     const int SECOND_HERO_POSITION_Y = 20;
-    Game &m_game;
+    Game &m_gameplayState;
     vector<Texture2D> m_images{};
     Rectangle m_endTurnButtonHitbox{};
     Rectangle m_heroHitboxPlayer{};

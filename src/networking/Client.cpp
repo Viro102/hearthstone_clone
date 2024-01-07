@@ -17,8 +17,7 @@ int Client::start(short port) {
     serverAddress.sin_family = AF_INET;
     serverAddress.sin_port = htons(port);
 
-    // Convert IPv4 and IPv6 addresses from text to binary form
-    if (inet_pton(AF_INET, "158.193.128.160", &serverAddress.sin_addr) <= 0) {
+    if (inet_pton(AF_INET, "127.0.0.1", &serverAddress.sin_addr) <= 0) {
         cout << "\nInvalid address/Address not supported\n";
         return -1;
     }
@@ -72,10 +71,12 @@ void Client::processMessage(const string &message) {
             updateLocalLobbyState(data);
         }
 
-        if (type == "startGame") {
-            if (stateChangeCallback) {
-                stateChangeCallback(GameState::GAMEPLAY);
-            }
+        if (type == "startGame" && stateChangeCallback) {
+            stateChangeCallback(GameState::GAMEPLAY);
+        }
+
+        if (type == "updateGameState") {
+            updateLocalGameplayState(data);
         }
 
 
@@ -96,6 +97,37 @@ void Client::updateLocalLobbyState(const string &message) {
     }
 }
 
+void Client::updateLocalGameplayState(const string &message) {
+    json json = json::parse(message);
+
+    for (int i = 0; i < json["players"].size(); i++) {
+        const auto &playerJson = json["players"][i];
+        m_gameplayState.getPlayers()[i]->setHp(playerJson["hp"]);
+        m_gameplayState.getPlayers()[i]->setMana(playerJson["mana"]);
+        m_gameplayState.getPlayers()[i]->setDeck(deserializeDeck(playerJson["deck"]));
+        m_gameplayState.getPlayers()[i]->setHand(deserializeContainer(playerJson["hand"]));
+        m_gameplayState.getPlayers()[i]->setBoard(deserializeContainer(playerJson["board"]));
+    }
+}
+
+std::unique_ptr<Deck> Client::deserializeDeck(const json &jsonArray) {
+    auto deck = std::make_unique<Deck>();
+    for (const auto &cardJson: jsonArray) {
+        Card newCard = Card::createFromJson(cardJson);
+        deck->addCard(newCard);
+    }
+    return deck;
+}
+
+std::unique_ptr<CardContainer<5>> Client::deserializeContainer(const json &jsonArray) {
+    auto cardContainer = std::make_unique<CardContainer<5>>();
+    for (const auto &cardJson: jsonArray) {
+        Card newCard = Card::createFromJson(cardJson);
+        cardContainer->addCard(newCard);
+    }
+    return cardContainer;
+}
+
 void Client::shutdown() {
     if (m_socket >= 0) {
         ::shutdown(m_socket, SHUT_RDWR);
@@ -114,4 +146,8 @@ int Client::getSocket() const {
 
 LobbyState Client::getLobbyState() const {
     return m_lobbyState;
+}
+
+Game &Client::getGameplayState() {
+    return m_gameplayState;
 }

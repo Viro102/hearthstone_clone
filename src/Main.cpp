@@ -12,7 +12,6 @@ int main() {
 
     InitWindow(screenWidth, screenHeight, "Hearthstone");
 
-    Game game;
     Client client;
     GameState gameState = GameState::MENU;
     std::unique_ptr<GameScreen> gameScreen = nullptr;
@@ -111,9 +110,8 @@ int main() {
                 break;
             case GameState::GAMEPLAY:
                 if (!hasInit) {
-                    gameScreen = std::make_unique<GameScreen>(game);
-                    game.startGame("mage", "warrior");
-                    mouse = std::make_unique<Mouse>(game, *gameScreen);
+                    gameScreen = std::make_unique<GameScreen>(client.getGameplayState());
+                    mouse = std::make_unique<Mouse>(client.getGameplayState(), *gameScreen);
                     hasInit = true;
                 } else {
                     gameScreen->update();

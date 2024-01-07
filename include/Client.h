@@ -10,6 +10,7 @@
 #include <thread>
 #include <functional>
 #include <GameState.h>
+#include <Game.h>
 
 using nlohmann::json;
 
@@ -33,9 +34,11 @@ public:
 
     [[nodiscard]] LobbyState getLobbyState() const;
 
+    [[nodiscard]] Game &getGameplayState();
+
     using StateChangeCallback = std::function<void(GameState)>;
 
-    void setStateChangeCallback(const StateChangeCallback& callback);
+    void setStateChangeCallback(const StateChangeCallback &callback);
 
 private:
 
@@ -43,10 +46,16 @@ private:
 
     void updateLocalLobbyState(const string &message);
 
+    void updateLocalGameplayState(const string &message);
+
     void processMessage(const string &message);
 
+    std::unique_ptr<Deck> deserializeDeck(const json &jsonArray);
+
+    std::unique_ptr<CardContainer<5>> deserializeContainer(const json &jsonArray);
 
     int m_socket{-1};
     LobbyState m_lobbyState{};
+    Game m_gameplayState{};
     std::jthread m_serverListener;
 };

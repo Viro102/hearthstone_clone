@@ -35,6 +35,6 @@ public:
 private:
     const int PLAYER_MAX_HP{20};
     array<std::unique_ptr<Player>, 2> m_players{};
-    std::unique_ptr<Card> m_selectedCard;
+    std::unique_ptr<Card> m_selectedCard{};
     int m_turnCounter{0};
 };

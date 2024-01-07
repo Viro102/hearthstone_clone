@@ -106,8 +106,9 @@ void Server::processMessage(int clientSocket, const string &message) {
             }
             lock.unlock();
             broadcastMessage("updateLobbyState", serializeLobbyState());
-        } else if (m_lobbyState.canStart()) {
-            broadcastMessage("startGame", json());
+        } else if (type == "startGame" && m_lobbyState.canStart()) {
+            m_game.startGame("mage", "warrior");
+            broadcastMessage("startGame", serializeGameplayState());
         }
 
 
@@ -138,6 +139,22 @@ json Server::serializeLobbyState() {
                 {"isReady", player.isReady}
         };
         j["players"].push_back(playerJson);
+    }
+    return j;
+}
+
+json Server::serializeGameplayState() {
+    json j;
+    for (const auto &player: m_game.getPlayers()) {
+        json playerStatsJson = {
+                {"hp",    player->getHp()},
+                {"mana",  player->getMana()},
+                {"deck",  player->getDeck().serialize()},
+                {"hand",  player->getHand().serialize()},
+                {"board", player->getBoard().serialize()},
+        };
+        j["players"].push_back(playerStatsJson);
+
     }
     return j;
 }
@@ -179,12 +196,6 @@ void Server::checkAllClientsReady() {
     cout << "Clients are ready!" << endl;
 }
 
-
-string Server::serializeGameState() {
-    // TODO
-    return "game state";
-}
-
 void Server::stop() {
     m_isRunning = false;
 
@@ -209,6 +220,6 @@ void Server::stop() {
     cout << "Server is shutting down..." << endl;
 }
 
-const bool Server::isRunning() const {
+bool Server::isRunning() const {
     return m_isRunning;
 }
