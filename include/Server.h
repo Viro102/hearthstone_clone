@@ -42,18 +42,18 @@ private:
     void updateLobbyStateWithNewClient(int clientSocket);
 
     json serializeGameplayState();
-    
+
     bool sendAll(int socket, const char *buffer, size_t length);
 
     void sendMessage(const string &type, const nlohmann::json &data, int clientSocket = -1);
 
-    GameState currentGameState = GameState::LOBBY;
 
     json serializeLobbyState();
 
     int m_serverFD{-1};
     Game m_game{};
     LobbyState m_lobbyState{};
+    GameState m_currentGameState{GameState::LOBBY};
     vector<std::unique_ptr<Client>> m_clients{};
     std::vector<std::jthread> m_clientThreads{};
     std::atomic<bool> m_isRunning{false};
