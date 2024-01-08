@@ -1,6 +1,8 @@
 #include <Player.h>
 
-Player::Player(int hp, int id, string archetype) : m_archetype(std::move(archetype)), m_hp(hp), m_id(id) {}
+Player::Player(int hp, int id, string archetype) : m_archetype(std::move(archetype)), m_hp(hp), m_id(id) {
+    m_deck->makeDeck("../assets/cards.txt");
+}
 
 std::unique_ptr<Card> Player::drawCard() {
     if (!m_hand->isFull()) {
@@ -22,6 +24,9 @@ std::unique_ptr<Card> Player::drawCard() {
 
 std::unique_ptr<Card> Player::playCard(int i) {
     auto &card = m_hand->getCard(i);
+    if (card.getName().empty()) {
+        return nullptr;
+    }
     if (m_board->isFull()) {
         cout << "Your board is full!\n";
         return nullptr;
@@ -31,8 +36,8 @@ std::unique_ptr<Card> Player::playCard(int i) {
         if (card.getType() == "spell" || card.getType() == "aoe") {
             return std::make_unique<Card>(card);
         }
-        m_hand->removeCard(i);
         m_board->addCard(card);
+        m_hand->removeCard(i);
         return std::make_unique<Card>(card);
     } else {
         cout << "Not enough Mana!\n";
@@ -48,7 +53,7 @@ void Player::shuffleDeck() {
     std::ranges::shuffle(cards, generator);
 }
 
-CardContainer &Player::getBoard() const {
+CardContainer<5> &Player::getBoard() const {
     return *m_board;
 }
 
@@ -56,7 +61,7 @@ Deck &Player::getDeck() const {
     return *m_deck;
 }
 
-CardContainer &Player::getHand() const {
+CardContainer<5> &Player::getHand() const {
     return *m_hand;
 }
 
@@ -109,4 +114,16 @@ bool Player::isTurn() const {
 
 void Player::setTurn(bool turn) {
     m_turn = turn;
+}
+
+void Player::setDeck(std::unique_ptr<Deck> deck) {
+    m_deck = std::move(deck);
+}
+
+void Player::setHand(std::unique_ptr<CardContainer<5>> hand) {
+    m_hand = std::move(hand);
+}
+
+void Player::setBoard(std::unique_ptr<CardContainer<5>> board) {
+    m_board = std::move(board);
 }

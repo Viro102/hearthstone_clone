@@ -1,9 +1,5 @@
 #include <Deck.h>
 
-Deck::Deck(const string &filename) {
-    makeDeck(filename);
-}
-
 Deck &Deck::makeDeck(const string &filename) {
     try {
         std::ifstream file(filename);
@@ -41,8 +37,4 @@ Deck &Deck::makeDeck(const string &filename) {
     }
 
     return *this;
-}
-
-int Deck::getMaxCards() const {
-    return 30;
 }

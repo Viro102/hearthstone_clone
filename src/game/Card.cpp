@@ -19,6 +19,59 @@ Card::Card(string name, string type, int hp, int damage, int cost) : m_name(std:
     init();
 }
 
+Card::Card() {
+    init();
+}
+
+Card Card::createFromJson(const json &jsonData) {
+    return {
+            jsonData["name"],
+            jsonData["type"],
+            jsonData["buffAmount"],
+            jsonData["hp"],
+            jsonData["damage"],
+            jsonData["cost"]
+    };
+}
+
+json Card::serialize() const {
+    return {
+            {"name",        m_name},
+            {"type",        m_type},
+            {"buffAmount",  m_buffAmount},
+            {"hp",          m_hp},
+            {"damage",      m_damage},
+            {"cost",        m_cost},
+            {"x",           m_x},
+            {"y",           m_y},
+            {"width",       m_width},
+            {"height",      m_height},
+            {"hasAttacked", m_hasAttacked}
+    };
+}
+
+void Card::print() const {
+    cout << "Card Information:" << endl;
+    cout << "Name: " << m_name << endl;
+    cout << "Type: " << m_type << endl;
+    cout << "Buff Amount: " << m_buffAmount << endl;
+    cout << "HP: " << m_hp << endl;
+    cout << "Damage: " << m_damage << endl;
+    cout << "Cost: " << m_cost << endl;
+    cout << "X Position: " << m_x << endl;
+    cout << "Y Position: " << m_y << endl;
+    cout << "Width: " << m_width << endl;
+    cout << "Height: " << m_height << endl;
+    cout << "Has Attacked: " << (m_hasAttacked ? "Yes" : "No") << endl;
+}
+
+void Card::init() {
+    m_x = 0;
+    m_y = 0;
+    m_width = 150;
+    m_height = 200;
+}
+
 const string &Card::getName() const {
     return m_name;
 }
@@ -89,14 +142,6 @@ void Card::setPosition(int x, int y) {
 }
 
 void Card::setPosition(Rectangle rec) {
-    setX(rec.x);
-    setY(rec.y);
-}
-
-
-void Card::init() {
-    m_x = 0;
-    m_y = 0;
-    m_width = 150;
-    m_height = 200;
+    setX(static_cast<int>(rec.x));
+    setY(static_cast<int>(rec.y));
 }

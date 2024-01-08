@@ -3,13 +3,16 @@ project(Hearthstone_clone)
 
 set(CMAKE_CXX_STANDARD 20)
 
-# Generate compile_commands.json
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(SERVER_SOURCES
         src/networking/ServerMain.cpp
         src/networking/Server.cpp
-        src/networking/Client.cpp)
+        src/networking/Client.cpp
+        src/game/Card.cpp
+        src/game/Game.cpp
+        src/game/Player.cpp
+        src/game/Deck.cpp)
 
 add_executable(Server ${SERVER_SOURCES})
 
@@ -19,10 +22,9 @@ set(CLIENT_SOURCES
         src/game/Player.cpp
         src/game/Card.cpp
         src/game/Deck.cpp
-        src/gui/Panel.cpp
-        src/game/Slot.cpp
-        src/utility/CardContainer.cpp
-        src/networking/Client.cpp)
+        src/gui/GameScreen.cpp
+        src/networking/Client.cpp
+        src/gui/Button.cpp)
 
 add_executable(Client ${CLIENT_SOURCES})
 
@@ -55,3 +57,4 @@ endif ()
 target_link_libraries(Client nlohmann_json::nlohmann_json)
 target_link_libraries(Server nlohmann_json::nlohmann_json pthread)
 target_link_libraries(Client raylib)
+target_link_libraries(Server raylib)

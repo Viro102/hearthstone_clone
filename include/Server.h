@@ -10,8 +10,7 @@
 #include <LobbyState.h>
 #include <nlohmann/json.hpp>
 #include <mutex>
-
-using nlohmann::json;
+#include <Game.h>
 
 class Server {
 public:
@@ -21,6 +20,8 @@ public:
 
     // Main loop for listening to clients
     void listenForClients();
+
+    [[nodiscard]] bool isRunning() const;
 
 private:
     void start(short port);
@@ -43,13 +44,14 @@ private:
     void broadcastGameState();
 
     // Convert the game state to a string for sending
-    string serializeGameState();
+    json serializeGameplayState();
 
     void broadcastMessage(const string &type, const nlohmann::json &data);
 
     json serializeLobbyState();
 
     int m_serverFD{-1};
+    Game m_game{};
     LobbyState m_lobbyState{};
     vector<std::unique_ptr<Client>> m_clients{};
     std::vector<std::jthread> m_clientThreads{};

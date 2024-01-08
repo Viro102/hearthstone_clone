@@ -9,6 +9,12 @@ public:
 
     Card(string name, string type, int hp, int damage, int cost);
 
+    Card();
+
+    [[nodiscard]] json serialize() const;
+
+    static Card createFromJson(const json &jsonData);
+
     [[nodiscard]] const string &getName() const;
 
     [[nodiscard]] const string &getType() const;
@@ -48,6 +54,8 @@ public:
     void init();
 
     bool operator==(const Card &other) const = default;
+
+    void print() const;
 
 private:
     string m_name{};

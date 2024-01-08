@@ -10,8 +10,9 @@
 #include <thread>
 #include <functional>
 #include <GameState.h>
+#include <Game.h>
 
-using nlohmann::json;
+using StateChangeCallback = std::function<void(GameState)>;
 
 class Client {
 public:
@@ -27,29 +28,34 @@ public:
 
     void listenToServer();
 
-    void sendMessage(const string &message) const;
+    void sendMessage(const string &message, const string &data = "") const;
 
     [[nodiscard]] int getSocket() const;
 
     [[nodiscard]] LobbyState getLobbyState() const;
 
-    using StateChangeCallback = std::function<void(GameState)>;
+    [[nodiscard]] Game &getGameplayState();
 
-    void setStateChangeCallback(const StateChangeCallback& callback);
+    [[nodiscard]] bool isGameStateInitialized() const;
 
-    bool canStart() const;
+    void setStateChangeCallback(const StateChangeCallback &callback);
 
 private:
-
     StateChangeCallback stateChangeCallback;
 
     void updateLocalLobbyState(const string &message);
 
+    void updateLocalGameplayState(const string &message);
+
     void processMessage(const string &message);
 
+    std::unique_ptr<Deck> deserializeDeck(const json &jsonArray);
+
+    std::unique_ptr<CardContainer<5>> deserializeContainer(const json &jsonArray);
 
     int m_socket{-1};
-    bool m_canStart{false};
     LobbyState m_lobbyState{};
+    Game m_gameplayState{};
     std::jthread m_serverListener;
+    bool m_isGameStateInitialized{false};
 };

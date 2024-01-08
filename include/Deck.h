@@ -4,15 +4,7 @@
 #include <sstream>
 #include <CardContainer.h>
 
-class Deck : public CardContainer {
+class Deck : public CardContainer<30> {
 public:
-    explicit Deck(const string &filename);
-
-    Deck() = default;
-
-    ~Deck() override = default;
-
     Deck &makeDeck(const string &filename);
-
-    [[nodiscard]] int getMaxCards() const override;
 };

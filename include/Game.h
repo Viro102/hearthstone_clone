@@ -11,11 +11,9 @@ public:
 
     void endTurn();
 
-    void playACard(Player &player, int i);
+    void playACard(int i);
 
-    void selectCardBoard(const Player &player, int i);
-
-    void selectCardHand(const Player &player, int i);
+    void selectCardBoard(int i);
 
     void attack(int i);
 
@@ -31,12 +29,14 @@ public:
 
     void isGameOver() const;
 
-    void specialCard(const Player &player, const Card &card);
+    void specialCard(const Card &card);
+
+    void addPlayer(Player player, int i);
 
 
 private:
     const int PLAYER_MAX_HP{20};
     array<std::unique_ptr<Player>, 2> m_players{};
-    std::unique_ptr<Card> m_selectedCard;
+    std::unique_ptr<Card> m_selectedCard{};
     int m_turnCounter{0};
 };
