@@ -91,3 +91,15 @@ private:
     array<std::unique_ptr<Card>, MAX_CARDS> m_cards{};
     int m_numberOfCards{};
 };
+
+template<typename ContainerType>
+std::unique_ptr<ContainerType> deserialize(const json &jsonArray) {
+    auto container = std::make_unique<ContainerType>();
+    for (const auto &cardJson: jsonArray) {
+        Card newCard = Card::createFromJson(cardJson);
+        if (!newCard.getName().empty()) {
+            container->addCard(newCard);
+        }
+    }
+    return container;
+}

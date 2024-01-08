@@ -2,9 +2,6 @@
 
 #include <Common.h>
 #include <raylib.h>
-#include <nlohmann/json.hpp>
-
-using nlohmann::json;
 
 class Card {
 public:
