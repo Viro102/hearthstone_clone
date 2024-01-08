@@ -1,6 +1,6 @@
 #include <Player.h>
 
-Player::Player(int hp, int id, string archetype) : m_archetype(std::move(archetype)), m_hp(hp), m_id(id) {
+Player::Player(int id, string archetype) : m_archetype(std::move(archetype)), m_id(id) {
     m_deck->makeDeck("../assets/cards.txt");
 }
 

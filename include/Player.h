@@ -11,7 +11,7 @@ private:
     const int MAX_MANA{10};
 
 public:
-    Player(int hp, int id, string archetype);
+    Player(int id, string archetype);
 
     std::unique_ptr<Card> drawCard();
 
