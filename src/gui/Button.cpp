@@ -35,17 +35,6 @@ void Button::draw() const {
     }
 }
 
-void Button::update() const {
-    if (CheckCollisionPointRec(GetMousePosition(), m_hitbox)
-        && IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && onClick) {
-        onClick();
-    }
-}
-
-void Button::setOnClick(std::function<void()> func) {
-    onClick = std::move(func);
-}
-
 bool Button::isFree() const {
     return m_isFree;
 }
@@ -56,4 +45,12 @@ void Button::setFree(bool isFree) {
 
 Rectangle Button::getHitbox() const {
     return m_hitbox;
+}
+
+bool Button::isClicked() const {
+    return (CheckCollisionPointRec(GetMousePosition(), m_hitbox) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT));
+}
+
+void Button::setColor(Color color) {
+    m_regularColor = color;
 }

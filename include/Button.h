@@ -17,11 +17,11 @@ public:
 
     void draw() const;
 
-    void update() const;
-
-    void setOnClick(std::function<void()> func);
-
     void setFree(bool isFree);
+
+    void setColor(Color color);
+
+    [[nodiscard]] bool isClicked() const;
 
     [[nodiscard]] bool isFree() const;
 
@@ -39,5 +39,4 @@ private:
     Color m_textColor{BLACK};
     bool m_visible{true};
     bool m_isFree{true};
-    std::function<void()> onClick;
 };
