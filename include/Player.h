@@ -39,6 +39,8 @@ public:
 
     [[nodiscard]] string getArchetype() const;
 
+    [[nodiscard]] bool isTurn() const;
+
     void setHp(int hp);
 
     void setMana(int mana);
@@ -49,14 +51,12 @@ public:
 
     void setBoard(std::unique_ptr<CardContainer<5>> board);
 
-    [[nodiscard]] bool isTurn() const;
-
     void setTurn(bool turn);
 
 private:
     string m_archetype;
-    int m_hp;
-    int m_id;
+    int m_hp{20};
+    int m_id{-1};
     int m_mana{0};
     int m_currentMaxMana{0};
     bool m_turn{false};
