@@ -1,27 +1,12 @@
 #include <Card.h>
 
-Card::Card(string name, string type, int buffAmount, int hp, int damage, int cost) : m_name(std::move(name)),
-                                                                                     m_type(std::move(type)),
-                                                                                     m_buffAmount(
-                                                                                             buffAmount),
-                                                                                     m_hp(hp),
-                                                                                     m_damage(damage),
-                                                                                     m_cost(cost) {
+Card::Card(string name, string type, int buffAmount, int hp, int damage, int cost)
+        : m_name(std::move(name)), m_type(std::move(type)),
+          m_buffAmount(buffAmount), m_hp(hp), m_damage(damage), m_cost(cost) {}
 
-    init();
-}
-
-Card::Card(string name, string type, int hp, int damage, int cost) : m_name(std::move(name)),
-                                                                     m_type(std::move(type)),
-                                                                     m_hp(hp),
-                                                                     m_damage(damage), m_cost(cost) {
-
-    init();
-}
-
-Card::Card() {
-    init();
-}
+Card::Card(string name, string type, int hp, int damage, int cost)
+        : m_name(std::move(name)), m_type(std::move(type)),
+          m_hp(hp), m_damage(damage), m_cost(cost) {}
 
 Card Card::createFromJson(const json &jsonData) {
     return {
@@ -63,13 +48,6 @@ void Card::print() const {
     cout << "Width: " << m_width << endl;
     cout << "Height: " << m_height << endl;
     cout << "Has Attacked: " << (m_hasAttacked ? "Yes" : "No") << endl;
-}
-
-void Card::init() {
-    m_x = 0;
-    m_y = 0;
-    m_width = 150;
-    m_height = 200;
 }
 
 const string &Card::getName() const {
@@ -134,11 +112,6 @@ void Card::setX(int x) {
 
 void Card::setY(int y) {
     m_y = y;
-}
-
-void Card::setPosition(int x, int y) {
-    setX(x);
-    setY(y);
 }
 
 void Card::setPosition(Rectangle rec) {

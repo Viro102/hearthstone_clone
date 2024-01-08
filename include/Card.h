@@ -9,7 +9,9 @@ public:
 
     Card(string name, string type, int hp, int damage, int cost);
 
-    Card();
+    Card() = default;
+
+    Card(const Card &other) = default;
 
     [[nodiscard]] json serialize() const;
 
@@ -47,26 +49,23 @@ public:
 
     void setY(int y);
 
-    void setPosition(int x, int y);
-
     void setPosition(Rectangle rec);
-
-    void init();
-
-    bool operator==(const Card &other) const = default;
 
     void print() const;
 
+    bool operator==(const Card &other) const = default;
+
+
 private:
-    string m_name{};
-    string m_type{};
+    string m_name;
+    string m_type;
     int m_buffAmount{};
     int m_hp{};
     int m_damage{};
     int m_cost{};
     int m_x{};
     int m_y{};
-    int m_width{};
-    int m_height{};
+    int m_width{150};
+    int m_height{200};
     bool m_hasAttacked{};
 };
