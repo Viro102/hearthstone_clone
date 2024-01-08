@@ -33,11 +33,11 @@ public:
 
     [[nodiscard]] int getSocket() const;
 
-    [[nodiscard]] int getID() const;
-
     [[nodiscard]] LobbyState getLobbyState() const;
 
     [[nodiscard]] Game &getGameplayState();
+
+    [[nodiscard]] int getID() const;
 
     [[nodiscard]] bool isGameStateInitialized() const;
 
@@ -54,6 +54,7 @@ private:
 
     bool recvAll(int socket, char *buffer, size_t length);
 
+    
     int m_socket{-1};
     int m_ID{-1};
     LobbyState m_lobbyState{};

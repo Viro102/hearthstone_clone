@@ -68,8 +68,6 @@ void Client::listenToServer() {
             break;
         }
 
-        // Process the fully received message
-        cout << "Client: received message = " << message << std::endl;
         processMessage(message);
     }
 }
@@ -79,6 +77,8 @@ void Client::sendMessage(const string &message, const string &data) const {
     j["type"] = message;
     j["data"] = data;
     string serializedMsg = j.dump();
+
+    cout << "Client sending message: " << j.dump(4) << endl;
 
     send(m_socket, serializedMsg.c_str(), serializedMsg.size(), 0);
 }
@@ -93,6 +93,8 @@ void Client::processMessage(const string &message) {
 
         string type = j["type"];
         string data = j["data"].dump();
+
+        cout << "Client received message = " << j.dump(4) << endl;
 
         if (type == "updateLobbyState") {
             updateLocalLobbyState(data);
@@ -137,20 +139,8 @@ void Client::updateLocalGameplayState(const string &message) {
     json json = json::parse(message);
 
     if (!m_isGameStateInitialized) {
-        for (int i = 0; i < 2; i++) {
-            const auto &playerJson = json["players"][i];
-            int id = playerJson["id"];
-            int hp = playerJson["hp"];
-            string archetype = playerJson["archetype"];
-
-            Player player(hp, i, archetype);
-
-            if (id == m_ID) {
-                m_gameplayState.addPlayer(std::move(player), 0);
-            } else {
-                m_gameplayState.addPlayer(std::move(player), 1);
-            }
-        }
+        m_gameplayState.initializeFromJson(json);
+        m_isGameStateInitialized = true;
     }
 
     for (int i = 0; i < 2; i++) {
@@ -162,9 +152,6 @@ void Client::updateLocalGameplayState(const string &message) {
         m_gameplayState.getPlayers()[i]->setHand(deserialize<CardContainer<5>>(playerJson["hand"]));
         m_gameplayState.getPlayers()[i]->setBoard(deserialize<CardContainer<5>>(playerJson["board"]));
     }
-
-
-    m_isGameStateInitialized = true;
 }
 
 void Client::shutdown() {
