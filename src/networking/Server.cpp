@@ -37,6 +37,7 @@ void Server::start(short port) {
         return;
     }
 
+    // Start listening
     if (listen(m_serverFD, SOMAXCONN) < 0) {
         std::cerr << "Failed to listen on socket: " << strerror(errno) << endl;
         close(m_serverFD);
@@ -70,10 +71,10 @@ void Server::listenForClients() {
 
 void Server::handleClient(int clientSocket) {
     while (m_isRunning) {
-        char buffer[1024] = {0};
-        auto valread = recv(clientSocket, buffer, 1024, 0);
+        array<char, 10240> buffer{};
+        auto valread = recv(clientSocket, buffer.data(), 10240, 0);
         if (valread > 0) {
-            string message(buffer, valread);
+            string message(buffer.data(), valread);
             cout << "Incoming message from client " << clientSocket << ": " << message << endl;
             processMessage(clientSocket, message);
         } else if (valread == -1) {
@@ -119,9 +120,11 @@ void Server::processMessage(int clientSocket, const string &message) {
             }
             lock.unlock();
             broadcastMessage("updateLobbyState", serializeLobbyState());
-        } else if (m_lobbyState.canStart()) {
-            currentGameState = GameState::GAMEPLAY;
-            broadcastMessage("startGame", json());
+        } else if (type == "startGame" && m_lobbyState.canStart()) {
+            m_game.startGame("mage", "warrior");
+            broadcastMessage("startGame", serializeGameplayState());
+        } else if (type == "updateGameState") {
+            broadcastMessage("updateGameState", serializeGameplayState());
         }
 
 
@@ -153,6 +156,26 @@ json Server::serializeLobbyState() {
         };
         j["players"].push_back(playerJson);
     }
+    return j;
+}
+
+json Server::serializeGameplayState() {
+    json j;
+    for (const auto &player: m_game.getPlayers()) {
+        json playerStatsJson = {
+                {"archetype", player->getArchetype()},
+                {"onTurn",    player->isTurn()},
+                {"id",        player->getId()},
+                {"hp",        player->getHp()},
+                {"mana",      player->getMana()},
+                {"deck",      player->getDeck().serialize()},
+                {"hand",      player->getHand().serialize()},
+                {"board",     player->getBoard().serialize()},
+        };
+        j["players"].push_back(playerStatsJson);
+
+    }
+    cout << j.dump() << endl;
     return j;
 }
 
@@ -193,12 +216,6 @@ void Server::checkAllClientsReady() {
     cout << "Clients are ready!" << endl;
 }
 
-
-string Server::serializeGameState() {
-    // TODO
-    return "game state";
-}
-
 void Server::stop() {
     m_isRunning = false;
 
@@ -223,6 +240,6 @@ void Server::stop() {
     cout << "Server is shutting down..." << endl;
 }
 
-const bool Server::isRunning() const {
+bool Server::isRunning() const {
     return m_isRunning;
 }

@@ -7,13 +7,12 @@
 #include <memory>
 #include <algorithm>
 #include <utility>
+#include <nlohmann/json.hpp>
+#include <functional>
 
 using std::string;
 using std::cout;
 using std::array;
 using std::vector;
 using std::endl;
-
-namespace Common {
-    vector<int> extractNumbers(const string &input);
-}
+using nlohmann::json;

@@ -34,10 +34,10 @@ int Client::start(short port, const string &ipAddr) {
 
 void Client::listenToServer() {
     while (true) {
-        char buffer[1024] = {0};
-        auto valread = recv(m_socket, buffer, 1024, 0);
+        array<char, 10240> buffer{};
+        auto valread = recv(m_socket, buffer.data(), 10240, 0);
         if (valread > 0) {
-            string message(buffer, valread);
+            string message(buffer.data(), valread);
             cout << "Client: received message = " << message << endl;
             processMessage(message);
         } else {
@@ -47,10 +47,10 @@ void Client::listenToServer() {
 }
 
 
-void Client::sendMessage(const string &message) const {
+void Client::sendMessage(const string &message, const string &data) const {
     json j;
     j["type"] = message;
-    j["data"] = "";
+    j["data"] = data;
     string serializedMsg = j.dump();
 
     send(m_socket, serializedMsg.c_str(), serializedMsg.size(), 0);
@@ -64,7 +64,6 @@ void Client::processMessage(const string &message) {
     try {
         json j = json::parse(message);
 
-        // Extract the message type
         string type = j["type"];
         string data = j["data"].dump();
 
@@ -72,10 +71,13 @@ void Client::processMessage(const string &message) {
             updateLocalLobbyState(data);
         }
 
-        if (type == "startGame") {
-            if (stateChangeCallback) {
-                stateChangeCallback(GameState::GAMEPLAY);
-            }
+        if (type == "startGame" && stateChangeCallback) {
+            updateLocalGameplayState(data);
+            stateChangeCallback(GameState::GAMEPLAY);
+        }
+
+        if (type == "updateGameState") {
+            updateLocalGameplayState(data);
         }
 
         if (type == "opponentDisconnected") {
@@ -102,6 +104,31 @@ void Client::updateLocalLobbyState(const string &message) {
     }
 }
 
+void Client::updateLocalGameplayState(const string &message) {
+    json json = json::parse(message);
+
+    if (!m_isGameStateInitialized) {
+        for (int i = 0; i < json["players"].size(); i++) {
+            const auto &playerJson = json["players"][i];
+            Player player(playerJson["hp"], playerJson["id"], playerJson["archetype"]);
+            m_gameplayState.addPlayer(std::move(player), i);
+        }
+    }
+
+    for (int i = 0; i < json["players"].size(); i++) {
+        const auto &playerJson = json["players"][i];
+        m_gameplayState.getPlayers()[i]->setTurn(playerJson["onTurn"]);
+        m_gameplayState.getPlayers()[i]->setHp(playerJson["hp"]);
+        m_gameplayState.getPlayers()[i]->setMana(playerJson["mana"]);
+        m_gameplayState.getPlayers()[i]->setDeck(deserialize<Deck>(playerJson["deck"]));
+        m_gameplayState.getPlayers()[i]->setHand(deserialize<CardContainer<5>>(playerJson["hand"]));
+        m_gameplayState.getPlayers()[i]->setBoard(deserialize<CardContainer<5>>(playerJson["board"]));
+    }
+
+
+    m_isGameStateInitialized = true;
+}
+
 void Client::shutdown() {
     if (m_socket >= 0) {
         ::shutdown(m_socket, SHUT_RDWR);
@@ -112,6 +139,8 @@ void Client::shutdown() {
     if (m_serverListener.joinable()) {
         m_serverListener.join();
     }
+
+    m_isGameStateInitialized = false;
 }
 
 int Client::getSocket() const {
@@ -120,4 +149,12 @@ int Client::getSocket() const {
 
 LobbyState Client::getLobbyState() const {
     return m_lobbyState;
+}
+
+Game &Client::getGameplayState() {
+    return m_gameplayState;
+}
+
+bool Client::isGameStateInitialized() const {
+    return m_isGameStateInitialized;
 }

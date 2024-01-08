@@ -1,7 +1,7 @@
 #include <Game.h>
 #include <GameScreen.h>
 #include <Client.h>
-#include <Mouse.h>
+#include <Button.h>
 
 int main() {
     // Initialization
@@ -32,36 +32,59 @@ int main() {
 
     InitWindow(screenWidth, screenHeight, "Hearthstone");
 
-    Game game;
     Client client;
     GameState gameState = GameState::MENU;
-    std::unique_ptr<GameScreen> gameScreen = nullptr;
-    std::unique_ptr<Mouse> mouse = nullptr;
+    std::unique_ptr<GameScreen> gameScreen{};
 
     client.setStateChangeCallback([&gameState](GameState newState) {
         gameState = newState;
     });
 
-
     bool hasInit = false;
 
-    // Define the buttons
-    Rectangle lobbyBtn = {screenCenterX - 100, 200, 200, 50};
-    Rectangle exitBtn = {screenCenterX - 100, 300, 200, 50};
-    Rectangle readyBtn = {screenCenterX - 150, 350, 100, 50};
-    Rectangle startBtn = {screenCenterX - 50, 350, 100, 50};
-    Rectangle exitBtnLobby = {screenCenterX + 50, 350, 100, 50};
-    Rectangle exitBtnWin = {screenCenterX - 160, 400, 200, 50};
-    Rectangle exitBtnLose = {screenCenterX - 160, 400, 200, 50};
+    // Menu buttons
+    Button lobbyBtn({screenCenterX - 100, 200, 200, 50}, "Lobby");
+    Button exitBtn({screenCenterX - 100, 300, 200, 50}, "Exit");
 
-    auto lobbyBtnColor = GRAY;
-    auto exitBtnColor = GRAY;
-    auto readyBtnColor = GRAY;
-    auto startBtnColor = GRAY;
-    auto exitBtnLobbyColor = GRAY;
-    auto exitBtnWinColor = GRAY;
-    auto exitBtnLoseColor = GRAY;
-    auto hoverColor = DARKGRAY;
+    lobbyBtn.setOnClick([&client, &gameState] {
+        if (client.start(10322) != -1) {
+            gameState = GameState::LOBBY;
+        }
+        // single player
+        // gameState = GameState::LOBBY;
+    });
+
+    exitBtn.setOnClick([&gameState] {
+        gameState = GameState::END;
+    });
+
+    vector<Button> buttonsMenu{lobbyBtn, exitBtn};
+
+    // Lobby buttons
+    Button readyBtn({screenCenterX - 150, 350, 100, 50}, "Ready");
+    Button startBtn({screenCenterX - 50, 350, 100, 50}, "Start");
+    Button exitBtnLobby({screenCenterX + 50, 350, 100, 50}, "Exit");
+
+    readyBtn.setOnClick([&client] {
+        client.sendMessage("ready");
+    });
+
+    exitBtnLobby.setOnClick([&client, &gameState] {
+        gameState = GameState::MENU;
+        client.shutdown();
+    });
+
+    startBtn.setOnClick([&client, &gameState] {
+        if (client.getLobbyState().canStart()) {
+            client.sendMessage("startGame");
+            gameState = GameState::GAMEPLAY;
+        }
+        // single player
+        // gameState = GameState::GAMEPLAY;
+    });
+
+    vector<Button> buttonsLobby{readyBtn, startBtn, exitBtnLobby};
+
 
     SetTargetFPS(60);
     SetExitKey(KEY_NULL);
@@ -73,64 +96,18 @@ int main() {
         if (IsKeyPressed(KEY_ESCAPE)) {
             gameState = GameState::MENU;
         }
-        if (mouse) {
-            mouse->update();
-        }
 
         switch (gameState) {
             case GameState::MENU:
                 // Update menu logic
-                if (CheckCollisionPointRec(GetMousePosition(), lobbyBtn)) {
-                    lobbyBtnColor = hoverColor;
-                    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-                        if (client.start(10322, ipAddress) != -1) {
-                            gameState = GameState::LOBBY;
-                        }
-                        // single player
-                        // gameState = GameState::LOBBY;
-                    }
-                } else {
-                    lobbyBtnColor = GRAY;
-                }
-                if (CheckCollisionPointRec(GetMousePosition(), exitBtn)) {
-                    exitBtnColor = hoverColor;
-                    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-                        gameState = GameState::END;
-                    }
-                } else {
-                    exitBtnColor = GRAY;
+                for (const auto &button: buttonsMenu) {
+                    button.update();
                 }
                 break;
             case GameState::LOBBY:
-                if (CheckCollisionPointRec(GetMousePosition(), readyBtn)) {
-                    readyBtnColor = hoverColor;
-                    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-                        client.sendMessage("ready");
-                    }
-                } else {
-                    readyBtnColor = GRAY;
-                }
-                if (CheckCollisionPointRec(GetMousePosition(), exitBtnLobby)) {
-                    exitBtnLobbyColor = hoverColor;
-                    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-                        gameState = GameState::MENU;
-                        client.shutdown();
-                    }
-                } else {
-                    exitBtnLobbyColor = GRAY;
-                }
-                if (CheckCollisionPointRec(GetMousePosition(), startBtn)) {
-                    startBtnColor = hoverColor;
-                    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && client.getLobbyState().canStart()) {
-                        client.sendMessage("startGame");
-                        gameState = GameState::GAMEPLAY;
-                    }
-                    // single player
-                    // if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-                    // gameState = GameState::GAMEPLAY;
-                    // }
-                } else {
-                    startBtnColor = GRAY;
+                // Update lobby logic
+                for (const auto &button: buttonsLobby) {
+                    button.update();
                 }
                 break;
             case GameState::WIN:
@@ -157,12 +134,10 @@ int main() {
                 break;
 
             case GameState::GAMEPLAY:
-                if (!hasInit) {
-                    gameScreen = std::make_unique<GameScreen>(game);
-                    game.startGame("mage", "warrior");
-                    mouse = std::make_unique<Mouse>(game, *gameScreen);
+                if (client.isGameStateInitialized() && !hasInit) {
+                    gameScreen = std::make_unique<GameScreen>(client.getGameplayState());
                     hasInit = true;
-                } else {
+                } else if (client.isGameStateInitialized()) {
                     gameScreen->update();
                 }
                 break;
@@ -180,12 +155,9 @@ int main() {
         switch (gameState) {
             case GameState::MENU:
                 // Draw buttons
-                DrawRectangleRec(lobbyBtn, lobbyBtnColor);
-                DrawRectangleRec(exitBtn, exitBtnColor);
-
-                // Draw button text
-                DrawText("Lobby", lobbyBtn.x + 70, lobbyBtn.y + 15, 20, BLACK);
-                DrawText("Exit", exitBtn.x + 80, exitBtn.y + 15, 20, BLACK);
+                for (const auto &button: buttonsMenu) {
+                    button.draw();
+                }
                 break;
             case GameState::LOBBY:
                 DrawText("Game Lobby", screenWidth / 2 - MeasureText("Game Lobby", 20) / 2, 20, 20, BLACK);
@@ -193,17 +165,14 @@ int main() {
                 // Draw player states
                 for (int i = 0; i < client.getLobbyState().players.size(); ++i) {
                     const auto &player = client.getLobbyState().players[i];
-                    DrawText(TextFormat("Player %zu: %s", i + 1, player.isReady ? "Ready" : "Not Ready"), 100,
+                    DrawText(TextFormat("Player %d: %s", i + 1, player.isReady ? "Ready" : "Not Ready"), 100,
                              150 + 50 * i, 20, BLACK);
                 }
 
                 // Draw buttons
-                DrawRectangleRec(readyBtn, readyBtnColor);
-                DrawRectangleRec(startBtn, startBtnColor);
-                DrawRectangleRec(exitBtnLobby, exitBtnLobbyColor);
-                DrawText("Ready", readyBtn.x + 20, readyBtn.y + 15, 20, BLACK);
-                DrawText("Start", startBtn.x + 20, startBtn.y + 15, 20, BLACK);
-                DrawText("Exit", exitBtnLobby.x + 20, exitBtnLobby.y + 15, 20, BLACK);
+                for (const auto &button: buttonsLobby) {
+                    button.draw();
+                }
                 break;
 
             case GameState::WIN:
@@ -218,7 +187,7 @@ int main() {
                 DrawText("Back to Main Menu", exitBtnLose.x + 10, exitBtnLose.y + 15, 20, BLACK);
                 break;
             case GameState::GAMEPLAY:
-                if (hasInit) {
+                if (hasInit && client.isGameStateInitialized()) {
                     gameScreen->draw();
                 }
                 break;

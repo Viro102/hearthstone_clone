@@ -181,3 +181,7 @@ void Game::specialCard(const Card &card) {
         }
     }
 }
+
+void Game::addPlayer(Player player, int i) {
+    m_players[i] = std::make_unique<Player>(std::move(player));
+}

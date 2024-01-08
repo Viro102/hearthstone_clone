@@ -115,3 +115,15 @@ bool Player::isTurn() const {
 void Player::setTurn(bool turn) {
     m_turn = turn;
 }
+
+void Player::setDeck(std::unique_ptr<Deck> deck) {
+    m_deck = std::move(deck);
+}
+
+void Player::setHand(std::unique_ptr<CardContainer<5>> hand) {
+    m_hand = std::move(hand);
+}
+
+void Player::setBoard(std::unique_ptr<CardContainer<5>> board) {
+    m_board = std::move(board);
+}

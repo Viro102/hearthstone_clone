@@ -43,6 +43,12 @@ public:
 
     void setMana(int mana);
 
+    void setDeck(std::unique_ptr<Deck> deck);
+
+    void setHand(std::unique_ptr<CardContainer<5>> hand);
+
+    void setBoard(std::unique_ptr<CardContainer<5>> board);
+
     [[nodiscard]] bool isTurn() const;
 
     void setTurn(bool turn);
