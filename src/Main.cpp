@@ -1,4 +1,3 @@
-#include <Game.h>
 #include <GameScreen.h>
 #include <Client.h>
 #include <Button.h>
@@ -9,6 +8,10 @@ int main() {
     const int screenHeight = 750;
     const int screenCenterX = screenWidth / 2;
     const int screenCenterY = screenHeight / 2;
+
+    using Clock = std::chrono::high_resolution_clock;
+    auto lastPrintTime = Clock::now();
+    std::chrono::seconds printInterval(3); // Print every 3 seconds
 
     string choice;
     string ipAddress;
@@ -46,52 +49,17 @@ int main() {
     Button lobbyBtn({screenCenterX - 100, 200, 200, 50}, "Lobby");
     Button exitBtn({screenCenterX - 100, 300, 200, 50}, "Exit");
 
-    lobbyBtn.setOnClick([&client, &gameState, &ipAddress] {
-        if (client.start(10322, ipAddress) != -1) {
-            gameState = GameState::LOBBY;
-        }
-        // single player
-        // gameState = GameState::LOBBY;
-    });
-
-    exitBtn.setOnClick([&gameState] {
-        gameState = GameState::END;
-    });
-
     vector<Button> buttonsMenu{lobbyBtn, exitBtn};
 
     // Lobby buttons
     Button readyBtn({screenCenterX - 150, 350, 100, 50}, "Ready");
     Button startBtn({screenCenterX - 50, 350, 100, 50}, "Start");
     Button exitBtnLobby({screenCenterX + 50, 350, 100, 50}, "Exit");
-
-    readyBtn.setOnClick([&client] {
-        client.sendMessage("ready");
-    });
-
-    exitBtnLobby.setOnClick([&client, &gameState] {
-        gameState = GameState::MENU;
-        client.shutdown();
-    });
-
-    startBtn.setOnClick([&client, &gameState] {
-        if (client.getLobbyState().canStart()) {
-            client.sendMessage("startGame");
-            gameState = GameState::GAMEPLAY;
-        }
-        // single player
-        // gameState = GameState::GAMEPLAY;
-    });
-
+    
     vector<Button> buttonsLobby{readyBtn, startBtn, exitBtnLobby};
 
     // End game screen buttons
     Button exitBtnEnd(Rectangle(screenCenterX - 110, 400 - 25, 220, 50), "Back to Main Menu");
-
-    exitBtnEnd.setOnClick([&gameState, &client] {
-        gameState = GameState::MENU;
-        client.shutdown();
-    });
 
     SetTargetFPS(60);
     SetExitKey(KEY_NULL);
@@ -107,27 +75,54 @@ int main() {
         switch (gameState) {
             case GameState::MENU:
                 // Update menu logic
-                for (const auto &button: buttonsMenu) {
-                    button.update();
+                if (exitBtn.isClicked()) {
+                    gameState = GameState::END;
+                }
+                if (lobbyBtn.isClicked() && client.start(10322, ipAddress) != -1) {
+                    gameState = GameState::LOBBY;
                 }
                 break;
             case GameState::LOBBY:
                 // Update lobby logic
-                for (const auto &button: buttonsLobby) {
-                    button.update();
+                if (readyBtn.isClicked()) {
+                    client.sendMessage("ready");
+                }
+                if (exitBtnLobby.isClicked()) {
+                    gameState = GameState::MENU;
+                    client.shutdown();
+                }
+                if (startBtn.isClicked() && client.getLobbyState().canStart()) {
+                    client.sendMessage("startGame");
+                    gameState = GameState::GAMEPLAY;
                 }
                 break;
             case GameState::WIN:
             case GameState::LOSE:
-                exitBtnEnd.update();
+                if (exitBtnEnd.isClicked()) {
+                    gameState = GameState::MENU;
+                    client.shutdown();
+                }
                 break;
 
             case GameState::GAMEPLAY:
                 if (client.isGameStateInitialized() && !hasInit) {
-                    gameScreen = std::make_unique<GameScreen>(client.getGameplayState());
+                    gameScreen = std::make_unique<GameScreen>(client);
                     hasInit = true;
-                } else if (client.isGameStateInitialized()) {
+                }
+
+                if (client.isGameStateInitialized()) {
                     gameScreen->update();
+
+                    // Check if 3 seconds have passed
+                    auto currentTime = Clock::now();
+                    if (currentTime - lastPrintTime >= printInterval) {
+                        cout << endl << endl;
+                        gameScreen->print();
+                        cout << endl << endl;
+
+                        // Reset the timer
+                        lastPrintTime = currentTime;
+                    }
                 }
                 break;
             case GameState::END:
