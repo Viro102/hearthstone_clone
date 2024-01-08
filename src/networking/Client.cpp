@@ -33,10 +33,10 @@ int Client::start(short port) {
 
 void Client::listenToServer() {
     while (true) {
-        char buffer[32768] = {0};
-        auto valread = recv(m_socket, buffer, 32768, 0);
+        array<char, 10240> buffer{};
+        auto valread = recv(m_socket, buffer.data(), 10240, 0);
         if (valread > 0) {
-            string message(buffer, valread);
+            string message(buffer.data(), valread);
             cout << "Client: received message = " << message << endl;
             processMessage(message);
         } else {

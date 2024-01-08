@@ -70,10 +70,10 @@ void Server::listenForClients() {
 
 void Server::handleClient(int clientSocket) {
     while (m_isRunning) {
-        char buffer[32768] = {0};
-        auto valread = recv(clientSocket, buffer, 32768, 0);
+        array<char, 10240> buffer{};
+        auto valread = recv(clientSocket, buffer.data(), 10240, 0);
         if (valread > 0) {
-            string message(buffer, valread);
+            string message(buffer.data(), valread);
             cout << "Incoming message from client " << clientSocket << ": " << message << endl;
             processMessage(clientSocket, message);
         } else if (valread == -1) {
@@ -148,13 +148,13 @@ json Server::serializeGameplayState() {
     for (const auto &player: m_game.getPlayers()) {
         json playerStatsJson = {
                 {"archetype", player->getArchetype()},
-                {"onTurn", player->isTurn()},
-                {"id", player->getId()},
-                {"hp", player->getHp()},
-                {"mana", player->getMana()},
-                {"deck", player->getDeck().serialize()},
-                {"hand", player->getHand().serialize()},
-                {"board", player->getBoard().serialize()},
+                {"onTurn",    player->isTurn()},
+                {"id",        player->getId()},
+                {"hp",        player->getHp()},
+                {"mana",      player->getMana()},
+                {"deck",      player->getDeck().serialize()},
+                {"hand",      player->getHand().serialize()},
+                {"board",     player->getBoard().serialize()},
         };
         j["players"].push_back(playerStatsJson);
 
