@@ -12,8 +12,6 @@
 #include <mutex>
 #include <Game.h>
 
-using nlohmann::json;
-
 class Server {
 public:
     explicit Server(short port);

@@ -37,6 +37,7 @@ void Server::start(short port) {
         return;
     }
 
+    // Start listening
     if (listen(m_serverFD, SOMAXCONN) < 0) {
         std::cerr << "Failed to listen on socket: " << strerror(errno) << endl;
         close(m_serverFD);
@@ -109,6 +110,8 @@ void Server::processMessage(int clientSocket, const string &message) {
         } else if (type == "startGame" && m_lobbyState.canStart()) {
             m_game.startGame("mage", "warrior");
             broadcastMessage("startGame", serializeGameplayState());
+        } else if (type == "updateGameState") {
+            broadcastMessage("updateGameState", serializeGameplayState());
         }
 
 
