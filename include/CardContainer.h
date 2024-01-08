@@ -43,7 +43,7 @@ public:
     };
 
     void removeCard(const Card &card) {
-        for (size_t i = 0; i < MAX_CARDS; ++i) {
+        for (int i = 0; i < MAX_CARDS; ++i) {
             if (m_cards[i] != nullptr && m_cards[i].get() == &card) {
                 m_cards[i] = nullptr;
                 m_numberOfCards--;
