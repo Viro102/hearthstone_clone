@@ -46,8 +46,8 @@ int main() {
     Button lobbyBtn({screenCenterX - 100, 200, 200, 50}, "Lobby");
     Button exitBtn({screenCenterX - 100, 300, 200, 50}, "Exit");
 
-    lobbyBtn.setOnClick([&client, &gameState] {
-        if (client.start(10322) != -1) {
+    lobbyBtn.setOnClick([&client, &gameState, &ipAddress] {
+        if (client.start(10322, ipAddress) != -1) {
             gameState = GameState::LOBBY;
         }
         // single player
@@ -85,6 +85,13 @@ int main() {
 
     vector<Button> buttonsLobby{readyBtn, startBtn, exitBtnLobby};
 
+    // End game screen buttons
+    Button exitBtnEnd(Rectangle(screenCenterX - 160, 400, 200, 50), "Back to Main Menu");
+
+    exitBtnEnd.setOnClick([&gameState, &client] {
+        gameState = GameState::MENU;
+        client.shutdown();
+    });
 
     SetTargetFPS(60);
     SetExitKey(KEY_NULL);
@@ -111,26 +118,8 @@ int main() {
                 }
                 break;
             case GameState::WIN:
-                if (CheckCollisionPointRec(GetMousePosition(), exitBtnWin)) {
-                    exitBtnWinColor = hoverColor;
-                    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-                        gameState = GameState::MENU;
-                        client.shutdown();
-                    }
-                } else {
-                    exitBtnWinColor = GRAY;
-                }
-                break;
             case GameState::LOSE:
-                if (CheckCollisionPointRec(GetMousePosition(), exitBtnLose)) {
-                    exitBtnLoseColor = hoverColor;
-                    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-                        gameState = GameState::MENU;
-                        client.shutdown();
-                    }
-                } else {
-                    exitBtnLoseColor = GRAY;
-                }
+                exitBtnEnd.update();
                 break;
 
             case GameState::GAMEPLAY:
@@ -160,7 +149,7 @@ int main() {
                 }
                 break;
             case GameState::LOBBY:
-                DrawText("Game Lobby", screenWidth / 2 - MeasureText("Game Lobby", 20) / 2, 20, 20, BLACK);
+                DrawText("Game Lobby", screenCenterX - MeasureText("Game Lobby", 20) / 2, 20, 20, BLACK);
 
                 // Draw player states
                 for (int i = 0; i < client.getLobbyState().players.size(); ++i) {
@@ -177,14 +166,12 @@ int main() {
 
             case GameState::WIN:
                 DrawText("Congratulations, You Won!", screenCenterX / 2, screenCenterY - 20, 40, RED);
-                DrawRectangleRec(exitBtnWin, exitBtnWinColor);
-                DrawText("Back to Main Menu", exitBtnWin.x + 10, exitBtnWin.y + 15, 20, BLACK);
+                exitBtnEnd.draw();
                 break;
 
             case GameState::LOSE:
                 DrawText("Oh no, You Lost!", screenCenterX / 2, screenCenterY - 20, 40, RED);
-                DrawRectangleRec(exitBtnLose, exitBtnLoseColor);
-                DrawText("Back to Main Menu", exitBtnLose.x + 10, exitBtnLose.y + 15, 20, BLACK);
+                exitBtnEnd.draw();
                 break;
             case GameState::GAMEPLAY:
                 if (hasInit && client.isGameStateInitialized()) {
