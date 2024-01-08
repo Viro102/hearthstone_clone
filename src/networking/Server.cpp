@@ -82,6 +82,19 @@ void Server::handleClient(int clientSocket) {
         } else {
             cout << "Client " << clientSocket << " disconnected" << endl;
             removeClient(clientSocket);
+
+            if (currentGameState == GameState::GAMEPLAY) {
+                for (auto &client : m_clients) {
+                    if (client->getSocket() != clientSocket) {
+                        json winMessage;
+                        winMessage["type"] = "opponentDisconnected";
+                        string messageStr = winMessage.dump();
+                        send(client->getSocket(), messageStr.c_str(), messageStr.length(), 0);
+                    }
+                }
+                currentGameState = GameState::LOBBY;
+            }
+
             break;
         }
     }

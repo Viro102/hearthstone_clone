@@ -10,6 +10,26 @@ int main() {
     const int screenCenterX = screenWidth / 2;
     const int screenCenterY = screenHeight / 2;
 
+    string choice;
+    string ipAddress;
+    cout << "Which server to connect to: " << endl;
+    cout << "1. frios2" << endl;
+    cout << "2. localhost" << endl;
+    std::getline(std::cin, choice);
+    cout << "You entered: " << choice << endl;
+
+    switch (std::stoi(choice)) {
+        case 1:
+            ipAddress = "158.193.128.160";
+            break;
+        case 2:
+            ipAddress = "127.0.0.1";
+            break;
+        default:
+            cout << "error" << endl;
+            return -1;
+    }
+
     InitWindow(screenWidth, screenHeight, "Hearthstone");
 
     Client client;
@@ -90,6 +110,29 @@ int main() {
                     button.update();
                 }
                 break;
+            case GameState::WIN:
+                if (CheckCollisionPointRec(GetMousePosition(), exitBtnWin)) {
+                    exitBtnWinColor = hoverColor;
+                    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                        gameState = GameState::MENU;
+                        client.shutdown();
+                    }
+                } else {
+                    exitBtnWinColor = GRAY;
+                }
+                break;
+            case GameState::LOSE:
+                if (CheckCollisionPointRec(GetMousePosition(), exitBtnLose)) {
+                    exitBtnLoseColor = hoverColor;
+                    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                        gameState = GameState::MENU;
+                        client.shutdown();
+                    }
+                } else {
+                    exitBtnLoseColor = GRAY;
+                }
+                break;
+
             case GameState::GAMEPLAY:
                 if (client.isGameStateInitialized() && !hasInit) {
                     gameScreen = std::make_unique<GameScreen>(client.getGameplayState());
@@ -131,6 +174,18 @@ int main() {
                     button.draw();
                 }
                 break;
+
+            case GameState::WIN:
+                DrawText("Congratulations, You Won!", screenCenterX / 2, screenCenterY - 20, 40, RED);
+                DrawRectangleRec(exitBtnWin, exitBtnWinColor);
+                DrawText("Back to Main Menu", exitBtnWin.x + 10, exitBtnWin.y + 15, 20, BLACK);
+                break;
+
+            case GameState::LOSE:
+                DrawText("Oh no, You Lost!", screenCenterX / 2, screenCenterY - 20, 40, RED);
+                DrawRectangleRec(exitBtnLose, exitBtnLoseColor);
+                DrawText("Back to Main Menu", exitBtnLose.x + 10, exitBtnLose.y + 15, 20, BLACK);
+                break;
             case GameState::GAMEPLAY:
                 if (hasInit && client.isGameStateInitialized()) {
                     gameScreen->draw();
@@ -143,7 +198,6 @@ int main() {
 
         EndDrawing();
     }
-
     CloseWindow();
     return 0;
 }

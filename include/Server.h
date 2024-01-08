@@ -2,6 +2,7 @@
 
 #include <Client.h>
 #include <Common.h>
+#include <GameState.h>
 #include <thread>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -47,6 +48,8 @@ private:
     json serializeGameplayState();
 
     void broadcastMessage(const string &type, const nlohmann::json &data);
+
+    GameState currentGameState = GameState::LOBBY;
 
     json serializeLobbyState();
 

@@ -9,6 +9,7 @@
 #include <nlohmann/json.hpp>
 #include <thread>
 #include <functional>
+#include <utility>
 #include <GameState.h>
 #include <Game.h>
 
@@ -22,7 +23,7 @@ public:
 
     ~Client();
 
-    int start(short port);
+    int start(short port, const string &ipAddr);
 
     void shutdown();
 

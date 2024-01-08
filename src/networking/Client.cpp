@@ -6,7 +6,7 @@ Client::~Client() {
     shutdown();
 }
 
-int Client::start(short port) {
+int Client::start(short port, const string &ipAddr) {
     struct sockaddr_in serverAddress{};
 
     if ((m_socket = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
@@ -17,7 +17,8 @@ int Client::start(short port) {
     serverAddress.sin_family = AF_INET;
     serverAddress.sin_port = htons(port);
 
-    if (inet_pton(AF_INET, "127.0.0.1", &serverAddress.sin_addr) <= 0) {
+    // Convert IPv4 and IPv6 addresses from text to binary form
+    if (inet_pton(AF_INET, ipAddr.c_str(), &serverAddress.sin_addr) <= 0) {
         cout << "\nInvalid address/Address not supported\n";
         return -1;
     }
@@ -77,6 +78,12 @@ void Client::processMessage(const string &message) {
 
         if (type == "updateGameState") {
             updateLocalGameplayState(data);
+        }
+
+        if (type == "opponentDisconnected") {
+            if (stateChangeCallback) {
+                stateChangeCallback(GameState::WIN);
+            }
         }
 
 
