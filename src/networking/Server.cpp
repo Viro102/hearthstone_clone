@@ -78,23 +78,15 @@ void Server::handleClient(int clientSocket) {
             cout << "Incoming message from client " << clientSocket << ": " << message << endl;
             processMessage(clientSocket, message);
         } else if (valread == -1) {
-            cout << "Error when receiving message" << strerror(errno) << endl;
+            cout << "Error when receiving message: " << strerror(errno) << endl;
         } else {
             cout << "Client " << clientSocket << " disconnected" << endl;
             removeClient(clientSocket);
 
             if (currentGameState == GameState::GAMEPLAY) {
-                for (auto &client : m_clients) {
-                    if (client->getSocket() != clientSocket) {
-                        json winMessage;
-                        winMessage["type"] = "opponentDisconnected";
-                        string messageStr = winMessage.dump();
-                        send(client->getSocket(), messageStr.c_str(), messageStr.length(), 0);
-                    }
-                }
+                sendMessage("opponentDisconnected", json());
                 currentGameState = GameState::LOBBY;
             }
-
             break;
         }
     }
@@ -119,12 +111,17 @@ void Server::processMessage(int clientSocket, const string &message) {
                 }
             }
             lock.unlock();
-            broadcastMessage("updateLobbyState", serializeLobbyState());
-        } else if (type == "startGame" && m_lobbyState.canStart()) {
+            sendMessage("updateLobbyState", serializeLobbyState());
+        }
+
+        if (type == "startGame" && m_lobbyState.canStart()) {
+            currentGameState = GameState::GAMEPLAY;
             m_game.startGame("mage", "warrior");
-            broadcastMessage("startGame", serializeGameplayState());
-        } else if (type == "updateGameState") {
-            broadcastMessage("updateGameState", serializeGameplayState());
+            sendMessage("startGame", serializeGameplayState());
+        }
+
+        if (type == "updateGameState") {
+            sendMessage("updateGameState", serializeGameplayState());
         }
 
 
@@ -134,15 +131,59 @@ void Server::processMessage(int clientSocket, const string &message) {
     checkAllClientsReady();
 }
 
-void Server::broadcastMessage(const string &type, const json &data) {
+bool Server::sendAll(int socket, const char *buffer, size_t length) {
+    size_t totalSent = 0;
+    ssize_t lastSent;
+    while (totalSent < length) {
+        lastSent = send(socket, buffer + totalSent, length - totalSent, 0);
+        if (lastSent == -1) {
+            std::cerr << "Failed to send data." << std::endl;
+            return false;
+        }
+        totalSent += lastSent;
+    }
+    return true;
+}
+
+void Server::sendMessage(const string &type, const json &data, int clientSocket) {
     json message;
     message["type"] = type;
     message["data"] = data;
-
     string serializedMessage = message.dump();
+    uint32_t messageLength = htonl(serializedMessage.size());
+
     std::scoped_lock lock(m_clientsMutex);
-    for (const auto &client: m_clients) {
-        send(client->getSocket(), serializedMessage.c_str(), serializedMessage.length(), 0);
+    if (clientSocket == -1) {
+        for (const auto &client: m_clients) {
+            // Prefix message with its length
+            if (!sendAll(client->getSocket(), reinterpret_cast<const char *>(&messageLength), sizeof(messageLength))) {
+                std::cerr << "Failed to send message length." << std::endl;
+                return;
+            }
+            // Send the actual message
+            if (!sendAll(client->getSocket(), serializedMessage.c_str(), serializedMessage.size())) {
+                std::cerr << "Failed to send message." << std::endl;
+            } else {
+                cout << "Server sent message: " << serializedMessage << endl;
+            }
+        }
+    } else {
+        for (const auto &client: m_clients) {
+            if (clientSocket == client->getSocket()) {
+                // Prefix message with its length
+                if (!sendAll(client->getSocket(), reinterpret_cast<const char *>(&messageLength),
+                             sizeof(messageLength))) {
+                    std::cerr << "Failed to send message length." << std::endl;
+                    return;
+                }
+                // Send the actual message
+                if (!sendAll(client->getSocket(), serializedMessage.c_str(), serializedMessage.size())) {
+                    std::cerr << "Failed to send message." << std::endl;
+                } else {
+                    cout << "Server sent message: " << serializedMessage << endl;
+                }
+            }
+        }
     }
 }
 
@@ -161,11 +202,12 @@ json Server::serializeLobbyState() {
 
 json Server::serializeGameplayState() {
     json j;
-    for (const auto &player: m_game.getPlayers()) {
+    for (int i = 0; i < m_clients.size(); i++) {
+        const auto &player = m_game.getPlayers()[i];
         json playerStatsJson = {
                 {"archetype", player->getArchetype()},
                 {"onTurn",    player->isTurn()},
-                {"id",        player->getId()},
+                {"id",        m_clients[i]->getSocket()},
                 {"hp",        player->getHp()},
                 {"mana",      player->getMana()},
                 {"deck",      player->getDeck().serialize()},
@@ -187,7 +229,8 @@ void Server::updateLobbyStateWithNewClient(int clientSocket) {
     m_lobbyState.players.push_back(newPlayer);
 
     json serializedMessage = serializeLobbyState();
-    broadcastMessage("updateLobbyState", serializedMessage);
+    sendMessage("updateLobbyState", serializedMessage);
+    sendMessage("yourID", clientSocket, clientSocket);
 }
 
 

@@ -41,13 +41,11 @@ private:
 
     void updateLobbyStateWithNewClient(int clientSocket);
 
-    // Send the game state to all connected clients
-    void broadcastGameState();
-
-    // Convert the game state to a string for sending
     json serializeGameplayState();
+    
+    bool sendAll(int socket, const char *buffer, size_t length);
 
-    void broadcastMessage(const string &type, const nlohmann::json &data);
+    void sendMessage(const string &type, const nlohmann::json &data, int clientSocket = -1);
 
     GameState currentGameState = GameState::LOBBY;
 

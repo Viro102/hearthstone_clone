@@ -33,6 +33,8 @@ public:
 
     [[nodiscard]] int getSocket() const;
 
+    [[nodiscard]] int getID() const;
+
     [[nodiscard]] LobbyState getLobbyState() const;
 
     [[nodiscard]] Game &getGameplayState();
@@ -50,11 +52,10 @@ private:
 
     void processMessage(const string &message);
 
-    std::unique_ptr<Deck> deserializeDeck(const json &jsonArray);
-
-    std::unique_ptr<CardContainer<5>> deserializeContainer(const json &jsonArray);
+    bool recvAll(int socket, char *buffer, size_t length);
 
     int m_socket{-1};
+    int m_ID{-1};
     LobbyState m_lobbyState{};
     Game m_gameplayState{};
     std::jthread m_serverListener;

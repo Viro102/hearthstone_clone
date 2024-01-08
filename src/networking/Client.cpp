@@ -32,20 +32,47 @@ int Client::start(short port, const string &ipAddr) {
     return 0;
 }
 
-void Client::listenToServer() {
-    while (true) {
-        array<char, 10240> buffer{};
-        auto valread = recv(m_socket, buffer.data(), 10240, 0);
-        if (valread > 0) {
-            string message(buffer.data(), valread);
-            cout << "Client: received message = " << message << endl;
-            processMessage(message);
-        } else {
-            break;
+bool Client::recvAll(int socket, char *buffer, size_t length) {
+    size_t totalReceived = 0;
+    ssize_t lastReceived;
+    while (totalReceived < length) {
+        lastReceived = recv(socket, buffer + totalReceived, length - totalReceived, 0);
+        if (lastReceived == -1) {
+            std::cerr << "Failed to receive data." << std::endl;
+            return false;
         }
+        if (lastReceived == 0) {
+            std::cerr << "The peer has performed an orderly shutdown." << std::endl;
+            return false;
+        }
+        totalReceived += lastReceived;
     }
+    return true;
 }
 
+void Client::listenToServer() {
+    while (true) {
+        // First, read the length of the message
+        uint32_t messageLength;
+        if (!recvAll(m_socket, reinterpret_cast<char *>(&messageLength), sizeof(messageLength))) {
+            std::cerr << "Failed to receive message length." << std::endl;
+            break;
+        }
+        messageLength = ntohl(messageLength);  // Convert length from network byte order to host byte order
+
+        // Now read the message of that length
+        std::string message;
+        message.resize(messageLength);
+        if (!recvAll(m_socket, &message[0], messageLength)) {
+            std::cerr << "Failed to receive message." << std::endl;
+            break;
+        }
+
+        // Process the fully received message
+        cout << "Client: received message = " << message << std::endl;
+        processMessage(message);
+    }
+}
 
 void Client::sendMessage(const string &message, const string &data) const {
     json j;
@@ -71,6 +98,10 @@ void Client::processMessage(const string &message) {
             updateLocalLobbyState(data);
         }
 
+        if (type == "yourID") {
+            m_ID = std::stoi(data);
+        }
+
         if (type == "startGame" && stateChangeCallback) {
             updateLocalGameplayState(data);
             stateChangeCallback(GameState::GAMEPLAY);
@@ -80,10 +111,8 @@ void Client::processMessage(const string &message) {
             updateLocalGameplayState(data);
         }
 
-        if (type == "opponentDisconnected") {
-            if (stateChangeCallback) {
-                stateChangeCallback(GameState::WIN);
-            }
+        if (type == "opponentDisconnected" && stateChangeCallback) {
+            stateChangeCallback(GameState::WIN);
         }
 
 
@@ -108,14 +137,23 @@ void Client::updateLocalGameplayState(const string &message) {
     json json = json::parse(message);
 
     if (!m_isGameStateInitialized) {
-        for (int i = 0; i < json["players"].size(); i++) {
+        for (int i = 0; i < 2; i++) {
             const auto &playerJson = json["players"][i];
-            Player player(playerJson["hp"], playerJson["id"], playerJson["archetype"]);
-            m_gameplayState.addPlayer(std::move(player), i);
+            int id = playerJson["id"];
+            int hp = playerJson["hp"];
+            string archetype = playerJson["archetype"];
+
+            Player player(hp, i, archetype);
+
+            if (id == m_ID) {
+                m_gameplayState.addPlayer(std::move(player), 0);
+            } else {
+                m_gameplayState.addPlayer(std::move(player), 1);
+            }
         }
     }
 
-    for (int i = 0; i < json["players"].size(); i++) {
+    for (int i = 0; i < 2; i++) {
         const auto &playerJson = json["players"][i];
         m_gameplayState.getPlayers()[i]->setTurn(playerJson["onTurn"]);
         m_gameplayState.getPlayers()[i]->setHp(playerJson["hp"]);
@@ -145,6 +183,10 @@ void Client::shutdown() {
 
 int Client::getSocket() const {
     return m_socket;
+}
+
+int Client::getID() const {
+    return m_ID;
 }
 
 LobbyState Client::getLobbyState() const {
