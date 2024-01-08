@@ -6,17 +6,12 @@ GameScreen::GameScreen(Game &gameplayState) : m_gameplayState(gameplayState) {
     for (int i = 0; i < m_slotsHand.size(); i++) {
         auto newSlot = Button(30 + (i * 170), 530);
         m_slotsHand[i] = newSlot;
-        string label = "slotHand[" + std::to_string(i) + "]";
-        m_buttons[label] = newSlot;
     }
 
     for (int i = 0; i < m_slotsBoard.size(); i++) {
         for (int j = 0; j < m_slotsBoard[i].size(); j++) {
-            int x = std::abs(i - 1);
             auto newSlot = Button(30 + (j * 170), 40 + (i * 240));
-            m_slotsBoard[x][j] = newSlot;
-            string label = "slotBoard[" + std::to_string(x) + "][" + std::to_string(j) + "]";
-            m_buttons[label] = newSlot;
+            m_slotsBoard[i][j] = newSlot;
         }
     }
 
@@ -25,17 +20,19 @@ GameScreen::GameScreen(Game &gameplayState) : m_gameplayState(gameplayState) {
     auto deck = LoadImage("../assets/deck.png");
     auto mage = LoadImage("../assets/mage.png");
     auto warrior = LoadImage("../assets/warrior.png");
+
     m_images[0] = LoadTextureFromImage(board);
     m_images[1] = LoadTextureFromImage(deck);
     m_images[2] = LoadTextureFromImage(mage);
     m_images[3] = LoadTextureFromImage(warrior);
+
     UnloadImage(board);
     UnloadImage(deck);
     UnloadImage(mage);
     UnloadImage(warrior);
 
-    m_buttons["heroPlayer"] = Button(HEROES_POSITION_X, FIRST_HERO_POSITION_Y, m_images[3]);
-    m_buttons["heroOpponent"] = Button(HEROES_POSITION_X, SECOND_HERO_POSITION_Y, m_images[2]);
+    m_buttons["heroPlayer"] = Button(HEROES_POSITION_X, FIRST_HERO_POSITION_Y, m_images[2]);
+    m_buttons["heroOpponent"] = Button(HEROES_POSITION_X, SECOND_HERO_POSITION_Y, m_images[3]);
     m_buttons["endTurn"] = Button(Rectangle(END_TURN_BUTTON_POSITION_X, END_TURN_BUTTON_POSITION_Y,
                                             200, 75), "END TURN");
 }
@@ -121,10 +118,10 @@ void GameScreen::update() {
     for (int i = 0; i < playerCardsHand.size(); i++) {
         const auto &cardToPaint = playerCardsHand[i];
         if (cardToPaint != nullptr) {
-            m_slotsHand[i].update();
             m_slotsHand[i].setFree(false);
             auto shape = m_slotsHand[i].getHitbox();
             cardToPaint->setPosition(shape);
+            m_slotsHand[i].update();
             m_cardsHand.push_back(*cardToPaint);
         } else {
             m_slotsHand[i].setFree(true);
@@ -137,10 +134,10 @@ void GameScreen::update() {
 
         for (int i = 0; i < playerCardsBoard.size(); i++) {
             if (playerCardsBoard[i] != nullptr) {
-                m_slotsBoard[id][i].update();
                 m_slotsBoard[id][i].setFree(false);
                 auto shape = m_slotsBoard[id][i].getHitbox();
                 playerCardsBoard[i]->setPosition(shape);
+                m_slotsBoard[id][i].update();
                 m_cardsBoard.push_back(*playerCardsBoard[i]);
             } else {
                 m_slotsBoard[id][i].setFree(true);
@@ -161,7 +158,10 @@ void GameScreen::draw() {
 
     paintCards(allCards);
 
-    std::ranges::for_each(m_buttons, [](const auto &pair) {
-        pair.second.draw();
+    std::ranges::for_each(m_slotsHand, [](const auto &slot) { slot.draw(); });
+    std::ranges::for_each(m_slotsBoard, [](const auto &slot) {
+        std::ranges::for_each(slot, [](const auto &element) { element.draw(); });
     });
+
+    std::ranges::for_each(m_buttons, [](const auto &pair) { pair.second.draw(); });
 }

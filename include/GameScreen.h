@@ -12,8 +12,15 @@ public:
     void draw();
 
     void update();
-    
+
 private:
+    void paintHero(int pos, const Player &player) const;
+
+    void paintUI() const;
+
+    static void paintCards(const vector<Card> &cards);
+
+
     const int END_TURN_BUTTON_POSITION_X = 910;
     const int END_TURN_BUTTON_POSITION_Y = 350;
     const int HEROES_POSITION_X = 900;
@@ -26,10 +33,4 @@ private:
     array<Button, 5> m_slotsHand;
     array<array<Button, 5>, 2> m_slotsBoard;
     std::map<string, Button> m_buttons;
-
-    void paintHero(int pos, const Player &player) const;
-
-    void paintUI() const;
-
-    static void paintCards(const vector<Card> &cards);
 };

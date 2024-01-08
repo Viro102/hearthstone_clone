@@ -86,7 +86,7 @@ int main() {
     vector<Button> buttonsLobby{readyBtn, startBtn, exitBtnLobby};
 
     // End game screen buttons
-    Button exitBtnEnd(Rectangle(screenCenterX - 160, 400, 200, 50), "Back to Main Menu");
+    Button exitBtnEnd(Rectangle(screenCenterX - 110, 400 - 25, 220, 50), "Back to Main Menu");
 
     exitBtnEnd.setOnClick([&gameState, &client] {
         gameState = GameState::MENU;
@@ -165,12 +165,16 @@ int main() {
                 break;
 
             case GameState::WIN:
-                DrawText("Congratulations, You Won!", screenCenterX / 2, screenCenterY - 20, 40, RED);
+                DrawText("Congratulations, You Won!",
+                         screenCenterX - MeasureText("Congratulations, You Won!", 40) / 2,
+                         screenCenterY - 45, 40, RED);
                 exitBtnEnd.draw();
                 break;
 
             case GameState::LOSE:
-                DrawText("Oh no, You Lost!", screenCenterX / 2, screenCenterY - 20, 40, RED);
+                DrawText("Oh no, You Lost!",
+                         screenCenterX - MeasureText("Oh no, You Lost!", 40) / 2,
+                         screenCenterY - 45, 40, RED);
                 exitBtnEnd.draw();
                 break;
             case GameState::GAMEPLAY:
