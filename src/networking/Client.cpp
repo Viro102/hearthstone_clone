@@ -46,10 +46,10 @@ void Client::listenToServer() {
 }
 
 
-void Client::sendMessage(const string &message) const {
+void Client::sendMessage(const string &message, const string &data) const {
     json j;
     j["type"] = message;
-    j["data"] = "";
+    j["data"] = data;
     string serializedMsg = j.dump();
 
     send(m_socket, serializedMsg.c_str(), serializedMsg.size(), 0);
@@ -63,7 +63,6 @@ void Client::processMessage(const string &message) {
     try {
         json j = json::parse(message);
 
-        // Extract the message type
         string type = j["type"];
         string data = j["data"].dump();
 
@@ -114,35 +113,13 @@ void Client::updateLocalGameplayState(const string &message) {
         m_gameplayState.getPlayers()[i]->setTurn(playerJson["onTurn"]);
         m_gameplayState.getPlayers()[i]->setHp(playerJson["hp"]);
         m_gameplayState.getPlayers()[i]->setMana(playerJson["mana"]);
-        m_gameplayState.getPlayers()[i]->setDeck(deserializeDeck(playerJson["deck"]));
-        m_gameplayState.getPlayers()[i]->setHand(deserializeContainer(playerJson["hand"]));
-        m_gameplayState.getPlayers()[i]->setBoard(deserializeContainer(playerJson["board"]));
+        m_gameplayState.getPlayers()[i]->setDeck(deserialize<Deck>(playerJson["deck"]));
+        m_gameplayState.getPlayers()[i]->setHand(deserialize<CardContainer<5>>(playerJson["hand"]));
+        m_gameplayState.getPlayers()[i]->setBoard(deserialize<CardContainer<5>>(playerJson["board"]));
     }
 
 
     m_isGameStateInitialized = true;
-}
-
-std::unique_ptr<Deck> Client::deserializeDeck(const json &jsonArray) {
-    auto deck = std::make_unique<Deck>();
-    for (const auto &cardJson: jsonArray) {
-        Card newCard = Card::createFromJson(cardJson);
-        if (!newCard.getName().empty()) {
-            deck->addCard(newCard);
-        }
-    }
-    return deck;
-}
-
-std::unique_ptr<CardContainer<5>> Client::deserializeContainer(const json &jsonArray) {
-    auto cardContainer = std::make_unique<CardContainer<5>>();
-    for (const auto &cardJson: jsonArray) {
-        Card newCard = Card::createFromJson(cardJson);
-        if (!newCard.getName().empty()) {
-            cardContainer->addCard(newCard);
-        }
-    }
-    return cardContainer;
 }
 
 void Client::shutdown() {

@@ -12,7 +12,6 @@
 #include <GameState.h>
 #include <Game.h>
 
-using nlohmann::json;
 using StateChangeCallback = std::function<void(GameState)>;
 
 class Client {
@@ -29,7 +28,7 @@ public:
 
     void listenToServer();
 
-    void sendMessage(const string &message) const;
+    void sendMessage(const string &message, const string &data = "") const;
 
     [[nodiscard]] int getSocket() const;
 
