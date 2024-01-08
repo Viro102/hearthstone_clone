@@ -142,6 +142,6 @@ void Card::setPosition(int x, int y) {
 }
 
 void Card::setPosition(Rectangle rec) {
-    setX(rec.x);
-    setY(rec.y);
+    setX(static_cast<int>(rec.x));
+    setY(static_cast<int>(rec.y));
 }
