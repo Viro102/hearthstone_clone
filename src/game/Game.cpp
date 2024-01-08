@@ -58,7 +58,6 @@ void Game::attack(int i) {
         cout << "No card selected!\n";
         return;
     }
-    // panel.removeGlow();
     const auto &opponent = getOffTurnPlayer();
     const auto &currentPlayer = getOnTurnPlayer();
     auto &targetCard = opponent.getBoard().getCard(i);
@@ -88,8 +87,6 @@ void Game::attackFace() {
         cout << "No card selected";
         return;
     }
-
-    // panel.removeGlow();
 
     for (const auto &c: target.getBoard().getCards()) {
         if (c == nullptr) {
@@ -184,4 +181,46 @@ void Game::specialCard(const Card &card) {
 
 void Game::addPlayer(Player player, int i) {
     m_players[i] = std::make_unique<Player>(std::move(player));
+}
+
+void Game::print() const {
+    cout << "---- Game State ----" << endl;
+    cout << "Turn Counter: " << m_turnCounter << endl;
+
+    if (isSelected()) {
+        cout << "Selected Card: " << m_selectedCard->getName()
+             << " | HP: " << m_selectedCard->getHp()
+             << " | Damage: " << m_selectedCard->getDamage() << endl;
+    } else {
+        cout << "No card selected" << endl;
+    }
+
+    for (int i = 0; i < m_players.size(); i++) {
+        if (m_players[i]) {
+            cout << "Player " << i + 1 << " (" << m_players[i]->getArchetype() << "):" << endl;
+            cout << "  HP: " << m_players[i]->getHp() << endl;
+            cout << "  Mana: " << m_players[i]->getMana() << endl;
+            cout << "  Cards in Hand: " << m_players[i]->getHand().getNumOfCards() << endl;
+            for (const auto &card: m_players[i]->getHand().getCards()) {
+                if (card != nullptr) {
+                    cout << "    Card: " << card->getName()
+                         << " | HP: " << card->getHp()
+                         << " | Damage: "
+                         << card->getDamage() << endl;
+                }
+            }
+            cout << "  Board Cards: " << m_players[i]->getBoard().getNumOfCards() << endl;
+            for (const auto &card: m_players[i]->getBoard().getCards()) {
+                if (card != nullptr) {
+                    cout << "    Card: " << card->getName()
+                         << " | HP: " << card->getHp()
+                         << " | Damage: "
+                         << card->getDamage() << endl;
+                }
+            }
+            cout << (m_players[i]->isTurn() ? "  Current Turn" : "  Waiting") << endl;
+        }
+    }
+
+    cout << "----------------------------------------------" << endl << endl;
 }

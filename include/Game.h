@@ -29,12 +29,15 @@ public:
 
     void isGameOver() const;
 
-    void specialCard(const Card &card);
-
     void addPlayer(Player player, int i);
+
+    void print() const;
 
 
 private:
+    void specialCard(const Card &card);
+
+    
     const int PLAYER_MAX_HP{20};
     array<std::unique_ptr<Player>, 2> m_players{};
     std::unique_ptr<Card> m_selectedCard{};
