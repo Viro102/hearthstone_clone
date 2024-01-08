@@ -4,19 +4,19 @@ GameScreen::GameScreen(Game &gameplayState) : m_gameplayState(gameplayState) {
     m_images.resize(4);
 
     for (int i = 0; i < m_slotsHand.size(); i++) {
-        auto newSlot = Slot(30 + (i * 170), 530);
-        m_slotsHand[i] = Slot(30 + (i * 170), 530);
+        auto newSlot = Button(30 + (i * 170), 530);
+        m_slotsHand[i] = newSlot;
         string label = "slotHand[" + std::to_string(i) + "]";
-        registerAsClickable(label, newSlot.getShape());
+        m_buttons[label] = newSlot;
     }
 
     for (int i = 0; i < m_slotsBoard.size(); i++) {
         for (int j = 0; j < m_slotsBoard[i].size(); j++) {
             int x = std::abs(i - 1);
-            auto newSlot = Slot(30 + (j * 170), 40 + (i * 240));
+            auto newSlot = Button(30 + (j * 170), 40 + (i * 240));
             m_slotsBoard[x][j] = newSlot;
             string label = "slotBoard[" + std::to_string(x) + "][" + std::to_string(j) + "]";
-            registerAsClickable(label, newSlot.getShape());
+            m_buttons[label] = newSlot;
         }
     }
 
@@ -34,29 +34,25 @@ GameScreen::GameScreen(Game &gameplayState) : m_gameplayState(gameplayState) {
     UnloadImage(mage);
     UnloadImage(warrior);
 
-    m_heroHitboxPlayer = Rectangle(HEROES_POSITION_X, FIRST_HERO_POSITION_Y, m_images[3].width, m_images[3].height);
-    m_heroHitboxOpponent = Rectangle(HEROES_POSITION_X, SECOND_HERO_POSITION_Y, m_images[2].width, m_images[2].height);
-
-    m_endTurnButtonHitbox = Rectangle(END_TURN_BUTTON_POSITION_X, END_TURN_BUTTON_POSITION_Y, 200, 100);
-
-    registerAsClickable("heroPlayer", m_heroHitboxPlayer);
-    registerAsClickable("heroOpponent", m_heroHitboxOpponent);
-    registerAsClickable("endTurnButton", m_endTurnButtonHitbox);
+    m_buttons["heroPlayer"] = Button(HEROES_POSITION_X, FIRST_HERO_POSITION_Y, m_images[3]);
+    m_buttons["heroOpponent"] = Button(HEROES_POSITION_X, SECOND_HERO_POSITION_Y, m_images[2]);
+    m_buttons["endTurn"] = Button(Rectangle(END_TURN_BUTTON_POSITION_X, END_TURN_BUTTON_POSITION_Y,
+                                            200, 75), "END TURN");
 }
 
-void GameScreen::paintHero(int pos, Texture2D hero, const Player &player) const {
+void GameScreen::paintHero(int pos, const Player &player) const {
     const int OFFSET_X = 220;
     const int OFFSET_Y_HP = 650;
     const int OFFSET_Y_MANA = 700;
     const int FONT_SIZE = 20;
 
     if (pos == 0) {
-        DrawTexture(hero, HEROES_POSITION_X, FIRST_HERO_POSITION_Y, WHITE);
+        m_buttons.at("heroPlayer").draw();
         DrawText(("HP: " + player.getHpString()).c_str(), HEROES_POSITION_X + OFFSET_X, OFFSET_Y_HP, FONT_SIZE, BLACK);
         DrawText(("MANA: " + player.getManaString()).c_str(), HEROES_POSITION_X + OFFSET_X, OFFSET_Y_MANA, FONT_SIZE,
                  BLACK);
     } else {
-        DrawTexture(hero, HEROES_POSITION_X, SECOND_HERO_POSITION_Y, WHITE);
+        m_buttons.at("heroOpponent").draw();
         DrawText(("HP: " + player.getHpString()).c_str(), HEROES_POSITION_X + OFFSET_X, 50, FONT_SIZE, BLACK);
         DrawText(("MANA: " + player.getManaString()).c_str(), HEROES_POSITION_X + OFFSET_X, 100, FONT_SIZE, BLACK);
     }
@@ -65,29 +61,19 @@ void GameScreen::paintHero(int pos, Texture2D hero, const Player &player) const 
 void GameScreen::paintUI() const {
     const auto &board = m_images[0];
     const auto &deck = m_images[1];
-    const auto &mage = m_images[2];
-    const auto &warrior = m_images[3];
     const auto &currentPlayer = m_gameplayState.getPlayers()[0];
     const auto &opponentPlayer = m_gameplayState.getPlayers()[1];
 
     // End turn button
-    int endTurnWidth = MeasureText("END TURN", 20);
-    DrawRectangle(END_TURN_BUTTON_POSITION_X, END_TURN_BUTTON_POSITION_Y, 200, 70, GRAY);
-    DrawText("END TURN", END_TURN_BUTTON_POSITION_X + 200 / 2 - endTurnWidth / 2,
-             END_TURN_BUTTON_POSITION_Y + 70 / 2, 20, BLACK);
+    m_buttons.at("endTurn").draw();
 
     if (currentPlayer->getArchetype().empty()) {
         return;
     }
 
     // Draw heroes
-    if (currentPlayer->getArchetype() == "mage") {
-        paintHero(0, mage, *currentPlayer);
-        paintHero(1, warrior, *opponentPlayer);
-    } else if (currentPlayer->getArchetype() == "warrior") {
-        paintHero(0, warrior, *currentPlayer);
-        paintHero(1, mage, *opponentPlayer);
-    }
+    paintHero(0, *currentPlayer);
+    paintHero(1, *opponentPlayer);
 
     DrawTexture(board, 20, 10, WHITE);
     DrawTexture(deck, 1150, 200, WHITE);
@@ -135,8 +121,9 @@ void GameScreen::update() {
     for (int i = 0; i < playerCardsHand.size(); i++) {
         const auto &cardToPaint = playerCardsHand[i];
         if (cardToPaint != nullptr) {
+            m_slotsHand[i].update();
             m_slotsHand[i].setFree(false);
-            auto shape = m_slotsHand[i].getShape();
+            auto shape = m_slotsHand[i].getHitbox();
             cardToPaint->setPosition(shape);
             m_cardsHand.push_back(*cardToPaint);
         } else {
@@ -150,8 +137,9 @@ void GameScreen::update() {
 
         for (int i = 0; i < playerCardsBoard.size(); i++) {
             if (playerCardsBoard[i] != nullptr) {
+                m_slotsBoard[id][i].update();
                 m_slotsBoard[id][i].setFree(false);
-                auto shape = m_slotsBoard[id][i].getShape();
+                auto shape = m_slotsBoard[id][i].getHitbox();
                 playerCardsBoard[i]->setPosition(shape);
                 m_cardsBoard.push_back(*playerCardsBoard[i]);
             } else {
@@ -173,40 +161,7 @@ void GameScreen::draw() {
 
     paintCards(allCards);
 
-    // Draw glow for slots on the board
-    for (int i = 0; i < m_slotsBoard.size(); i++) {
-        for (int j = 0; j < m_slotsBoard[i].size(); j++) {
-            if (!m_slotsBoard[i][j].isFree() && m_slotsBoard[i][j].isGlow()) {
-                DrawRectangleLinesEx(m_slotsBoard[i][j].getShape(), 2, YELLOW);
-            }
-        }
-    }
-
-    // Draw glow for slots in hand
-    for (const auto &slot: m_slotsHand) {
-        if (!slot.isFree() && slot.isGlow()) {
-            DrawRectangleLinesEx(slot.getShape(), 2, YELLOW);
-        }
-    }
-}
-
-void GameScreen::addGlow(int i) {
-    const auto &currentPlayer = m_gameplayState.getOnTurnPlayer();
-    m_slotsBoard[currentPlayer.getId()][i].setGlow(true);
-}
-
-void GameScreen::removeGlow() {
-    for (int i = 0; i < m_slotsBoard.size(); i++) {
-        for (int j = 0; j < m_slotsBoard[i].size(); j++) {
-            m_slotsBoard[i][j].setGlow(false);
-        }
-    }
-}
-
-void GameScreen::registerAsClickable(const string &name, const Rectangle &hitbox) {
-    m_clickableObjects[name] = hitbox;
-}
-
-const std::map<string, Rectangle> &GameScreen::getClickableObjects() const {
-    return m_clickableObjects;
+    std::ranges::for_each(m_buttons, [](const auto &pair) {
+        pair.second.draw();
+    });
 }

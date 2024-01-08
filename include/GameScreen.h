@@ -2,8 +2,8 @@
 
 #include <Common.h>
 #include <Game.h>
-#include <Slot.h>
 #include <map>
+#include <Button.h>
 
 class GameScreen {
 public:
@@ -12,13 +12,7 @@ public:
     void draw();
 
     void update();
-
-    [[nodiscard]] const std::map<string, Rectangle> &getClickableObjects() const;
-
-    void addGlow(int i);
-
-    void removeGlow();
-
+    
 private:
     const int END_TURN_BUTTON_POSITION_X = 910;
     const int END_TURN_BUTTON_POSITION_Y = 350;
@@ -27,18 +21,13 @@ private:
     const int SECOND_HERO_POSITION_Y = 20;
     Game &m_gameplayState;
     vector<Texture2D> m_images{};
-    Rectangle m_endTurnButtonHitbox{};
-    Rectangle m_heroHitboxPlayer{};
-    Rectangle m_heroHitboxOpponent{};
     vector<Card> m_cardsHand{};
     vector<Card> m_cardsBoard{};
-    array<Slot, 5> m_slotsHand;
-    array<array<Slot, 5>, 2> m_slotsBoard;
-    std::map<string, Rectangle> m_clickableObjects{};
+    array<Button, 5> m_slotsHand;
+    array<array<Button, 5>, 2> m_slotsBoard;
+    std::map<string, Button> m_buttons;
 
-    void registerAsClickable(const string &name, const Rectangle &hitbox);
-
-    void paintHero(int pos, Texture2D hero, const Player &player) const;
+    void paintHero(int pos, const Player &player) const;
 
     void paintUI() const;
 

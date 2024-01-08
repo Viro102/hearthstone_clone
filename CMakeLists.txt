@@ -3,7 +3,6 @@ project(Hearthstone_clone)
 
 set(CMAKE_CXX_STANDARD 20)
 
-# Generate compile_commands.json
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(SERVER_SOURCES
@@ -24,10 +23,7 @@ set(CLIENT_SOURCES
         src/game/Card.cpp
         src/game/Deck.cpp
         src/gui/GameScreen.cpp
-        src/game/Slot.cpp
         src/networking/Client.cpp
-        src/mouse/Mouse.cpp
-        src/utility/Common.cpp
         src/gui/Button.cpp)
 
 add_executable(Client ${CLIENT_SOURCES})
