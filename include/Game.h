@@ -23,7 +23,7 @@ public:
 
     void attackFace();
 
-    void checkGameOver() const;
+    bool checkGameOver() const;
 
     void initializeFromJson(const nlohmann::json &jsonState);
 

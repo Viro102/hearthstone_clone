@@ -118,7 +118,6 @@ void Game::attackFace() {
     }
 
     m_selectedCard = std::nullopt;
-    checkGameOver();
 }
 
 Player &Game::getOnTurnPlayer() const {
@@ -149,12 +148,15 @@ bool Game::isSelected() const {
     return m_selectedCard.has_value();
 }
 
-void Game::checkGameOver() const {
+bool Game::checkGameOver() const {
     if (m_players[0]->getHp() <= 0) {
         cout << "Player 2 (" + m_players[1]->getArchetype() + ") wins\n";
+        return true;
     } else if (m_players[1]->getHp() <= 0) {
         cout << "Player 1 (" + m_players[0]->getArchetype() + ") wins\n";
+        return true;
     }
+    return false;
 }
 
 void Game::specialCard(Card &card) {

@@ -129,6 +129,9 @@ void Server::processMessage(int clientSocket, const string &message) {
 
         if (type == "attackFace") {
             m_game.attackFace();
+            if (m_game.checkGameOver()) {
+                sendMessage("endGame", json());
+            }
         }
 
         if (type == "attack") {

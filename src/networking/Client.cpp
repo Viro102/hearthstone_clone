@@ -117,6 +117,10 @@ void Client::processMessage(const string &message) {
             stateChangeCallback(GameState::WIN);
         }
 
+        if (type == "endGame" && stateChangeCallback) {
+            stateChangeCallback(GameState::END);
+        }
+
 
     } catch (json::parse_error &e) {
         std::cerr << "Received an invalid JSON message: " << message << " error:" << e.what() << endl;
