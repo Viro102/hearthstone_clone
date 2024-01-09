@@ -19,7 +19,6 @@ public:
 
     ~Server();
 
-    // Main loop for listening to clients
     void listenForClients();
 
     [[nodiscard]] bool isRunning() const;
@@ -31,27 +30,27 @@ private:
 
     void removeClient(int clientSocket);
 
-    void checkAllClientsReady();
-
-    // Handle individual client
     void handleClient(int clientSocket);
 
-    // Process incoming messages from clients
-    void processMessage(int clientSocket, const string &message);
-
-    void updateLobbyStateWithNewClient(int clientSocket);
-
-    json serializeGameplayState();
+    void checkAllClientsReady();
 
     bool sendAll(int socket, const char *buffer, size_t length);
 
     void sendMessage(const string &type, const nlohmann::json &data, int clientSocket = -1);
 
+    void processMessage(int clientSocket, const string &message);
+
+    void updateLobbyStateWithNewClient(int clientSocket);
+
+    void updateGameState();
+
+    json serializeGameplayState();
 
     json serializeLobbyState();
 
+
     int m_serverFD{-1};
-    Game m_game{};
+    Game m_game;
     LobbyState m_lobbyState{};
     GameState m_currentGameState{GameState::LOBBY};
     vector<std::unique_ptr<Client>> m_clients{};

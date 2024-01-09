@@ -4,19 +4,22 @@
 #include <Game.h>
 #include <map>
 #include <Button.h>
+#include <Client.h>
 
 class GameScreen {
 public:
-    explicit GameScreen(Game &gameplayState);
+    explicit GameScreen(Client &client);
 
     void draw();
 
     void update();
 
-private:
-    void paintHero(int pos, const Player &player) const;
+    void print();
 
-    void paintUI() const;
+private:
+    void paintHeroes(const Player &player) const;
+
+    void paintUI();
 
     static void paintCards(const vector<Card> &cards);
 
@@ -26,7 +29,7 @@ private:
     const int HEROES_POSITION_X = 900;
     const int FIRST_HERO_POSITION_Y = 460;
     const int SECOND_HERO_POSITION_Y = 20;
-    Game &m_gameplayState;
+    Client &m_client;
     vector<Texture2D> m_images{};
     vector<Card> m_cardsHand{};
     vector<Card> m_cardsBoard{};
