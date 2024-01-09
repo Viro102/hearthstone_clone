@@ -118,3 +118,10 @@ void Card::setPosition(Rectangle rec) {
     setX(static_cast<int>(rec.x));
     setY(static_cast<int>(rec.y));
 }
+
+bool Card::operator==(const Card &other) const {
+    return other.m_name == m_name &&
+           other.m_type == m_type &&
+           other.m_x == m_x &&
+           other.m_y == m_y;
+}

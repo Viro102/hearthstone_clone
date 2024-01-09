@@ -53,7 +53,7 @@ public:
 
     void print() const;
 
-    bool operator==(const Card &other) const = default;
+    bool operator==(const Card &other) const;
 
 
 private:
