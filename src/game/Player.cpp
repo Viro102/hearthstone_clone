@@ -6,13 +6,15 @@ Player::Player(int id, string archetype) : m_archetype(std::move(archetype)), m_
 
 std::unique_ptr<Card> Player::drawCard() {
     if (!m_hand->isFull()) {
-        if (!m_deck->getCards().empty()) {
-            this->shuffleDeck();
-            auto &drawnCard = m_deck->getCard(0);
-            auto returns = std::make_unique<Card>(drawnCard);
-            m_hand->addCard(drawnCard);
-            m_deck->removeCard(drawnCard);
-            return returns;
+        if (!m_deck->isEmpty()) {
+            m_deck->shuffleDeck();
+            auto drawnCard = m_deck->getCard(0);
+            if (drawnCard.has_value()) {
+                auto &dc = drawnCard->get();
+                m_hand->addCard(dc);
+                m_deck->removeCard(dc);
+                return std::make_unique<Card>(dc);
+            }
         } else {
             cout << "You have no more cards in your deck\n";
             return nullptr;
@@ -23,34 +25,30 @@ std::unique_ptr<Card> Player::drawCard() {
 }
 
 std::unique_ptr<Card> Player::playCard(int i) {
-    auto &card = m_hand->getCard(i);
-    if (card.getName().empty()) {
-        return nullptr;
-    }
-    if (m_board->isFull()) {
-        cout << "Your board is full!\n";
-        return nullptr;
-    }
-    if (m_mana >= card.getCost()) {
-        m_mana -= card.getCost();
-        if (card.getType() == "spell" || card.getType() == "aoe") {
-            return std::make_unique<Card>(card);
+    auto card = m_hand->getCard(i);
+    if (card.has_value()) {
+        auto &c = card->get();
+
+        if (m_board->isFull()) {
+            cout << "Your board is full!\n";
+            return nullptr;
         }
-        m_board->addCard(card);
-        m_hand->removeCard(i);
-        return std::make_unique<Card>(card);
+        if (m_mana >= c.getCost()) {
+            m_mana -= c.getCost();
+            if (c.getType() == "spell" || c.getType() == "aoe") {
+                return std::make_unique<Card>(c);
+            }
+            m_board->addCard(c);
+            m_hand->removeCard(i);
+            return std::make_unique<Card>(c);
+        } else {
+            cout << "Not enough Mana!\n";
+            return nullptr;
+        }
     } else {
-        cout << "Not enough Mana!\n";
+        cout << "No card at index " << i << endl;
         return nullptr;
     }
-}
-
-void Player::shuffleDeck() {
-    std::random_device rd;
-    std::mt19937 generator(rd());
-
-    auto &cards = m_deck->getCards();
-    std::ranges::shuffle(cards, generator);
 }
 
 CardContainer<5> &Player::getBoard() const {

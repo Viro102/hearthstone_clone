@@ -17,8 +17,6 @@ public:
 
     std::unique_ptr<Card> playCard(int i);
 
-    void shuffleDeck();
-
     [[nodiscard]] CardContainer<5> &getBoard() const;
 
     [[nodiscard]] Deck &getDeck() const;

@@ -6,12 +6,6 @@
 template<int MAX_CARDS>
 class CardContainer {
 public:
-    CardContainer() {
-        for (auto &card: m_cards) {
-            card = std::make_unique<Card>();
-        }
-    };
-
     void print() const {
         for (const auto &card: m_cards) {
             card->print();
@@ -22,7 +16,7 @@ public:
     void addCard(const Card &card) {
         if (!isFull()) {
             for (auto &slot: m_cards) {
-                if (slot->getName().empty()) {
+                if (!slot) {
                     slot = std::make_unique<Card>(card);
                     m_numberOfCards++;
                     return;
@@ -52,16 +46,14 @@ public:
         }
     };
 
-    Card &getCard(int i) {
-        static Card empty;
+    std::optional<std::reference_wrapper<Card>> getCard(int i) {
         if (i >= 0 && i < MAX_CARDS && m_cards[i] != nullptr) {
             return *m_cards[i];
-        } else {
-            return empty;
         }
+        return std::nullopt;
     };
 
-    array<std::unique_ptr<Card>, MAX_CARDS> &getCards() {
+    [[nodiscard]] const array<std::unique_ptr<Card>, MAX_CARDS> &getCards() const {
         return m_cards;
     };
 
@@ -77,6 +69,10 @@ public:
         return m_numberOfCards >= MAX_CARDS;
     };
 
+    [[nodiscard]] bool isEmpty() const {
+        return m_numberOfCards <= 0;
+    };
+
     [[nodiscard]] json serialize() const {
         json cardsJson = json::array();
         for (const auto &card: m_cards) {
@@ -87,7 +83,7 @@ public:
         return cardsJson;
     };
 
-private:
+protected:
     array<std::unique_ptr<Card>, MAX_CARDS> m_cards{};
     int m_numberOfCards{};
 };

@@ -38,3 +38,10 @@ Deck &Deck::makeDeck(const string &filename) {
 
     return *this;
 }
+
+void Deck::shuffleDeck() {
+    std::random_device rd;
+    std::mt19937 generator(rd());
+
+    std::ranges::shuffle(m_cards, generator);
+}
