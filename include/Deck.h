@@ -11,5 +11,4 @@ public:
     Deck &makeDeck(const string &filename);
 
     void shuffleDeck();
-
 };
