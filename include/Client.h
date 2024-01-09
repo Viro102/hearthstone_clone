@@ -29,7 +29,7 @@ public:
 
     void listenToServer();
 
-    void sendMessage(const string &message, const string &data = "") const;
+    void sendMessage(const string &message, const json &data = "") const;
 
     [[nodiscard]] int getSocket() const;
 
@@ -54,7 +54,7 @@ private:
 
     bool recvAll(int socket, char *buffer, size_t length);
 
-    
+
     int m_socket{-1};
     int m_ID{-1};
     LobbyState m_lobbyState{};

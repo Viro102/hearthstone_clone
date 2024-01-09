@@ -96,7 +96,9 @@ void Server::processMessage(int clientSocket, const string &message) {
         json jsonMessage = json::parse(message);
 
         string type = jsonMessage["type"];
-        json data = jsonMessage["data"];
+        string data = jsonMessage["data"].dump();
+
+        json parsedData = json::parse(data);
 
         cout << "Incoming message from client " << clientSocket << ": " << jsonMessage.dump(4) << endl;
 
@@ -126,12 +128,12 @@ void Server::processMessage(int clientSocket, const string &message) {
         }
 
         if (type == "playCard") {
-            m_game.playACard(data["index"]);
+            m_game.playACard(parsedData["index"]);
             sendMessage("updateGameState", serializeGameplayState());
         }
 
         if (type == "selectCardBoard") {
-            m_game.selectCardBoard(data["index"]);
+            m_game.selectCardBoard(parsedData["index"]);
             sendMessage("updateGameState", serializeGameplayState());
         }
 
@@ -141,7 +143,7 @@ void Server::processMessage(int clientSocket, const string &message) {
         }
 
         if (type == "attack") {
-            m_game.attack(data["index"]);
+            m_game.attack(parsedData["index"]);
             sendMessage("updateGameState", serializeGameplayState());
         }
 

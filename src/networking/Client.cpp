@@ -72,7 +72,7 @@ void Client::listenToServer() {
     }
 }
 
-void Client::sendMessage(const string &message, const string &data) const {
+void Client::sendMessage(const string &message, const json &data) const {
     json j;
     j["type"] = message;
     j["data"] = data;
