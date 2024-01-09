@@ -143,6 +143,11 @@ void Client::updateLocalGameplayState(const string &message) {
         m_isGameStateInitialized = true;
     }
 
+    if (!json["selectedCard"].is_null()) {
+        auto selectedCard = Card::createFromJson(json["selectedCard"]);
+        m_gameplayState.setSelectedCard(selectedCard);
+    }
+
     for (int i = 0; i < 2; i++) {
         const auto &playerJson = json["players"][i];
         m_gameplayState.getPlayers()[i]->setTurn(playerJson["onTurn"]);

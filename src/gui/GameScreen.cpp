@@ -31,8 +31,11 @@ GameScreen::GameScreen(Client &client) : m_client(client) {
     UnloadImage(mage);
     UnloadImage(warrior);
 
-    auto heroPlayer = Button(HEROES_POSITION_X, FIRST_HERO_POSITION_Y, m_images[2]);
-    auto heroOpponent = Button(HEROES_POSITION_X, SECOND_HERO_POSITION_Y, m_images[3]);
+    int i = m_client.getGameplayState().getPlayer(m_client.getID()).getArchetype() == "mage" ? 2 : 3;
+    int other = i == 2 ? 3 : 2;
+
+    auto heroPlayer = Button(HEROES_POSITION_X, FIRST_HERO_POSITION_Y, m_images[i]);
+    auto heroOpponent = Button(HEROES_POSITION_X, SECOND_HERO_POSITION_Y, m_images[other]);
     auto endTurn = Button(Rectangle(END_TURN_BUTTON_POSITION_X, END_TURN_BUTTON_POSITION_Y, 200, 75), "END TURN");
 
     m_buttons["heroPlayer"] = heroPlayer;
@@ -138,7 +141,7 @@ void GameScreen::update() {
             card->setPosition(shape);
             m_cardsHand.push_back(*card);
 
-            if (m_slotsHand[i].isClicked()) {
+            if (m_slotsHand[i].isClicked() && m_client.getGameplayState().getPlayer(m_client.getID()).isTurn()) {
                 json j = {{"index", i}};
                 m_client.sendMessage("playCard", j);
             }
@@ -159,7 +162,11 @@ void GameScreen::update() {
 
                 if (row == 0 && m_slotsBoard[row][i].isClicked()) {
                     json j = {{"index", i}};
-                    m_client.sendMessage("selectCardBoard", j);
+                    if (m_client.getGameplayState().isSelected()) {
+                        m_client.sendMessage("attack", j);
+                    } else {
+                        m_client.sendMessage("selectCardBoard", j);
+                    }
                 }
             } else {
                 m_slotsBoard[row][i].setFree(true);
@@ -167,7 +174,11 @@ void GameScreen::update() {
         }
     }
 
-    if (m_buttons["endTurn"].isClicked()) {
+//    if (m_buttons["heroPlayer"].isClicked() || m_buttons["heroOpponent"].isClicked()) {
+//
+//    }
+
+    if (m_buttons["endTurn"].isClicked() && m_client.getGameplayState().getPlayer(m_client.getID()).isTurn()) {
         m_client.sendMessage("endTurn");
     }
 }

@@ -27,18 +27,21 @@ public:
 
     void initializeFromJson(const nlohmann::json &jsonState);
 
+    void setSelectedCard(Card &card);
+
     [[nodiscard]] bool isSelected() const;
 
     [[nodiscard]] Player &getOnTurnPlayer() const;
 
     [[nodiscard]] Player &getOffTurnPlayer() const;
 
+    [[nodiscard]] std::optional<std::reference_wrapper<Card>> getSelectedCard() const;
+
     array<std::unique_ptr<Player>, 2> &getPlayers();
 
     [[nodiscard]] Player &getPlayer(int id) const;
 
     void print() const;
-
 
 private:
     void specialCard(Card &card);

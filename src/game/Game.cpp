@@ -256,3 +256,15 @@ Player &Game::getPlayer(int id) const {
     }
     return empty;
 }
+
+std::optional<std::reference_wrapper<Card>> Game::getSelectedCard() const {
+    if (isSelected()) {
+        return *m_selectedCard;
+    } else {
+        return std::nullopt;
+    }
+}
+
+void Game::setSelectedCard(Card &card) {
+    m_selectedCard = &card;
+}

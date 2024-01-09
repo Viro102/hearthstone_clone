@@ -127,26 +127,33 @@ void Server::processMessage(int clientSocket, const string &message) {
             sendMessage("updateGameState", serializeGameplayState());
         }
 
-        if (type == "playCard") {
-            m_game.playACard(parsedData["index"]);
-            sendMessage("updateGameState", serializeGameplayState());
-        }
-
-        if (type == "selectCardBoard") {
-            m_game.selectCardBoard(parsedData["index"]);
-            sendMessage("updateGameState", serializeGameplayState());
-        }
-
-        if (type == "endTurn") {
-            m_game.endTurn();
-            sendMessage("updateGameState", serializeGameplayState());
+        if (type == "attackFace") {
+            m_game.attackFace();
         }
 
         if (type == "attack") {
             m_game.attack(parsedData["index"]);
-            sendMessage("updateGameState", serializeGameplayState());
         }
 
+        if (type == "playCard") {
+            m_game.playACard(parsedData["index"]);
+        }
+
+        if (type == "selectCardBoard") {
+            m_game.selectCardBoard(parsedData["index"]);
+        }
+
+        if (type == "endTurn") {
+            m_game.endTurn();
+        }
+
+        if (type == "attack") {
+            m_game.attack(parsedData["index"]);
+        }
+
+        if (m_currentGameState == GameState::GAMEPLAY) {
+            sendMessage("updateGameState", serializeGameplayState());
+        }
 
     } catch (json::parse_error &e) {
         std::cerr << "Received an invalid JSON message: " << message << " error:" << e.what() << endl;
@@ -241,6 +248,10 @@ json Server::serializeGameplayState() {
         };
         j["players"].push_back(playerStatsJson);
 
+    }
+    if (m_game.getSelectedCard().has_value()) {
+        const auto &card = m_game.getSelectedCard()->get();
+        j += {"selectedCard", card.serialize()};
     }
     cout << "Serializing game state" << j.dump(4) << endl;
     return j;

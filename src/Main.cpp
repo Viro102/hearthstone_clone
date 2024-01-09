@@ -55,7 +55,7 @@ int main() {
     Button readyBtn({screenCenterX - 150, 350, 100, 50}, "Ready");
     Button startBtn({screenCenterX - 50, 350, 100, 50}, "Start");
     Button exitBtnLobby({screenCenterX + 50, 350, 100, 50}, "Exit");
-    
+
     vector<Button> buttonsLobby{readyBtn, startBtn, exitBtnLobby};
 
     // End game screen buttons
@@ -113,16 +113,16 @@ int main() {
                 if (client.isGameStateInitialized()) {
                     gameScreen->update();
 
-                    // Check if 3 seconds have passed
-                    auto currentTime = Clock::now();
-                    if (currentTime - lastPrintTime >= printInterval) {
-                        cout << endl << endl;
-                        gameScreen->print();
-                        cout << endl << endl;
-
-                        // Reset the timer
-                        lastPrintTime = currentTime;
-                    }
+//                    // Check if 3 seconds have passed
+//                    auto currentTime = Clock::now();
+//                    if (currentTime - lastPrintTime >= printInterval) {
+//                        cout << endl << endl;
+//                        gameScreen->print();
+//                        cout << endl << endl;
+//
+//                        // Reset the timer
+//                        lastPrintTime = currentTime;
+//                    }
                 }
                 break;
             case GameState::END:
