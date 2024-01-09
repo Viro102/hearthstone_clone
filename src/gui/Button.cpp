@@ -54,3 +54,8 @@ bool Button::isClicked() const {
 void Button::setColor(Color color) {
     m_regularColor = color;
 }
+
+void Button::setPosition(int x, int y) {
+    m_hitbox.x = x;
+    m_hitbox.y = y;
+}

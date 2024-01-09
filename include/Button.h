@@ -21,6 +21,8 @@ public:
 
     void setColor(Color color);
 
+    void setPosition(int x, int y);
+
     [[nodiscard]] bool isClicked() const;
 
     [[nodiscard]] bool isFree() const;
