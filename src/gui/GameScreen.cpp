@@ -40,21 +40,17 @@ GameScreen::GameScreen(Client &client) : m_client(client) {
     m_buttons["endTurn"] = endTurn;
 }
 
-void GameScreen::paintHeroes(const Player &player) const {
+void GameScreen::paintHero(const Player *player, int posYHero, int offsetYHP, int offsetYMana,
+                           const std::string &buttonKey) {
     const int OFFSET_X = 220;
-    const int OFFSET_Y_HP = 650;
-    const int OFFSET_Y_MANA = 700;
     const int FONT_SIZE = 20;
 
-    m_buttons.at("heroPlayer").draw();
-    DrawText(("HP: " + player.getHpString()).c_str(), HEROES_POSITION_X + OFFSET_X, OFFSET_Y_HP, FONT_SIZE, BLACK);
-    DrawText(("MANA: " + player.getManaString()).c_str(), HEROES_POSITION_X + OFFSET_X, OFFSET_Y_MANA, FONT_SIZE,
-             BLACK);
-
-    m_buttons.at("heroOpponent").draw();
-    DrawText(("HP: " + player.getHpString()).c_str(), HEROES_POSITION_X + OFFSET_X, 50, FONT_SIZE, BLACK);
-    DrawText(("MANA: " + player.getManaString()).c_str(), HEROES_POSITION_X + OFFSET_X, 100, FONT_SIZE, BLACK);
+    m_buttons.at(buttonKey).setPosition(HEROES_POSITION_X, posYHero);
+    m_buttons.at(buttonKey).draw();
+    DrawText(("HP: " + player->getHpString()).c_str(), HEROES_POSITION_X + OFFSET_X, offsetYHP, FONT_SIZE, BLACK);
+    DrawText(("MANA: " + player->getManaString()).c_str(), HEROES_POSITION_X + OFFSET_X, offsetYMana, FONT_SIZE, BLACK);
 }
+
 
 void GameScreen::paintUI() {
     const auto &board = m_images[0];
@@ -79,18 +75,21 @@ void GameScreen::paintUI() {
     // End turn button
     m_buttons.at("endTurn").draw();
 
-//    if (currentPlayer->getArchetype().empty()) {
-//        return;
-//    }
-
     // Draw heroes
-    paintHeroes(*currentPlayer);
-    paintHeroes(*opponentPlayer);
+    if (currentPlayer) {
+        paintHero(currentPlayer, FIRST_HERO_POSITION_Y, 650, 700, "heroPlayer");
+    }
+    if (opponentPlayer) {
+        paintHero(opponentPlayer, SECOND_HERO_POSITION_Y, 50, 100, "heroOpponent");
+    }
 
     DrawTexture(board, 20, 10, WHITE);
     DrawTexture(deck, 1150, 200, WHITE);
-    DrawText(("Cards: " + currentPlayer->getDeck().getNumOfCardsString()).c_str(), 1170, 175, 20, BLACK);
+    if (currentPlayer) {
+        DrawText(("Cards: " + currentPlayer->getDeck().getNumOfCardsString()).c_str(), 1170, 175, 20, BLACK);
+    }
 }
+
 
 void GameScreen::paintCards(const vector<Card> &cards) {
     for (const auto &card: cards) {
@@ -140,10 +139,8 @@ void GameScreen::update() {
             m_cardsHand.push_back(*card);
 
             if (m_slotsHand[i].isClicked()) {
-                json j = {
-                        {"index", i}
-                };
-                m_client.sendMessage("playCard", j.dump());
+                json j = {{"index", i}};
+                m_client.sendMessage("playCard", j);
             }
         } else {
             m_slotsHand[i].setFree(true);
@@ -161,10 +158,8 @@ void GameScreen::update() {
                 m_cardsBoard.push_back(*playerCardsBoard[i]);
 
                 if (row == 0 && m_slotsBoard[row][i].isClicked()) {
-                    json j = {
-                            {"index", i}
-                    };
-                    m_client.sendMessage("selectCardBoard", j.dump());
+                    json j = {{"index", i}};
+                    m_client.sendMessage("selectCardBoard", j);
                 }
             } else {
                 m_slotsBoard[row][i].setFree(true);

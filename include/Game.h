@@ -41,10 +41,10 @@ public:
 
 
 private:
-    void specialCard(const Card &card);
+    void specialCard(Card &card);
 
 
     array<std::unique_ptr<Player>, 2> m_players;
-    std::unique_ptr<Card> m_selectedCard{};
+    Card *m_selectedCard{};
     int m_turnCounter{0};
 };

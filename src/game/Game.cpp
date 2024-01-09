@@ -48,11 +48,17 @@ void Game::playACard(int i) {
 }
 
 void Game::selectCardBoard(int i) {
-    if (m_selectedCard == nullptr) {
-        m_selectedCard = std::make_unique<Card>(getOnTurnPlayer().getBoard().getCard(i));
+    auto card = getOnTurnPlayer().getBoard().getCard(i);
+    if (card.has_value()) {
+        auto &refCard = card->get();
+        if (m_selectedCard == nullptr) {
+            m_selectedCard = &refCard;
 
-    } else if (*m_selectedCard == getOnTurnPlayer().getBoard().getCard(i)) {
-        m_selectedCard = nullptr;
+        } else if (m_selectedCard == &refCard) {
+            m_selectedCard = nullptr;
+        }
+    } else {
+        cout << "No card on board with index " << i << endl;
     }
 }
 
@@ -63,20 +69,22 @@ void Game::attack(int i) {
     }
     const auto &opponent = getOffTurnPlayer();
     const auto &currentPlayer = getOnTurnPlayer();
-    auto &targetCard = opponent.getBoard().getCard(i);
 
-    if (!m_selectedCard->getHasAttacked()) {
-        targetCard.setHp(targetCard.getHp() - m_selectedCard->getDamage());
-        m_selectedCard->setHp(m_selectedCard->getHp() - targetCard.getDamage());
-        m_selectedCard->setHasAttacked(true);
-        if (targetCard.getHp() <= 0) {
-            opponent.getBoard().removeCard(i);
+    if (auto targetCard = opponent.getBoard().getCard(i); targetCard.has_value()) {
+        auto &tc = targetCard->get();
+        if (!m_selectedCard->getHasAttacked()) {
+            tc.setHp(tc.getHp() - m_selectedCard->getDamage());
+            m_selectedCard->setHp(m_selectedCard->getHp() - tc.getDamage());
+            m_selectedCard->setHasAttacked(true);
+            if (tc.getHp() <= 0) {
+                opponent.getBoard().removeCard(i);
+            }
+            if (m_selectedCard->getHp() <= 0) {
+                currentPlayer.getBoard().removeCard(*m_selectedCard);
+            }
+        } else {
+            cout << "Card has already attacked!" << endl;
         }
-        if (m_selectedCard->getHp() <= 0) {
-            currentPlayer.getBoard().removeCard(*m_selectedCard);
-        }
-    } else {
-        cout << "Card has already attacked!" << endl;
     }
 
     m_selectedCard = nullptr;
@@ -150,7 +158,7 @@ void Game::checkGameOver() const {
     }
 }
 
-void Game::specialCard(const Card &card) {
+void Game::specialCard(Card &card) {
     if (card.getType() == "buff") {
         int buffAmount = card.getBuffAmount();
         for (const auto &c: getOnTurnPlayer().getBoard().getCards()) {
@@ -164,7 +172,7 @@ void Game::specialCard(const Card &card) {
 
     if (card.getType() == "spell") {
         getOnTurnPlayer().getHand().removeCard(card);
-        m_selectedCard = std::make_unique<Card>(card);
+        m_selectedCard = &card;
         return;
     }
 

@@ -17,13 +17,13 @@ public:
     void print();
 
 private:
-    void paintHeroes(const Player &player) const;
-
     void paintUI();
+
+    void paintHero(const Player *player, int posYHero, int offsetYHP, int offsetYMana, const string &buttonKey);
 
     static void paintCards(const vector<Card> &cards);
 
-
+    
     const int END_TURN_BUTTON_POSITION_X = 910;
     const int END_TURN_BUTTON_POSITION_Y = 350;
     const int HEROES_POSITION_X = 900;
