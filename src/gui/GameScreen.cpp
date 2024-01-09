@@ -151,7 +151,7 @@ void GameScreen::update() {
     }
 
     for (const auto &player: players) {
-        int row = player->getId() == m_client.getID() ? 0 : 1;
+        int row = player->getId() == m_client.getID() ? 1 : 0;
         auto &playerCardsBoard = player->getBoard().getCards();
         for (int i = 0; i < playerCardsBoard.size(); i++) {
             if (playerCardsBoard[i] != nullptr) {
@@ -160,10 +160,17 @@ void GameScreen::update() {
                 playerCardsBoard[i]->setPosition(shape);
                 m_cardsBoard.push_back(*playerCardsBoard[i]);
 
-                if (row == 0 && m_slotsBoard[row][i].isClicked()) {
+                if (row == 1 && m_slotsBoard[row][i].isClicked()) {
                     json j = {{"index", i}};
                     if (m_client.getGameplayState().isSelected()) {
-                        m_client.sendMessage("attack", j);
+                        Rectangle rec(m_client.getGameplayState().getSelectedCard().value().getX(),
+                                      m_client.getGameplayState().getSelectedCard().value().getY());
+                        if (rec.x == m_slotsBoard[row][i].getHitbox().x
+                            && rec.y == m_slotsBoard[row][i].getHitbox().y) {
+                            m_client.sendMessage("selectCardBoard", j);
+                        } else {
+                            m_client.sendMessage("attack", j);
+                        }
                     } else {
                         m_client.sendMessage("selectCardBoard", j);
                     }
@@ -174,9 +181,9 @@ void GameScreen::update() {
         }
     }
 
-//    if (m_buttons["heroPlayer"].isClicked() || m_buttons["heroOpponent"].isClicked()) {
-//
-//    }
+    if (m_buttons["heroOpponent"].isClicked() && m_client.getGameplayState().getPlayer(m_client.getID()).isTurn()) {
+        m_client.sendMessage("attackFace");
+    }
 
     if (m_buttons["endTurn"].isClicked() && m_client.getGameplayState().getPlayer(m_client.getID()).isTurn()) {
         m_client.sendMessage("endTurn");

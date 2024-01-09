@@ -29,13 +29,15 @@ public:
 
     void setSelectedCard(Card &card);
 
+    void deselectCard();
+
     [[nodiscard]] bool isSelected() const;
 
     [[nodiscard]] Player &getOnTurnPlayer() const;
 
     [[nodiscard]] Player &getOffTurnPlayer() const;
 
-    [[nodiscard]] std::optional<std::reference_wrapper<Card>> getSelectedCard() const;
+    [[nodiscard]] std::optional<Card> getSelectedCard() const;
 
     array<std::unique_ptr<Player>, 2> &getPlayers();
 
@@ -48,6 +50,6 @@ private:
 
 
     array<std::unique_ptr<Player>, 2> m_players;
-    Card *m_selectedCard{};
+    std::optional<Card> m_selectedCard;
     int m_turnCounter{0};
 };

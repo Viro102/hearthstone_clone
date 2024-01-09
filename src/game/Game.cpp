@@ -32,8 +32,8 @@ void Game::endTurn() {
             card->setHasAttacked(false);
         }
     }
-    if (m_selectedCard != nullptr) {
-        m_selectedCard = nullptr;
+    if (m_selectedCard.has_value()) {
+        m_selectedCard = std::nullopt;
     }
     m_turnCounter++;
     cout << "Turn ended!\n";
@@ -51,11 +51,11 @@ void Game::selectCardBoard(int i) {
     auto card = getOnTurnPlayer().getBoard().getCard(i);
     if (card.has_value()) {
         auto &refCard = card->get();
-        if (m_selectedCard == nullptr) {
-            m_selectedCard = &refCard;
+        if (!m_selectedCard.has_value()) {
+            m_selectedCard = refCard;
 
-        } else if (m_selectedCard == &refCard) {
-            m_selectedCard = nullptr;
+        } else if (m_selectedCard == refCard) {
+            m_selectedCard = std::nullopt;
         }
     } else {
         cout << "No card on board with index " << i << endl;
@@ -63,7 +63,7 @@ void Game::selectCardBoard(int i) {
 }
 
 void Game::attack(int i) {
-    if (m_selectedCard == nullptr) {
+    if (!m_selectedCard.has_value()) {
         cout << "No card selected!\n";
         return;
     }
@@ -87,25 +87,24 @@ void Game::attack(int i) {
         }
     }
 
-    m_selectedCard = nullptr;
+    m_selectedCard = std::nullopt;
 }
 
 void Game::attackFace() {
     auto &target = getOffTurnPlayer();
     const auto &attacker = getOnTurnPlayer();
 
-    if (m_selectedCard == nullptr) {
+    if (!m_selectedCard.has_value()) {
         cout << "No card selected";
         return;
     }
 
     for (const auto &c: target.getBoard().getCards()) {
-        if (c == nullptr) {
-            continue;
-        }
-        if (c->getType() == "taunt") {
-            cout << "Taunt card in play, cannot attack hero" << endl;
-            return;
+        if (c != nullptr) {
+            if (c->getType() == "taunt") {
+                cout << "Taunt card in play, cannot attack hero" << endl;
+                return;
+            }
         }
     }
     if (!m_selectedCard->getHasAttacked()) {
@@ -118,7 +117,7 @@ void Game::attackFace() {
         cout << "Card has already attacked" << endl;
     }
 
-    m_selectedCard = nullptr;
+    m_selectedCard = std::nullopt;
     checkGameOver();
 }
 
@@ -147,7 +146,7 @@ array<std::unique_ptr<Player>, 2> &Game::getPlayers() {
 }
 
 bool Game::isSelected() const {
-    return m_selectedCard != nullptr;
+    return m_selectedCard.has_value();
 }
 
 void Game::checkGameOver() const {
@@ -172,13 +171,13 @@ void Game::specialCard(Card &card) {
 
     if (card.getType() == "spell") {
         getOnTurnPlayer().getHand().removeCard(card);
-        m_selectedCard = &card;
+        m_selectedCard = card;
         return;
     }
 
     if (card.getType() == "aoe") {
         getOnTurnPlayer().getHand().removeCard(card);
-        m_selectedCard = nullptr;
+        m_selectedCard = std::nullopt;
         for (const auto &target: getOffTurnPlayer().getBoard().getCards()) {
             if (target != nullptr) {
                 target->setHp(target->getHp() - card.getDamage());
@@ -257,14 +256,14 @@ Player &Game::getPlayer(int id) const {
     return empty;
 }
 
-std::optional<std::reference_wrapper<Card>> Game::getSelectedCard() const {
-    if (isSelected()) {
-        return *m_selectedCard;
-    } else {
-        return std::nullopt;
-    }
+std::optional<Card> Game::getSelectedCard() const {
+    return m_selectedCard;
 }
 
 void Game::setSelectedCard(Card &card) {
-    m_selectedCard = &card;
+    m_selectedCard = card;
+}
+
+void Game::deselectCard() {
+    m_selectedCard = std::nullopt;
 }

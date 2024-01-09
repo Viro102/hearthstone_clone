@@ -195,7 +195,7 @@ void Server::sendMessage(const string &type, const json &data, int clientSocket)
             if (!sendAll(client->getSocket(), serializedMessage.c_str(), serializedMessage.size())) {
                 std::cerr << "Failed to send message." << std::endl;
             } else {
-                cout << "Server sent message: " << message.dump(4) << endl;
+//                cout << "Server sent message: " << message.dump(4) << endl;
             }
         }
     } else {
@@ -212,7 +212,7 @@ void Server::sendMessage(const string &type, const json &data, int clientSocket)
                 if (!sendAll(client->getSocket(), serializedMessage.c_str(), serializedMessage.size())) {
                     std::cerr << "Failed to send message." << std::endl;
                 } else {
-                    cout << "Server sent message: " << message.dump(4) << endl;
+//                    cout << "Server sent message: " << message.dump(4) << endl;
                 }
             }
         }
@@ -250,7 +250,7 @@ json Server::serializeGameplayState() {
 
     }
     if (m_game.getSelectedCard().has_value()) {
-        const auto &card = m_game.getSelectedCard()->get();
+        const auto card = m_game.getSelectedCard().value();
         j += {"selectedCard", card.serialize()};
     }
     cout << "Serializing game state" << j.dump(4) << endl;

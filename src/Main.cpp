@@ -113,16 +113,16 @@ int main() {
                 if (client.isGameStateInitialized()) {
                     gameScreen->update();
 
-//                    // Check if 3 seconds have passed
-//                    auto currentTime = Clock::now();
-//                    if (currentTime - lastPrintTime >= printInterval) {
-//                        cout << endl << endl;
-//                        gameScreen->print();
-//                        cout << endl << endl;
-//
-//                        // Reset the timer
-//                        lastPrintTime = currentTime;
-//                    }
+                    // Check if 3 seconds have passed
+                    auto currentTime = Clock::now();
+                    if (currentTime - lastPrintTime >= printInterval) {
+                        cout << endl << endl;
+                        gameScreen->print();
+                        cout << endl << endl;
+
+                        // Reset the timer
+                        lastPrintTime = currentTime;
+                    }
                 }
                 break;
             case GameState::END:

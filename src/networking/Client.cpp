@@ -78,7 +78,7 @@ void Client::sendMessage(const string &message, const json &data) const {
     j["data"] = data;
     string serializedMsg = j.dump();
 
-    cout << "Client sending message: " << j.dump(4) << endl;
+//    cout << "Client sending message: " << j.dump(4) << endl;
 
     send(m_socket, serializedMsg.c_str(), serializedMsg.size(), 0);
 }
@@ -94,7 +94,7 @@ void Client::processMessage(const string &message) {
         string type = j["type"];
         string data = j["data"].dump();
 
-        cout << "Client received message = " << j.dump(4) << endl;
+//        cout << "Client received message = " << j.dump(4) << endl;
 
         if (type == "updateLobbyState") {
             updateLocalLobbyState(data);
@@ -144,8 +144,10 @@ void Client::updateLocalGameplayState(const string &message) {
     }
 
     if (!json["selectedCard"].is_null()) {
-        auto selectedCard = Card::createFromJson(json["selectedCard"]);
+        Card selectedCard = Card::createFromJson(json["selectedCard"]);
         m_gameplayState.setSelectedCard(selectedCard);
+    } else {
+        m_gameplayState.deselectCard();
     }
 
     for (int i = 0; i < 2; i++) {

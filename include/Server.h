@@ -42,8 +42,6 @@ private:
 
     void updateLobbyStateWithNewClient(int clientSocket);
 
-    void updateGameState();
-
     json serializeGameplayState();
 
     json serializeLobbyState();
