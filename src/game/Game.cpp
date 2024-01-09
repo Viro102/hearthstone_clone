@@ -1,8 +1,11 @@
 #include <Game.h>
 
-void Game::startGame(const string &player1, const string &player2) {
-    m_players[0] = std::make_unique<Player>(PLAYER_MAX_HP, 0, player1);
-    m_players[1] = std::make_unique<Player>(PLAYER_MAX_HP, 1, player2);
+Game::Game(Player player1, Player player2) {
+    m_players[0] = std::make_unique<Player>(std::move(player1));
+    m_players[1] = std::make_unique<Player>(std::move(player2));
+}
+
+void Game::startGame() {
     m_players[0]->setTurn(true);
     m_players[0]->setMana(1);
     for (int i = 0; i < 3; i++) {
@@ -108,7 +111,7 @@ void Game::attackFace() {
     }
 
     m_selectedCard = nullptr;
-    isGameOver();
+    checkGameOver();
 }
 
 Player &Game::getOnTurnPlayer() const {
@@ -139,7 +142,7 @@ bool Game::isSelected() const {
     return m_selectedCard != nullptr;
 }
 
-void Game::isGameOver() const {
+void Game::checkGameOver() const {
     if (m_players[0]->getHp() <= 0) {
         cout << "Player 2 (" + m_players[1]->getArchetype() + ") wins\n";
     } else if (m_players[1]->getHp() <= 0) {
@@ -177,10 +180,6 @@ void Game::specialCard(const Card &card) {
             }
         }
     }
-}
-
-void Game::addPlayer(Player player, int i) {
-    m_players[i] = std::make_unique<Player>(std::move(player));
 }
 
 void Game::print() const {
@@ -223,4 +222,29 @@ void Game::print() const {
     }
 
     cout << "----------------------------------------------" << endl << endl;
+}
+
+void Game::initializeFromJson(const json &jsonState) {
+    array<int, 2> id{};
+    array<string, 2> archetype{};
+
+    if (!jsonState["players"].is_null()) {
+        for (int i = 0; i < jsonState["players"].size(); i++) {
+            const auto &j = jsonState["players"][i];
+            id[i] = j["id"];
+            archetype[i] = j["archetype"];
+        }
+    }
+
+    m_players = {std::make_unique<Player>(id[0], archetype[0]), std::make_unique<Player>(id[1], archetype[1])};
+}
+
+Player &Game::getPlayer(int id) const {
+    static Player empty(-1, "");
+    for (const auto &player: m_players) {
+        if (player->getId() == id) {
+            return *player;
+        }
+    }
+    return empty;
 }

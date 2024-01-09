@@ -7,7 +7,11 @@
 
 class Game {
 public:
-    void startGame(const string &player1, const string &player2);
+    Game(Player player1, Player player2);
+
+    Game() = default;
+
+    void startGame();
 
     void endTurn();
 
@@ -19,17 +23,19 @@ public:
 
     void attackFace();
 
+    void checkGameOver() const;
+
+    void initializeFromJson(const nlohmann::json &jsonState);
+
+    [[nodiscard]] bool isSelected() const;
+
     [[nodiscard]] Player &getOnTurnPlayer() const;
 
     [[nodiscard]] Player &getOffTurnPlayer() const;
 
     array<std::unique_ptr<Player>, 2> &getPlayers();
 
-    [[nodiscard]] bool isSelected() const;
-
-    void isGameOver() const;
-
-    void addPlayer(Player player, int i);
+    [[nodiscard]] Player &getPlayer(int id) const;
 
     void print() const;
 
@@ -37,9 +43,8 @@ public:
 private:
     void specialCard(const Card &card);
 
-    
-    const int PLAYER_MAX_HP{20};
-    array<std::unique_ptr<Player>, 2> m_players{};
+
+    array<std::unique_ptr<Player>, 2> m_players;
     std::unique_ptr<Card> m_selectedCard{};
     int m_turnCounter{0};
 };
