@@ -8,13 +8,11 @@ std::unique_ptr<Card> Player::drawCard() {
     if (!m_hand->isFull()) {
         if (!m_deck->isEmpty()) {
             m_deck->shuffleDeck();
-            auto drawnCard = m_deck->getCard(0);
-            if (drawnCard.has_value()) {
-                auto &dc = drawnCard->get();
-                m_hand->addCard(dc);
-                m_deck->removeCard(dc);
-                return std::make_unique<Card>(dc);
-            }
+            const auto &drawnCard = m_deck->getFirstCard();
+            auto drawnCardPtr = std::make_unique<Card>(drawnCard);
+            m_hand->addCard(drawnCard);
+            m_deck->removeCard(drawnCard);
+            return drawnCardPtr;
         } else {
             cout << "You have no more cards in your deck\n";
             return nullptr;
