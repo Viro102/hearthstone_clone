@@ -38,7 +38,7 @@ public:
 
     void removeCard(const Card &card) {
         for (int i = 0; i < MAX_CARDS; ++i) {
-            if (m_cards[i] != nullptr && m_cards[i].get() == &card) {
+            if (m_cards[i] != nullptr && *m_cards[i] == card) {
                 m_cards[i] = nullptr;
                 m_numberOfCards--;
                 return;
@@ -52,6 +52,15 @@ public:
         }
         return std::nullopt;
     };
+
+    Card &getFirstCard() {
+        for (const auto &card: m_cards) {
+            if (card) {
+                return *card;
+            }
+        }
+        throw std::runtime_error("Couldn't get a non null card");
+    }
 
     [[nodiscard]] const array<std::unique_ptr<Card>, MAX_CARDS> &getCards() const {
         return m_cards;
