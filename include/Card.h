@@ -13,9 +13,9 @@ public:
 
     Card(const Card &other) = default;
 
-    [[nodiscard]] json serialize() const;
-
     static Card createFromJson(const json &jsonData);
+
+    [[nodiscard]] json serialize() const;
 
     [[nodiscard]] const string &getName() const;
 
