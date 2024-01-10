@@ -16,20 +16,15 @@ GameScreen::GameScreen(Client &client) : m_client(client) {
     }
 
 
-    auto board = LoadImage("../assets/board.png");
-    auto deck = LoadImage("../assets/deck.png");
-    auto mage = LoadImage("../assets/mage.png");
-    auto warrior = LoadImage("../assets/warrior.png");
+    auto board = LoadTexture("../assets/board.png");
+    auto deck = LoadTexture("../assets/deck.png");
+    auto mage = LoadTexture("../assets/mage.png");
+    auto warrior = LoadTexture("../assets/warrior.png");
 
-    m_images[0] = LoadTextureFromImage(board);
-    m_images[1] = LoadTextureFromImage(deck);
-    m_images[2] = LoadTextureFromImage(mage);
-    m_images[3] = LoadTextureFromImage(warrior);
-
-    UnloadImage(board);
-    UnloadImage(deck);
-    UnloadImage(mage);
-    UnloadImage(warrior);
+    m_images[0] = board;
+    m_images[1] = deck;
+    m_images[2] = mage;
+    m_images[3] = warrior;
 
     int i = m_client.getGameplayState().getPlayer(m_client.getID()).getArchetype() == "mage" ? 2 : 3;
     int other = i == 2 ? 3 : 2;
