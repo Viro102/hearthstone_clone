@@ -48,11 +48,12 @@ void Game::playACard(int i) {
 void Game::selectCardBoard(int i) {
     auto card = getOnTurnPlayer().getBoard().getCard(i);
     if (card.has_value()) {
-        if (!isSelected()) {
-            m_selectedCard = std::nullopt;
-            m_selectedBoardIndex = i;
-        } else if (m_selectedBoardIndex == i) {
+        if (m_selectedBoardIndex == i) {
             deselectCard();
+        } else if (!m_selectedCard.has_value()) {
+            // Select this minion, or switch to it from another minion. A selected spell stays selected
+            // because its mana is already spent.
+            m_selectedBoardIndex = i;
         }
     } else {
         cout << "No card on board with index " << i << endl;
