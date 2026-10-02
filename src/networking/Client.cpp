@@ -1,32 +1,17 @@
 #include <Client.h>
 
-Client::Client(int socketFD) : m_socket(socketFD) {}
+Client::Client(net::Socket socket) : m_socket(socket) {}
 
 Client::~Client() {
     shutdown();
 }
 
-int Client::start(uint16_t port, const string &ipAddr) {
+int Client::start(uint16_t port, const string &host) {
     shutdown();
 
-    struct sockaddr_in serverAddress{};
-    serverAddress.sin_family = AF_INET;
-    serverAddress.sin_port = htons(port);
-
-    if (inet_pton(AF_INET, ipAddr.c_str(), &serverAddress.sin_addr) <= 0) {
-        cout << "\nInvalid address/Address not supported\n";
-        return -1;
-    }
-
-    int socketFD = socket(AF_INET, SOCK_STREAM, 0);
-    if (socketFD < 0) {
-        cout << "\n Socket creation error \n";
-        return -1;
-    }
-
-    if (connect(socketFD, (struct sockaddr *) &serverAddress, sizeof(serverAddress)) < 0) {
-        cout << "\nConnection Failed\n";
-        close(socketFD);
+    net::Socket socket = net::connectTo(host, port);
+    if (socket == net::INVALID_SOCKET_HANDLE) {
+        cout << "\nConnection to " << host << ":" << port << " failed\n";
         return -1;
     }
 
@@ -39,13 +24,13 @@ int Client::start(uint16_t port, const string &ipAddr) {
         m_notice.clear();
     }
 
-    m_socket = socketFD;
+    m_socket = socket;
     m_isShuttingDown = false;
-    m_serverListener = std::jthread(&Client::listenToServer, this, socketFD);
+    m_serverListener = std::jthread(&Client::listenToServer, this, socket);
     return 0;
 }
 
-void Client::listenToServer(int socket) {
+void Client::listenToServer(net::Socket socket) {
     while (true) {
         auto message = protocol::recvFrame(socket);
         if (!message.has_value()) {
@@ -150,8 +135,15 @@ void Client::updateLocalGameplayState(const json &data) {
 
 void Client::shutdown() {
     m_isShuttingDown = true;
-    if (m_socket >= 0) {
-        ::shutdown(m_socket, SHUT_RDWR);
+    if (m_socket != net::INVALID_SOCKET_HANDLE) {
+        net::shutdownSocket(m_socket);
+#ifdef _WIN32
+        // Unlike on POSIX, Winsock's shutdown() does not wake a thread blocked in recv(), so joining
+        // would hang until the server closes the connection. closesocket() cancels the blocking call.
+        // Closing before the join is safe: this process opens no other socket until shutdown() returns.
+        net::closeSocket(m_socket);
+        m_socket = net::INVALID_SOCKET_HANDLE;
+#endif
     }
 
     if (m_serverListener.joinable()) {
@@ -159,9 +151,9 @@ void Client::shutdown() {
     }
 
     // Close only after the listener has stopped using the socket.
-    if (m_socket >= 0) {
-        close(m_socket);
-        m_socket = -1;
+    if (m_socket != net::INVALID_SOCKET_HANDLE) {
+        net::closeSocket(m_socket);
+        m_socket = net::INVALID_SOCKET_HANDLE;
     }
 
     // The listener may have queued a transition (e.g. "startGame") right before it stopped;
@@ -183,7 +175,7 @@ const string &Client::getNotice() const {
     return m_notice;
 }
 
-int Client::getSocket() const {
+net::Socket Client::getSocket() const {
     return m_socket;
 }
 
