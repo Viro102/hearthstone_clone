@@ -10,6 +10,12 @@ class GameScreen {
 public:
     explicit GameScreen(Client &client);
 
+    ~GameScreen();
+
+    GameScreen(const GameScreen &) = delete;
+
+    GameScreen &operator=(const GameScreen &) = delete;
+
     void draw();
 
     void update();

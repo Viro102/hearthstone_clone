@@ -38,6 +38,12 @@ GameScreen::GameScreen(Client &client) : m_client(client) {
     m_buttons["endTurn"] = endTurn;
 }
 
+GameScreen::~GameScreen() {
+    for (const auto &image: m_images) {
+        UnloadTexture(image);
+    }
+}
+
 void GameScreen::paintHero(const Player *player, int posYHero, int offsetYHP, int offsetYMana,
                            const std::string &buttonKey) {
     const int OFFSET_X = 220;
@@ -127,6 +133,7 @@ void GameScreen::update() {
     m_cardsBoard.clear();
     const auto &players = m_client.getGameplayState().getPlayers();
     const auto &playerCardsHand = m_client.getGameplayState().getPlayer(m_client.getID()).getHand().getCards();
+    const bool isMyTurn = m_client.getGameplayState().getPlayer(m_client.getID()).isTurn();
 
     for (int i = 0; i < playerCardsHand.size(); i++) {
         const auto &card = playerCardsHand[i];
@@ -136,7 +143,7 @@ void GameScreen::update() {
             card->setPosition(shape);
             m_cardsHand.push_back(*card);
 
-            if (m_slotsHand[i].isClicked() && m_client.getGameplayState().getPlayer(m_client.getID()).isTurn()) {
+            if (m_slotsHand[i].isClicked() && isMyTurn) {
                 json j = {{"index", i}};
                 m_client.sendMessage("playCard", j);
             }
@@ -155,19 +162,14 @@ void GameScreen::update() {
                 playerCardsBoard[i]->setPosition(shape);
                 m_cardsBoard.push_back(*playerCardsBoard[i]);
 
-                if (row == 1 && m_slotsBoard[row][i].isClicked()) {
+                if (isMyTurn && m_slotsBoard[row][i].isClicked()) {
                     json j = {{"index", i}};
-                    if (m_client.getGameplayState().isSelected()) {
-                        Rectangle rec(m_client.getGameplayState().getSelectedCard().value().getX(),
-                                      m_client.getGameplayState().getSelectedCard().value().getY());
-                        if (rec.x == m_slotsBoard[row][i].getHitbox().x
-                            && rec.y == m_slotsBoard[row][i].getHitbox().y) {
-                            m_client.sendMessage("selectCardBoard", j);
-                        } else {
-                            m_client.sendMessage("attack", j);
-                        }
-                    } else {
+                    if (row == 1) {
+                        // Own minion: select it, or deselect it if it is already selected
                         m_client.sendMessage("selectCardBoard", j);
+                    } else if (m_client.getGameplayState().isSelected()) {
+                        // Enemy minion: attack it with the selected card
+                        m_client.sendMessage("attack", j);
                     }
                 }
             } else {
@@ -176,11 +178,11 @@ void GameScreen::update() {
         }
     }
 
-    if (m_buttons["heroOpponent"].isClicked() && m_client.getGameplayState().getPlayer(m_client.getID()).isTurn()) {
+    if (m_buttons["heroOpponent"].isClicked() && isMyTurn && m_client.getGameplayState().isSelected()) {
         m_client.sendMessage("attackFace");
     }
 
-    if (m_buttons["endTurn"].isClicked() && m_client.getGameplayState().getPlayer(m_client.getID()).isTurn()) {
+    if (m_buttons["endTurn"].isClicked() && isMyTurn) {
         m_client.sendMessage("endTurn");
     }
 }

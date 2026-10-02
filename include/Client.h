@@ -13,8 +13,10 @@
 #include <GameState.h>
 #include <Game.h>
 #include <Protocol.h>
-
-using StateChangeCallback = std::function<void(GameState)>;
+#include <atomic>
+#include <cstdint>
+#include <mutex>
+#include <optional>
 
 class Client {
 public:
@@ -24,17 +26,29 @@ public:
 
     ~Client();
 
-    int start(short port, const string &ipAddr);
+    // Connects to the server and starts the listener thread. Must not be called while holding lockState().
+    int start(uint16_t port, const string &ipAddr);
 
+    // Disconnects and joins the listener thread. Must not be called while holding lockState().
     void shutdown();
 
-    void listenToServer();
+    void sendMessage(const string &message, const json &data = json()) const;
 
-    void sendMessage(const string &message, const json &data = "") const;
+    // The listener thread updates the lobby and game state while holding this lock;
+    // hold it while reading or drawing that state, but not while waiting for the next frame.
+    [[nodiscard]] std::unique_lock<std::mutex> lockState();
+
+    // A state transition requested by the server since the last call, if any. Requires lockState().
+    std::optional<GameState> takePendingState();
+
+    // A message for the player (e.g. "Server is full"), empty if none. Requires lockState().
+    [[nodiscard]] const string &getNotice() const;
 
     [[nodiscard]] int getSocket() const;
 
-    [[nodiscard]] LobbyState getLobbyState() const;
+    // The getters below require lockState().
+
+    [[nodiscard]] const LobbyState &getLobbyState() const;
 
     [[nodiscard]] Game &getGameplayState();
 
@@ -42,22 +56,26 @@ public:
 
     [[nodiscard]] bool isGameStateInitialized() const;
 
-    void setStateChangeCallback(const StateChangeCallback &callback);
-
 private:
-    StateChangeCallback stateChangeCallback;
+    void listenToServer(int socket);
 
-    void updateLocalLobbyState(const string &message);
+    void updateLocalLobbyState(const json &data);
 
-    void updateLocalGameplayState(const string &message);
+    void updateLocalGameplayState(const json &data);
 
     void processMessage(const string &message);
 
 
     int m_socket{-1};
+    std::jthread m_serverListener;
+    std::atomic<bool> m_isShuttingDown{false};
+
+    // Guards everything below.
+    mutable std::mutex m_stateMutex;
     int m_ID{-1};
     LobbyState m_lobbyState{};
     Game m_gameplayState{};
-    std::jthread m_serverListener;
     bool m_isGameStateInitialized{false};
+    std::optional<GameState> m_pendingState;
+    string m_notice;
 };

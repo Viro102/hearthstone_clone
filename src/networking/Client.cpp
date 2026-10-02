@@ -6,41 +6,61 @@ Client::~Client() {
     shutdown();
 }
 
-int Client::start(short port, const string &ipAddr) {
+int Client::start(uint16_t port, const string &ipAddr) {
+    shutdown();
+
     struct sockaddr_in serverAddress{};
-
-    if ((m_socket = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-        cout << "\n Socket creation error \n";
-        return -1;
-    }
-
     serverAddress.sin_family = AF_INET;
     serverAddress.sin_port = htons(port);
 
-    // Convert IPv4 and IPv6 addresses from text to binary form
     if (inet_pton(AF_INET, ipAddr.c_str(), &serverAddress.sin_addr) <= 0) {
         cout << "\nInvalid address/Address not supported\n";
         return -1;
     }
 
-    if (connect(m_socket, (struct sockaddr *) &serverAddress, sizeof(serverAddress)) < 0) {
-        cout << "\nConnection Failed\n";
+    int socketFD = socket(AF_INET, SOCK_STREAM, 0);
+    if (socketFD < 0) {
+        cout << "\n Socket creation error \n";
         return -1;
     }
 
-    m_serverListener = std::jthread(&Client::listenToServer, this);
+    if (connect(socketFD, (struct sockaddr *) &serverAddress, sizeof(serverAddress)) < 0) {
+        cout << "\nConnection Failed\n";
+        close(socketFD);
+        return -1;
+    }
+
+    {
+        std::scoped_lock lock(m_stateMutex);
+        m_ID = -1;
+        m_lobbyState = {};
+        m_isGameStateInitialized = false;
+        m_pendingState.reset();
+        m_notice.clear();
+    }
+
+    m_socket = socketFD;
+    m_isShuttingDown = false;
+    m_serverListener = std::jthread(&Client::listenToServer, this, socketFD);
     return 0;
 }
 
-void Client::listenToServer() {
+void Client::listenToServer(int socket) {
     while (true) {
-        auto message = protocol::recvFrame(m_socket);
+        auto message = protocol::recvFrame(socket);
         if (!message.has_value()) {
-            std::cerr << "Connection to server closed." << std::endl;
             break;
         }
-
         processMessage(*message);
+    }
+
+    if (!m_isShuttingDown) {
+        std::cerr << "Connection to server closed." << std::endl;
+        std::scoped_lock lock(m_stateMutex);
+        if (m_notice.empty()) {
+            m_notice = "Disconnected from server";
+        }
+        m_pendingState = GameState::MENU;
     }
 }
 
@@ -48,17 +68,10 @@ void Client::sendMessage(const string &message, const json &data) const {
     json j;
     j["type"] = message;
     j["data"] = data;
-    string serializedMsg = j.dump();
 
-//    cout << "Client sending message: " << j.dump(4) << endl;
-
-    if (!protocol::sendFrame(m_socket, serializedMsg)) {
+    if (!protocol::sendFrame(m_socket, j.dump())) {
         std::cerr << "Failed to send message: " << message << std::endl;
     }
-}
-
-void Client::setStateChangeCallback(const StateChangeCallback &callback) {
-    stateChangeCallback = callback;
 }
 
 void Client::processMessage(const string &message) {
@@ -66,35 +79,29 @@ void Client::processMessage(const string &message) {
         json j = json::parse(message);
 
         string type = j["type"];
-        string data = j["data"].dump();
+        json data = j["data"];
 
-//        cout << "Client received message = " << j.dump(4) << endl;
+        std::scoped_lock lock(m_stateMutex);
 
         if (type == "updateLobbyState") {
             updateLocalLobbyState(data);
-        }
-
-        if (type == "yourID") {
-            m_ID = std::stoi(data);
-        }
-
-        if (type == "startGame" && stateChangeCallback) {
+        } else if (type == "yourID") {
+            m_ID = data;
+        } else if (type == "startGame") {
+            m_isGameStateInitialized = false;
             updateLocalGameplayState(data);
-            stateChangeCallback(GameState::GAMEPLAY);
-        }
-
-        if (type == "updateGameState") {
+            m_pendingState = GameState::GAMEPLAY;
+        } else if (type == "updateGameState") {
             updateLocalGameplayState(data);
+        } else if (type == "opponentDisconnected") {
+            m_isGameStateInitialized = false;
+            m_pendingState = GameState::WIN;
+        } else if (type == "endGame") {
+            m_isGameStateInitialized = false;
+            m_pendingState = data["winner"] == m_ID ? GameState::WIN : GameState::LOSE;
+        } else if (type == "serverFull") {
+            m_notice = "Server is full";
         }
-
-        if (type == "opponentDisconnected" && stateChangeCallback) {
-            stateChangeCallback(GameState::WIN);
-        }
-
-        if (type == "endGame" && stateChangeCallback) {
-            stateChangeCallback(GameState::END);
-        }
-
 
     } catch (json::parse_error &e) {
         std::cerr << "Received an invalid JSON message: " << message << " error:" << e.what() << endl;
@@ -103,11 +110,9 @@ void Client::processMessage(const string &message) {
     }
 }
 
-void Client::updateLocalLobbyState(const string &message) {
-    json json = json::parse(message);
-
+void Client::updateLocalLobbyState(const json &data) {
     m_lobbyState.players.clear();
-    for (const auto &playerJson: json["players"]) {
+    for (const auto &playerJson: data["players"]) {
         LobbyState::PlayerInfo player;
         player.name = playerJson["name"];
         player.isReady = playerJson["isReady"];
@@ -115,44 +120,66 @@ void Client::updateLocalLobbyState(const string &message) {
     }
 }
 
-void Client::updateLocalGameplayState(const string &message) {
-    json json = json::parse(message);
-
+void Client::updateLocalGameplayState(const json &data) {
     if (!m_isGameStateInitialized) {
-        m_gameplayState.initializeFromJson(json);
-        m_isGameStateInitialized = true;
+        m_gameplayState.initializeFromJson(data);
     }
 
-    if (!json["selectedCard"].is_null()) {
-        Card selectedCard = Card::createFromJson(json["selectedCard"]);
+    if (data.contains("selectedCard")) {
+        Card selectedCard = Card::createFromJson(data["selectedCard"]);
         m_gameplayState.setSelectedCard(selectedCard);
     } else {
         m_gameplayState.deselectCard();
     }
 
     for (int i = 0; i < 2; i++) {
-        const auto &playerJson = json["players"][i];
-        m_gameplayState.getPlayers()[i]->setTurn(playerJson["onTurn"]);
-        m_gameplayState.getPlayers()[i]->setHp(playerJson["hp"]);
-        m_gameplayState.getPlayers()[i]->setMana(playerJson["mana"]);
-        m_gameplayState.getPlayers()[i]->setDeck(deserialize<Deck>(playerJson["deck"]));
-        m_gameplayState.getPlayers()[i]->setHand(deserialize<CardContainer<5>>(playerJson["hand"]));
-        m_gameplayState.getPlayers()[i]->setBoard(deserialize<CardContainer<5>>(playerJson["board"]));
+        const auto &playerJson = data["players"].at(i);
+        auto &player = m_gameplayState.getPlayers()[i];
+        player->setTurn(playerJson["onTurn"]);
+        player->setHp(playerJson["hp"]);
+        player->setMana(playerJson["mana"]);
+        player->setDeck(deserialize<Deck>(playerJson["deck"]));
+        player->setHand(deserialize<CardContainer<5>>(playerJson["hand"]));
+        player->setBoard(deserialize<CardContainer<5>>(playerJson["board"]));
     }
+
+    // Only flag the state as usable once it is complete (turns, hands and boards set).
+    m_isGameStateInitialized = true;
 }
 
 void Client::shutdown() {
+    m_isShuttingDown = true;
     if (m_socket >= 0) {
         ::shutdown(m_socket, SHUT_RDWR);
-        close(m_socket);
-        m_socket = -1;
     }
 
     if (m_serverListener.joinable()) {
         m_serverListener.join();
     }
 
+    // Close only after the listener has stopped using the socket.
+    if (m_socket >= 0) {
+        close(m_socket);
+        m_socket = -1;
+    }
+
+    // The listener may have queued a transition (e.g. "startGame") right before it stopped;
+    // after a disconnect it must not move the player out of the menu.
+    std::scoped_lock lock(m_stateMutex);
     m_isGameStateInitialized = false;
+    m_pendingState.reset();
+}
+
+std::unique_lock<std::mutex> Client::lockState() {
+    return std::unique_lock(m_stateMutex);
+}
+
+std::optional<GameState> Client::takePendingState() {
+    return std::exchange(m_pendingState, std::nullopt);
+}
+
+const string &Client::getNotice() const {
+    return m_notice;
 }
 
 int Client::getSocket() const {
@@ -163,7 +190,7 @@ int Client::getID() const {
     return m_ID;
 }
 
-LobbyState Client::getLobbyState() const {
+const LobbyState &Client::getLobbyState() const {
     return m_lobbyState;
 }
 
