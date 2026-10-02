@@ -6,6 +6,10 @@ Game::Game(Player player1, Player player2) {
 }
 
 void Game::startGame() {
+    // Only the server runs the game; clients receive decks through the serialized state.
+    for (const auto &player: m_players) {
+        player->getDeck().makeDeck(assetPath("cards.txt"));
+    }
     m_players[0]->setTurn(true);
     m_players[0]->setMana(1);
     for (int i = 0; i < 3; i++) {
@@ -15,10 +19,6 @@ void Game::startGame() {
 }
 
 void Game::endTurn() {
-    if (m_turnCounter >= 30) {
-        cout << "Game over, no one won" << endl;
-        // TODO: exit to menu
-    }
     auto &currentPlayer = getOnTurnPlayer();
     auto &offPlayer = getOffTurnPlayer();
 
@@ -71,6 +71,11 @@ void Game::attack(int i) {
 
     if (auto targetCard = opponent.getBoard().getCard(i); targetCard.has_value()) {
         auto &tc = targetCard->get();
+        // Minions must attack a taunt first; spells can target anything
+        if (m_selectedBoardIndex >= 0 && tc.getType() != "taunt" && hasTaunt(opponent)) {
+            cout << "Taunt card in play, attack it first" << endl;
+            return;
+        }
         if (!attacker->getHasAttacked()) {
             tc.setHp(tc.getHp() - attacker->getDamage());
             attacker->setHp(attacker->getHp() - tc.getDamage());
@@ -98,13 +103,9 @@ void Game::attackFace() {
         return;
     }
 
-    for (const auto &c: target.getBoard().getCards()) {
-        if (c != nullptr) {
-            if (c->getType() == "taunt") {
-                cout << "Taunt card in play, cannot attack hero" << endl;
-                return;
-            }
-        }
+    if (m_selectedBoardIndex >= 0 && hasTaunt(target)) {
+        cout << "Taunt card in play, cannot attack hero" << endl;
+        return;
     }
     if (!attacker->getHasAttacked()) {
         target.setHp(target.getHp() - attacker->getDamage());
@@ -140,6 +141,12 @@ array<std::unique_ptr<Player>, 2> &Game::getPlayers() {
     return m_players;
 }
 
+bool Game::hasTaunt(const Player &player) {
+    return std::ranges::any_of(player.getBoard().getCards(), [](const auto &card) {
+        return card != nullptr && card->getType() == "taunt";
+    });
+}
+
 bool Game::isSelected() const {
     return m_selectedCard.has_value() || m_selectedBoardIndex >= 0;
 }
@@ -161,6 +168,10 @@ bool Game::checkGameOver() const {
         return true;
     }
     return false;
+}
+
+bool Game::isDraw() const {
+    return m_turnCounter >= MAX_TURNS && getWinnerId() == -1;
 }
 
 int Game::getWinnerId() const {
@@ -194,7 +205,7 @@ void Game::specialCard(const Card &card) {
     if (card.getType() == "aoe") {
         deselectCard();
         auto &board = getOffTurnPlayer().getBoard();
-        for (int i = 0; i < board.getCards().size(); i++) {
+        for (int i = 0; i < static_cast<int>(board.getCards().size()); i++) {
             if (auto target = board.getCard(i); target.has_value()) {
                 auto &t = target->get();
                 t.setHp(t.getHp() - card.getDamage());
@@ -218,7 +229,7 @@ void Game::print() const {
         cout << "No card selected" << endl;
     }
 
-    for (int i = 0; i < m_players.size(); i++) {
+    for (size_t i = 0; i < m_players.size(); i++) {
         if (m_players[i]) {
             cout << "Player " << i + 1 << " (" << m_players[i]->getArchetype() << "):" << endl;
             cout << "  HP: " << m_players[i]->getHp() << endl;
@@ -252,8 +263,9 @@ void Game::initializeFromJson(const json &jsonState) {
     array<int, 2> id{};
     array<string, 2> archetype{};
 
-    if (!jsonState["players"].is_null()) {
-        for (int i = 0; i < jsonState["players"].size(); i++) {
+    if (jsonState.contains("players")) {
+        // A game has exactly two players; never trust the message to say otherwise
+        for (size_t i = 0; i < std::min<size_t>(jsonState["players"].size(), id.size()); i++) {
             const auto &j = jsonState["players"][i];
             id[i] = j["id"];
             archetype[i] = j["archetype"];

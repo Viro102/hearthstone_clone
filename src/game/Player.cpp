@@ -1,8 +1,6 @@
 #include <Player.h>
 
-Player::Player(int id, string archetype) : m_archetype(std::move(archetype)), m_id(id) {
-    m_deck->makeDeck("../assets/cards.txt");
-}
+Player::Player(int id, string archetype) : m_archetype(std::move(archetype)), m_id(id) {}
 
 std::unique_ptr<Card> Player::drawCard() {
     if (!m_hand->isFull()) {
@@ -36,7 +34,10 @@ std::unique_ptr<Card> Player::playCard(int i) {
             m_mana -= c.getCost();
             m_hand->removeCard(i);
             if (!isSpell) {
-                m_board->addCard(c);
+                // Minions cannot attack on the turn they are played; endTurn makes them ready
+                Card minion = c;
+                minion.setHasAttacked(true);
+                m_board->addCard(minion);
             }
             return std::make_unique<Card>(c);
         } else {

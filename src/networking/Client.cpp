@@ -98,7 +98,8 @@ void Client::processMessage(const string &message) {
             m_pendingState = GameState::WIN;
         } else if (type == "endGame") {
             m_isGameStateInitialized = false;
-            m_pendingState = data["winner"] == m_ID ? GameState::WIN : GameState::LOSE;
+            int winner = data["winner"];
+            m_pendingState = winner == -1 ? GameState::DRAW : winner == m_ID ? GameState::WIN : GameState::LOSE;
         } else if (type == "serverFull") {
             m_notice = "Server is full";
         }

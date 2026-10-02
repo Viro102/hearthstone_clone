@@ -101,6 +101,7 @@ int main() {
                     break;
                 case GameState::WIN:
                 case GameState::LOSE:
+                case GameState::DRAW:
                     if (exitBtnEnd.isClicked()) {
                         gameState = GameState::MENU;
                         disconnect = true;
@@ -157,7 +158,7 @@ int main() {
                     DrawText("Game Lobby", screenCenterX - MeasureText("Game Lobby", 20) / 2, 20, 20, BLACK);
 
                     // Draw player states
-                    for (int i = 0; i < client.getLobbyState().players.size(); ++i) {
+                    for (int i = 0; i < static_cast<int>(client.getLobbyState().players.size()); ++i) {
                         const auto &player = client.getLobbyState().players[i];
                         DrawText(TextFormat("Player %d: %s", i + 1, player.isReady ? "Ready" : "Not Ready"), 100,
                                  150 + 50 * i, 20, BLACK);
@@ -179,6 +180,12 @@ int main() {
                 case GameState::LOSE:
                     DrawText("Oh no, You Lost!",
                              screenCenterX - MeasureText("Oh no, You Lost!", 40) / 2,
+                             screenCenterY - 45, 40, RED);
+                    exitBtnEnd.draw();
+                    break;
+                case GameState::DRAW:
+                    DrawText("It's a draw!",
+                             screenCenterX - MeasureText("It's a draw!", 40) / 2,
                              screenCenterY - 45, 40, RED);
                     exitBtnEnd.draw();
                     break;

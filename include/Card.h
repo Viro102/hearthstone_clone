@@ -1,7 +1,6 @@
 #pragma once
 
 #include <Common.h>
-#include <raylib.h>
 
 class Card {
 public:
@@ -49,7 +48,7 @@ public:
 
     void setY(int y);
 
-    void setPosition(Rectangle rec);
+    void setPosition(int x, int y);
 
     void print() const;
 
