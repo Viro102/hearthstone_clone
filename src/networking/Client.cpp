@@ -163,8 +163,11 @@ void Client::shutdown() {
         m_socket = -1;
     }
 
+    // The listener may have queued a transition (e.g. "startGame") right before it stopped;
+    // after a disconnect it must not move the player out of the menu.
     std::scoped_lock lock(m_stateMutex);
     m_isGameStateInitialized = false;
+    m_pendingState.reset();
 }
 
 std::unique_lock<std::mutex> Client::lockState() {
