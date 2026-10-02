@@ -32,9 +32,7 @@ void Game::endTurn() {
             card->setHasAttacked(false);
         }
     }
-    if (m_selectedCard.has_value()) {
-        m_selectedCard = std::nullopt;
-    }
+    deselectCard();
     m_turnCounter++;
     cout << "Turn ended!\n";
 }
@@ -50,12 +48,11 @@ void Game::playACard(int i) {
 void Game::selectCardBoard(int i) {
     auto card = getOnTurnPlayer().getBoard().getCard(i);
     if (card.has_value()) {
-        auto &refCard = card->get();
-        if (!m_selectedCard.has_value()) {
-            m_selectedCard = refCard;
-
-        } else if (m_selectedCard == refCard) {
+        if (!isSelected()) {
             m_selectedCard = std::nullopt;
+            m_selectedBoardIndex = i;
+        } else if (m_selectedBoardIndex == i) {
+            deselectCard();
         }
     } else {
         cout << "No card on board with index " << i << endl;
@@ -63,7 +60,8 @@ void Game::selectCardBoard(int i) {
 }
 
 void Game::attack(int i) {
-    if (!m_selectedCard.has_value()) {
+    Card *attacker = resolveSelectedCard();
+    if (attacker == nullptr) {
         cout << "No card selected!\n";
         return;
     }
@@ -72,30 +70,30 @@ void Game::attack(int i) {
 
     if (auto targetCard = opponent.getBoard().getCard(i); targetCard.has_value()) {
         auto &tc = targetCard->get();
-        if (!m_selectedCard->getHasAttacked()) {
-            tc.setHp(tc.getHp() - m_selectedCard->getDamage());
-            m_selectedCard->setHp(m_selectedCard->getHp() - tc.getDamage());
-            m_selectedCard->setHasAttacked(true);
+        if (!attacker->getHasAttacked()) {
+            tc.setHp(tc.getHp() - attacker->getDamage());
+            attacker->setHp(attacker->getHp() - tc.getDamage());
+            attacker->setHasAttacked(true);
             if (tc.getHp() <= 0) {
                 opponent.getBoard().removeCard(i);
             }
-            if (m_selectedCard->getHp() <= 0) {
-                currentPlayer.getBoard().removeCard(*m_selectedCard);
+            if (m_selectedBoardIndex >= 0 && attacker->getHp() <= 0) {
+                currentPlayer.getBoard().removeCard(m_selectedBoardIndex);
             }
         } else {
             cout << "Card has already attacked!" << endl;
         }
     }
 
-    m_selectedCard = std::nullopt;
+    deselectCard();
 }
 
 void Game::attackFace() {
     auto &target = getOffTurnPlayer();
-    const auto &attacker = getOnTurnPlayer();
+    Card *attacker = resolveSelectedCard();
 
-    if (!m_selectedCard.has_value()) {
-        cout << "No card selected";
+    if (attacker == nullptr) {
+        cout << "No card selected" << endl;
         return;
     }
 
@@ -107,17 +105,14 @@ void Game::attackFace() {
             }
         }
     }
-    if (!m_selectedCard->getHasAttacked()) {
-        target.setHp(target.getHp() - m_selectedCard->getDamage());
-        m_selectedCard->setHasAttacked(true);
-        if (m_selectedCard->getType() == "spell") {
-            attacker.getBoard().removeCard(*m_selectedCard);
-        }
+    if (!attacker->getHasAttacked()) {
+        target.setHp(target.getHp() - attacker->getDamage());
+        attacker->setHasAttacked(true);
     } else {
         cout << "Card has already attacked" << endl;
     }
 
-    m_selectedCard = std::nullopt;
+    deselectCard();
 }
 
 Player &Game::getOnTurnPlayer() const {
@@ -145,7 +140,15 @@ array<std::unique_ptr<Player>, 2> &Game::getPlayers() {
 }
 
 bool Game::isSelected() const {
-    return m_selectedCard.has_value();
+    return m_selectedCard.has_value() || m_selectedBoardIndex >= 0;
+}
+
+Card *Game::resolveSelectedCard() {
+    if (m_selectedBoardIndex >= 0) {
+        auto card = getOnTurnPlayer().getBoard().getCard(m_selectedBoardIndex);
+        return card.has_value() ? &card->get() : nullptr;
+    }
+    return m_selectedCard.has_value() ? &*m_selectedCard : nullptr;
 }
 
 bool Game::checkGameOver() const {
@@ -159,7 +162,7 @@ bool Game::checkGameOver() const {
     return false;
 }
 
-void Game::specialCard(Card &card) {
+void Game::specialCard(const Card &card) {
     if (card.getType() == "buff") {
         int buffAmount = card.getBuffAmount();
         for (const auto &c: getOnTurnPlayer().getBoard().getCards()) {
@@ -172,19 +175,20 @@ void Game::specialCard(Card &card) {
     }
 
     if (card.getType() == "spell") {
-        getOnTurnPlayer().getHand().removeCard(card);
         m_selectedCard = card;
+        m_selectedBoardIndex = -1;
         return;
     }
 
     if (card.getType() == "aoe") {
-        getOnTurnPlayer().getHand().removeCard(card);
-        m_selectedCard = std::nullopt;
-        for (const auto &target: getOffTurnPlayer().getBoard().getCards()) {
-            if (target != nullptr) {
-                target->setHp(target->getHp() - card.getDamage());
-                if (target->getHp() <= 0) {
-                    getOffTurnPlayer().getBoard().removeCard(*target);
+        deselectCard();
+        auto &board = getOffTurnPlayer().getBoard();
+        for (int i = 0; i < board.getCards().size(); i++) {
+            if (auto target = board.getCard(i); target.has_value()) {
+                auto &t = target->get();
+                t.setHp(t.getHp() - card.getDamage());
+                if (t.getHp() <= 0) {
+                    board.removeCard(i);
                 }
             }
         }
@@ -195,10 +199,10 @@ void Game::print() const {
     cout << "---- Game State ----" << endl;
     cout << "Turn Counter: " << m_turnCounter << endl;
 
-    if (isSelected()) {
-        cout << "Selected Card: " << m_selectedCard->getName()
-             << " | HP: " << m_selectedCard->getHp()
-             << " | Damage: " << m_selectedCard->getDamage() << endl;
+    if (auto selected = getSelectedCard(); selected.has_value()) {
+        cout << "Selected Card: " << selected->getName()
+             << " | HP: " << selected->getHp()
+             << " | Damage: " << selected->getDamage() << endl;
     } else {
         cout << "No card selected" << endl;
     }
@@ -259,13 +263,22 @@ Player &Game::getPlayer(int id) const {
 }
 
 std::optional<Card> Game::getSelectedCard() const {
+    if (m_selectedBoardIndex >= 0) {
+        auto card = getOnTurnPlayer().getBoard().getCard(m_selectedBoardIndex);
+        if (card.has_value()) {
+            return card->get();
+        }
+        return std::nullopt;
+    }
     return m_selectedCard;
 }
 
 void Game::setSelectedCard(Card &card) {
     m_selectedCard = card;
+    m_selectedBoardIndex = -1;
 }
 
 void Game::deselectCard() {
     m_selectedCard = std::nullopt;
+    m_selectedBoardIndex = -1;
 }

@@ -12,6 +12,8 @@
 #include <nlohmann/json.hpp>
 #include <mutex>
 #include <Game.h>
+#include <Protocol.h>
+#include <atomic>
 
 class Server {
 public:
@@ -33,8 +35,6 @@ private:
     void handleClient(int clientSocket);
 
     void checkAllClientsReady();
-
-    bool sendAll(int socket, const char *buffer, size_t length);
 
     void sendMessage(const string &type, const nlohmann::json &data, int clientSocket = -1);
 

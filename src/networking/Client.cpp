@@ -32,43 +32,15 @@ int Client::start(short port, const string &ipAddr) {
     return 0;
 }
 
-bool Client::recvAll(int socket, char *buffer, size_t length) {
-    size_t totalReceived = 0;
-    ssize_t lastReceived;
-    while (totalReceived < length) {
-        lastReceived = recv(socket, buffer + totalReceived, length - totalReceived, 0);
-        if (lastReceived == -1) {
-            std::cerr << "Failed to receive data." << std::endl;
-            return false;
-        }
-        if (lastReceived == 0) {
-            std::cerr << "The peer has performed an orderly shutdown." << std::endl;
-            return false;
-        }
-        totalReceived += lastReceived;
-    }
-    return true;
-}
-
 void Client::listenToServer() {
     while (true) {
-        // First, read the length of the message
-        uint32_t messageLength;
-        if (!recvAll(m_socket, reinterpret_cast<char *>(&messageLength), sizeof(messageLength))) {
-            std::cerr << "Failed to receive message length." << std::endl;
-            break;
-        }
-        messageLength = ntohl(messageLength);  // Convert length from network byte order to host byte order
-
-        // Now read the message of that length
-        std::string message;
-        message.resize(messageLength);
-        if (!recvAll(m_socket, &message[0], messageLength)) {
-            std::cerr << "Failed to receive message." << std::endl;
+        auto message = protocol::recvFrame(m_socket);
+        if (!message.has_value()) {
+            std::cerr << "Connection to server closed." << std::endl;
             break;
         }
 
-        processMessage(message);
+        processMessage(*message);
     }
 }
 
@@ -80,7 +52,9 @@ void Client::sendMessage(const string &message, const json &data) const {
 
 //    cout << "Client sending message: " << j.dump(4) << endl;
 
-    send(m_socket, serializedMsg.c_str(), serializedMsg.size(), 0);
+    if (!protocol::sendFrame(m_socket, serializedMsg)) {
+        std::cerr << "Failed to send message: " << message << std::endl;
+    }
 }
 
 void Client::setStateChangeCallback(const StateChangeCallback &callback) {
@@ -124,6 +98,8 @@ void Client::processMessage(const string &message) {
 
     } catch (json::parse_error &e) {
         std::cerr << "Received an invalid JSON message: " << message << " error:" << e.what() << endl;
+    } catch (std::exception &e) {
+        std::cerr << "Failed to process message: " << message << " error:" << e.what() << endl;
     }
 }
 
