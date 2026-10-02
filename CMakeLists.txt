@@ -28,10 +28,13 @@ set(CLIENT_SOURCES
 
 add_executable(Client ${CLIENT_SOURCES})
 
+# Default assets location baked into the binaries. When deploying elsewhere, set this at configure
+# time, set HEARTHSTONE_ASSETS at run time, or run from a directory with assets/ or ../assets/.
+set(HEARTHSTONE_ASSETS_DIR "${CMAKE_SOURCE_DIR}/assets" CACHE PATH "Directory containing the game assets")
+
 foreach (target Server Client)
     target_include_directories(${target} PRIVATE include)
-    # Absolute path, so the binaries find their assets from any working directory
-    target_compile_definitions(${target} PRIVATE ASSETS_DIR="${CMAKE_SOURCE_DIR}/assets")
+    target_compile_definitions(${target} PRIVATE ASSETS_DIR="${HEARTHSTONE_ASSETS_DIR}")
     if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
         target_compile_options(${target} PRIVATE -Wall -Wextra)
     endif ()

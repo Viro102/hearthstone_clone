@@ -8,7 +8,7 @@ Game::Game(Player player1, Player player2) {
 void Game::startGame() {
     // Only the server runs the game; clients receive decks through the serialized state.
     for (const auto &player: m_players) {
-        player->getDeck().makeDeck(ASSETS_DIR "/cards.txt");
+        player->getDeck().makeDeck(assetPath("cards.txt"));
     }
     m_players[0]->setTurn(true);
     m_players[0]->setMana(1);

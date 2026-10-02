@@ -16,10 +16,10 @@ GameScreen::GameScreen(Client &client) : m_client(client) {
     }
 
 
-    auto board = LoadTexture(ASSETS_DIR "/board.png");
-    auto deck = LoadTexture(ASSETS_DIR "/deck.png");
-    auto mage = LoadTexture(ASSETS_DIR "/mage.png");
-    auto warrior = LoadTexture(ASSETS_DIR "/warrior.png");
+    auto board = LoadTexture(assetPath("board.png").c_str());
+    auto deck = LoadTexture(assetPath("deck.png").c_str());
+    auto mage = LoadTexture(assetPath("mage.png").c_str());
+    auto warrior = LoadTexture(assetPath("warrior.png").c_str());
 
     m_images[0] = board;
     m_images[1] = deck;
