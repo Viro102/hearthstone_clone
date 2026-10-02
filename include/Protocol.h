@@ -47,9 +47,12 @@ namespace protocol {
     }
 
     inline bool sendFrame(int socket, const string &payload) {
+        // Header and payload go out in a single write: two small writes would trigger Nagle's algorithm
+        // together with delayed ACKs and add ~40ms to every message.
         uint32_t messageLength = htonl(static_cast<uint32_t>(payload.size()));
-        return sendAll(socket, reinterpret_cast<const char *>(&messageLength), sizeof(messageLength)) &&
-               sendAll(socket, payload.data(), payload.size());
+        string frame(reinterpret_cast<const char *>(&messageLength), sizeof(messageLength));
+        frame += payload;
+        return sendAll(socket, frame.data(), frame.size());
     }
 
     inline std::optional<string> recvFrame(int socket) {
