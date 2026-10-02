@@ -25,6 +25,9 @@ public:
 
     bool checkGameOver() const;
 
+    // Id of the player who won, or -1 while both heroes are alive.
+    [[nodiscard]] int getWinnerId() const;
+
     void initializeFromJson(const nlohmann::json &jsonState);
 
     void setSelectedCard(Card &card);

@@ -162,6 +162,16 @@ bool Game::checkGameOver() const {
     return false;
 }
 
+int Game::getWinnerId() const {
+    if (m_players[0]->getHp() <= 0) {
+        return m_players[1]->getId();
+    }
+    if (m_players[1]->getHp() <= 0) {
+        return m_players[0]->getId();
+    }
+    return -1;
+}
+
 void Game::specialCard(const Card &card) {
     if (card.getType() == "buff") {
         int buffAmount = card.getBuffAmount();
