@@ -50,6 +50,9 @@ private:
 
     void returnToLobby();
 
+    // Removes the threads of disconnected clients; destroying the result joins them.
+    std::vector<std::jthread> takeFinishedThreads();
+
     json serializeGameplayState(int viewerId);
 
     json serializeLobbyState();
@@ -58,7 +61,6 @@ private:
     int m_serverFD{-1};
     std::atomic<bool> m_isRunning{false};
     std::jthread m_listenerThread;
-    std::vector<std::jthread> m_clientThreads{};
 
     // Guards everything below: client list, lobby and game state.
     std::mutex m_mutex;
@@ -66,4 +68,7 @@ private:
     LobbyState m_lobbyState{};
     GameState m_currentGameState{GameState::LOBBY};
     vector<std::unique_ptr<Client>> m_clients{};
+    std::vector<std::jthread> m_clientThreads{};
+    // Handler threads that have finished their work and only need to be joined.
+    std::vector<std::thread::id> m_finishedThreads{};
 };
