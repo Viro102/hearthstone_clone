@@ -8,10 +8,10 @@ std::unique_ptr<Card> Player::drawCard() {
     if (!m_hand->isFull()) {
         if (!m_deck->isEmpty()) {
             m_deck->shuffleDeck();
-            const auto &drawnCard = m_deck->getFirstCard();
-            auto drawnCardPtr = std::make_unique<Card>(drawnCard);
-            m_hand->addCard(drawnCard);
-            m_deck->removeCard(drawnCard);
+            int index = m_deck->getFirstCardIndex();
+            auto drawnCardPtr = std::make_unique<Card>(m_deck->getCard(index)->get());
+            m_hand->addCard(*drawnCardPtr);
+            m_deck->removeCard(index);
             return drawnCardPtr;
         } else {
             cout << "You have no more cards in your deck\n";
@@ -25,19 +25,19 @@ std::unique_ptr<Card> Player::drawCard() {
 std::unique_ptr<Card> Player::playCard(int i) {
     auto card = m_hand->getCard(i);
     if (card.has_value()) {
-        auto &c = card->get();
+        Card c = card->get();
+        bool isSpell = c.getType() == "spell" || c.getType() == "aoe";
 
-        if (m_board->isFull()) {
+        if (!isSpell && m_board->isFull()) {
             cout << "Your board is full!\n";
             return nullptr;
         }
         if (m_mana >= c.getCost()) {
             m_mana -= c.getCost();
-            if (c.getType() == "spell" || c.getType() == "aoe") {
-                return std::make_unique<Card>(c);
-            }
-            m_board->addCard(c);
             m_hand->removeCard(i);
+            if (!isSpell) {
+                m_board->addCard(c);
+            }
             return std::make_unique<Card>(c);
         } else {
             cout << "Not enough Mana!\n";

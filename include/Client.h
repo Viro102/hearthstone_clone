@@ -12,6 +12,7 @@
 #include <utility>
 #include <GameState.h>
 #include <Game.h>
+#include <Protocol.h>
 
 using StateChangeCallback = std::function<void(GameState)>;
 
@@ -51,8 +52,6 @@ private:
     void updateLocalGameplayState(const string &message);
 
     void processMessage(const string &message);
-
-    bool recvAll(int socket, char *buffer, size_t length);
 
 
     int m_socket{-1};

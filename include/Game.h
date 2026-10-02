@@ -46,10 +46,15 @@ public:
     void print() const;
 
 private:
-    void specialCard(Card &card);
+    void specialCard(const Card &card);
+
+    // Resolves the selection to the live card on the board (minion) or to the stored copy (spell).
+    Card *resolveSelectedCard();
 
 
     array<std::unique_ptr<Player>, 2> m_players;
+    // Spells are not on the board, so they are kept as a copy; minions are referenced by board index.
     std::optional<Card> m_selectedCard;
+    int m_selectedBoardIndex{-1};
     int m_turnCounter{0};
 };
