@@ -252,7 +252,7 @@ void Server::sendMessage(const string &type, const json &data, int clientSocket)
             std::cerr << "Failed to send message to client " << client->getSocket() << " ("
                       << strerror(errno) << "), disconnecting it" << std::endl;
             // Wakes up the client's handler thread, which then removes it.
-            ::shutdown(client->getSocket(), SHUT_RDWR);
+            net::shutdownSocket(client->getSocket());
         }
     }
 }
@@ -315,7 +315,7 @@ void Server::stop() {
     {
         std::scoped_lock lock(m_mutex);
         for (const auto &client: m_clients) {
-            ::shutdown(client->getSocket(), SHUT_RDWR);
+            net::shutdownSocket(client->getSocket());
         }
     }
 

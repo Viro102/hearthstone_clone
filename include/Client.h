@@ -1,10 +1,6 @@
 #pragma once
 
 #include <Common.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <unistd.h>
-#include <arpa/inet.h>
 #include <LobbyState.h>
 #include <nlohmann/json.hpp>
 #include <thread>
@@ -12,6 +8,7 @@
 #include <utility>
 #include <GameState.h>
 #include <Game.h>
+#include <Net.h>
 #include <Protocol.h>
 #include <atomic>
 #include <cstdint>
@@ -20,14 +17,14 @@
 
 class Client {
 public:
-    explicit Client(int socketFD);
+    explicit Client(net::Socket socket);
 
     Client() = default;
 
     ~Client();
 
     // Connects to the server and starts the listener thread. Must not be called while holding lockState().
-    int start(uint16_t port, const string &ipAddr);
+    int start(uint16_t port, const string &host);
 
     // Disconnects and joins the listener thread. Must not be called while holding lockState().
     void shutdown();
@@ -44,7 +41,7 @@ public:
     // A message for the player (e.g. "Server is full"), empty if none. Requires lockState().
     [[nodiscard]] const string &getNotice() const;
 
-    [[nodiscard]] int getSocket() const;
+    [[nodiscard]] net::Socket getSocket() const;
 
     // The getters below require lockState().
 
@@ -57,7 +54,7 @@ public:
     [[nodiscard]] bool isGameStateInitialized() const;
 
 private:
-    void listenToServer(int socket);
+    void listenToServer(net::Socket socket);
 
     void updateLocalLobbyState(const json &data);
 
@@ -66,7 +63,7 @@ private:
     void processMessage(const string &message);
 
 
-    int m_socket{-1};
+    net::Socket m_socket{net::INVALID_SOCKET_HANDLE};
     std::jthread m_serverListener;
     std::atomic<bool> m_isShuttingDown{false};
 
