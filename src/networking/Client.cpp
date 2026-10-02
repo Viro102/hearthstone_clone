@@ -137,6 +137,13 @@ void Client::shutdown() {
     m_isShuttingDown = true;
     if (m_socket != net::INVALID_SOCKET_HANDLE) {
         net::shutdownSocket(m_socket);
+#ifdef _WIN32
+        // Unlike on POSIX, Winsock's shutdown() does not wake a thread blocked in recv(), so joining
+        // would hang until the server closes the connection. closesocket() cancels the blocking call.
+        // Closing before the join is safe: this process opens no other socket until shutdown() returns.
+        net::closeSocket(m_socket);
+        m_socket = net::INVALID_SOCKET_HANDLE;
+#endif
     }
 
     if (m_serverListener.joinable()) {
