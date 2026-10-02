@@ -3,7 +3,6 @@
 #include <Player.h>
 #include <Common.h>
 #include <Card.h>
-#include <raylib.h>
 
 class Game {
 public:
@@ -28,6 +27,9 @@ public:
     // Id of the player who won, or -1 while both heroes are alive.
     [[nodiscard]] int getWinnerId() const;
 
+    // The game ends in a draw once MAX_TURNS turns have been played without a winner.
+    [[nodiscard]] bool isDraw() const;
+
     void initializeFromJson(const nlohmann::json &jsonState);
 
     void setSelectedCard(Card &card);
@@ -51,9 +53,13 @@ public:
 private:
     void specialCard(const Card &card);
 
+    static bool hasTaunt(const Player &player);
+
     // Resolves the selection to the live card on the board (minion) or to the stored copy (spell).
     Card *resolveSelectedCard();
 
+
+    static constexpr int MAX_TURNS = 30;
 
     array<std::unique_ptr<Player>, 2> m_players;
     // Spells are not on the board, so they are kept as a copy; minions are referenced by board index.

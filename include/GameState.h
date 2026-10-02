@@ -6,5 +6,6 @@ enum class GameState {
     GAMEPLAY,
     WIN,
     LOSE,
+    DRAW,
     END
 };

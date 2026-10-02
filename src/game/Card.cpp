@@ -114,9 +114,9 @@ void Card::setY(int y) {
     m_y = y;
 }
 
-void Card::setPosition(Rectangle rec) {
-    setX(static_cast<int>(rec.x));
-    setY(static_cast<int>(rec.y));
+void Card::setPosition(int x, int y) {
+    setX(x);
+    setY(y);
 }
 
 bool Card::operator==(const Card &other) const {

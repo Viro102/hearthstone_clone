@@ -3,23 +3,23 @@
 GameScreen::GameScreen(Client &client) : m_client(client) {
     m_images.resize(4);
 
-    for (int i = 0; i < m_slotsHand.size(); i++) {
+    for (size_t i = 0; i < m_slotsHand.size(); i++) {
         auto newSlot = Button(30 + (i * 170), 530);
         m_slotsHand[i] = newSlot;
     }
 
-    for (int i = 0; i < m_slotsBoard.size(); i++) {
-        for (int j = 0; j < m_slotsBoard[i].size(); j++) {
+    for (size_t i = 0; i < m_slotsBoard.size(); i++) {
+        for (size_t j = 0; j < m_slotsBoard[i].size(); j++) {
             auto newSlot = Button(30 + (j * 170), 40 + (i * 240));
             m_slotsBoard[i][j] = newSlot;
         }
     }
 
 
-    auto board = LoadTexture("../assets/board.png");
-    auto deck = LoadTexture("../assets/deck.png");
-    auto mage = LoadTexture("../assets/mage.png");
-    auto warrior = LoadTexture("../assets/warrior.png");
+    auto board = LoadTexture(ASSETS_DIR "/board.png");
+    auto deck = LoadTexture(ASSETS_DIR "/deck.png");
+    auto mage = LoadTexture(ASSETS_DIR "/mage.png");
+    auto warrior = LoadTexture(ASSETS_DIR "/warrior.png");
 
     m_images[0] = board;
     m_images[1] = deck;
@@ -135,12 +135,12 @@ void GameScreen::update() {
     const auto &playerCardsHand = m_client.getGameplayState().getPlayer(m_client.getID()).getHand().getCards();
     const bool isMyTurn = m_client.getGameplayState().getPlayer(m_client.getID()).isTurn();
 
-    for (int i = 0; i < playerCardsHand.size(); i++) {
+    for (int i = 0; i < static_cast<int>(playerCardsHand.size()); i++) {
         const auto &card = playerCardsHand[i];
         if (card != nullptr) {
             m_slotsHand[i].setFree(false);
             auto shape = m_slotsHand[i].getHitbox();
-            card->setPosition(shape);
+            card->setPosition(static_cast<int>(shape.x), static_cast<int>(shape.y));
             m_cardsHand.push_back(*card);
 
             if (m_slotsHand[i].isClicked() && isMyTurn) {
@@ -155,11 +155,11 @@ void GameScreen::update() {
     for (const auto &player: players) {
         int row = player->getId() == m_client.getID() ? 1 : 0;
         auto &playerCardsBoard = player->getBoard().getCards();
-        for (int i = 0; i < playerCardsBoard.size(); i++) {
+        for (int i = 0; i < static_cast<int>(playerCardsBoard.size()); i++) {
             if (playerCardsBoard[i] != nullptr) {
                 m_slotsBoard[row][i].setFree(false);
                 auto shape = m_slotsBoard[row][i].getHitbox();
-                playerCardsBoard[i]->setPosition(shape);
+                playerCardsBoard[i]->setPosition(static_cast<int>(shape.x), static_cast<int>(shape.y));
                 m_cardsBoard.push_back(*playerCardsBoard[i]);
 
                 if (isMyTurn && m_slotsBoard[row][i].isClicked()) {

@@ -168,7 +168,8 @@ void Server::processMessage(int clientSocket, const string &message) {
 
         sendGameplayState("updateGameState");
 
-        if (m_game.checkGameOver()) {
+        if (m_game.checkGameOver() || m_game.isDraw()) {
+            // winner is -1 for a draw
             sendMessage("endGame", {{"winner", m_game.getWinnerId()}});
             returnToLobby();
             sendMessage("updateLobbyState", serializeLobbyState());
