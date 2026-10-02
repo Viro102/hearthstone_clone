@@ -67,7 +67,11 @@ void Server::listenForClients() {
             continue;
         }
 
+        // Declared before the lock, so finished threads are joined after it is released.
+        std::vector<std::jthread> finishedThreads;
         std::scoped_lock lock(m_mutex);
+        finishedThreads = takeFinishedThreads();
+
         if (m_clients.size() >= MAX_PLAYERS || m_currentGameState == GameState::GAMEPLAY) {
             cout << "Rejecting client " << newClientSocket << ": lobby is full" << endl;
             json full = {{"type", "serverFull"}, {"data", json()}};
@@ -99,6 +103,23 @@ void Server::handleClient(int clientSocket) {
         returnToLobby();
     }
     sendMessage("updateLobbyState", serializeLobbyState());
+
+    // Last step under the lock: from here on this thread needs nothing and can be joined.
+    m_finishedThreads.push_back(std::this_thread::get_id());
+}
+
+std::vector<std::jthread> Server::takeFinishedThreads() {
+    std::vector<std::jthread> finished;
+    for (auto it = m_clientThreads.begin(); it != m_clientThreads.end();) {
+        if (std::ranges::find(m_finishedThreads, it->get_id()) != m_finishedThreads.end()) {
+            finished.push_back(std::move(*it));
+            it = m_clientThreads.erase(it);
+        } else {
+            ++it;
+        }
+    }
+    m_finishedThreads.clear();
+    return finished;
 }
 
 void Server::processMessage(int clientSocket, const string &message) {
